@@ -1,5 +1,30 @@
 # Happy-spare-money-back-end
 
+## 运行说明
+
+1. 安装cnpm
+
+    ```bash
+    $ npm install -g cnpm --registry=https://registry.npm.taobao.org
+    ```
+
+2. 在根目录执行
+
+    ```bash
+    cnpm install
+    ```
+
+    如果遇到问题，可以把根目录下的node_modules文件夹删除，重新`cnpm install`
+
+
+> 执行测试文件
+> 
+> ```
+> node controller/test_connect_db.js
+> ```
+> 
+> 正常的话会有输出
+
 ## 目录结构
 
 ```bash
