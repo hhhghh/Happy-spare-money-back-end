@@ -20,7 +20,7 @@
 > 执行测试文件
 > 
 > ```
-> node controller/test_connect_db.js
+> node bin/www
 > ```
 > 
 > 正常的话会有输出
