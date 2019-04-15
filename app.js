@@ -8,6 +8,10 @@ const logger = require('koa-logger')
 
 const index = require('./routes/index')
 const users = require('./routes/users')
+const cors = require('koa-cors');
+
+// 使用koa-cors
+app.use(cors());
 
 // error handler
 onerror(app)
