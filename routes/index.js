@@ -20,4 +20,8 @@ const TeamController = require('../controller/teamController');
 router.post('/team', TeamController.create);
 router.get('/team/:team_id', TeamController.detail);
 
+const UserController = require('../controller/userController');
+router.post('/user', UserController.create);
+router.get('/user/:username', UserController.detail);
+
 module.exports = router;

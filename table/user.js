@@ -40,7 +40,7 @@ module.exports = function(sequelize, DataTypes){
         },
         nickname:{
             type:DataTypes.CHAR(20),
-            defaultValue:user.username
+            defaultValue:this.username
         },
         wechat:{
             type:DataTypes.CHAR(21)
