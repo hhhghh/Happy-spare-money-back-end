@@ -31,5 +31,9 @@ class TeamModel {
             }
         })
     }
+
+    /**
+     * 
+     */
 }
 module.exports = TeamModel;
