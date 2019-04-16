@@ -2,7 +2,7 @@ class Task {
     constructor(){
         this._id = 0;                // ID
         this._title = '';            // 标题
-        this._introduction = '';     // 简介
+        this._intro = '';            // 简介
         this._money = 0;             // 金额
         this._number = 0;            // 数量 （接受任务人的数量）
         this._remark = '';           // 备注

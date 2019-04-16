@@ -6,8 +6,11 @@ const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
 
-const index = require('./routes/index')
-const users = require('./routes/users')
+const routers = require('./routes/routers')
+const cors = require('koa-cors');
+
+// 使用koa-cors
+app.use(cors());
 
 // error handler
 onerror(app)
@@ -33,8 +36,10 @@ app.use(async (ctx, next) => {
 })
 
 // routes
-app.use(index.routes(), index.allowedMethods())
-app.use(users.routes(), users.allowedMethods())
+app.use(routers.index.routes(), routers.index.allowedMethods())
+app.use(routers.users.routes(), routers.users.allowedMethods())
+app.use(routers.team_api.routes(), routers.team_api.allowedMethods())
+app.use(routers.task_api.routes(), routers.task_api.allowedMethods())
 
 // error-handling
 app.on('error', (err, ctx) => {
