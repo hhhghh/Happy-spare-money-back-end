@@ -1,8 +1,10 @@
 const db = require('../config/db');
-const Sequelize = db.sequelize;
-const User = Sequelize.import('../table/user');
-const Task = Sequelize.import('../table/task');
-const TR = Sequelize.import('../table/tr');
+const Sequelize = require('sequelize')
+const sequelize = db.sequelize;
+const User = sequelize.import('../table/user');
+const Task = sequelize.import('../table/task');
+const TR = sequelize.import('../table/tr');
+const Op = Sequelize.Op
 
 Task.sync({force: false});
 
@@ -52,6 +54,46 @@ class TaskModel {
         return await Task.findAll({
             where: {
                 state: 'in_progress'
+            }
+        })
+    }
+
+    /**
+     * 查询可接受的任务列表
+     * @param username username of the user who want to search
+     */
+    static async getTasksByType(type) {
+        return await Task.findAll({
+            where: {
+                type: type
+            }
+        })
+    }
+
+    /**
+     * 查询在钱的范围内的任务
+     * @param username username of the user who want to search
+     */
+    static async getTaskByMoney(money_low, money_high) {
+        money_low = parseFloat(money_low)
+        money_high = parseFloat(money_high)
+        return await Task.findAll({
+            where: {
+                money: {
+                    [Op.between]: [money_low, money_high]
+                }
+            }
+        })
+    }
+
+    /**
+     * 查询可接受的任务列表
+     * @param username username of the user who want to search
+     */
+    static async getTaskByUserRelease(username) {
+        return await Task.findAll({
+            where: {
+                publisher: username
             }
         })
     }

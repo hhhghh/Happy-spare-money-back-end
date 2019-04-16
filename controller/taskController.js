@@ -6,14 +6,14 @@ class TaskController {
      * @param ctx
      * @returns {Promise.<void>}
      */
-    static async create(ctx) {
+    static async releaseTask(ctx) {
         // 接收客服端
         let req = ctx.request.body;
         if (req.team_name
             && req.description
         ) {
             try {
-                const ret = await TeamModel.createTeam(req);
+                const ret = await TaskModel.createTask(req);
                 const data = await TeamModel.getTeamDetail(ret.team_id);
 
                 ctx = response(ctx, 200, '查询成功', data)
@@ -32,20 +32,100 @@ class TaskController {
      * @param ctx
      * @returns {Promise.<void>}
      */
-    static async searchTask(ctx) {
-        let task_id = ctx.params.task_id;
-        if (task_id) {
-            try {
-                // 查询team详情模型
-                let data = await TaskModel.getTaskDetail(task_id);
-                ctx = response(ctx, 200, '查询成功', data);
-            } catch (err) {
-                ctx = response(ctx, 412, '插叙失败', err)
+    static async searchTaskById(task_id) {
+        let result
+        try {
+            let data = await TaskModel.getTaskDetail(task_id);
+            result = {
+                code: 200, 
+                msg: '查询成功',
+                data: data
             }
-        } else {
-            ctx = response(ctx, 416, '需要task_id', err)
+        } catch (err) {
+            result = {
+                code: 412,
+                msg: '查询失败',
+                data: err
+            }
         }
+        return result
     }
+
+    static async searchTaskByType(type) {
+        let result
+        try {
+            let data = await TaskModel.getTasksByType(type);
+            result = {
+                code: 200, 
+                msg: '查询成功',
+                data: data
+            }
+        } catch (err) {
+            result = {
+                code: 412,
+                msg: '查询失败',
+                data: err
+            }
+        }
+        return result
+    }
+
+    static async searchTaskByMoney(money_low, money_high) {
+        let result
+        try {
+            let data = await TaskModel.getTaskByMoney(money_low, money_high);
+            result = {
+                code: 200, 
+                msg: '查询成功',
+                data: data
+            }
+        } catch (err) {
+            result = {
+                code: 412,
+                msg: '查询失败',
+                data: err
+            }
+        }
+        return result
+    }
+
+    static async searchTaskByUserRelease(username) {
+        let result
+        try {
+            let data = await TaskModel.getTaskByUserRelease(username);
+            result = {
+                code: 200, 
+                msg: '查询成功',
+                data: data
+            }
+        } catch (err) {
+            result = {
+                code: 412,
+                msg: '查询失败',
+                data: err
+            }
+        }
+        return result
+    }
+
+    // static async searchTaskByUserAccept(username) {
+    //     let result
+    //     try {
+    //         let data = await TaskModel.getTaskByUserRelease(username);
+    //         result = {
+    //             code: 200, 
+    //             msg: '查询成功',
+    //             data: data
+    //         }
+    //     } catch (err) {
+    //         result = {
+    //             code: 412,
+    //             msg: '查询失败',
+    //             data: err
+    //         }
+    //     }
+    //     return result
+    // }
 }
 
 
