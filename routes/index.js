@@ -16,8 +16,4 @@ router.get('/json', async (ctx, next) => {
   }
 });
 
-const TeamController = require('../controller/teamController');
-router.post('/team', TeamController.create);
-router.get('/team/:team_id', TeamController.detail);
-
 module.exports = router;

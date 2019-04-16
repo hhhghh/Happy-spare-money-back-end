@@ -1,11 +1,14 @@
+const db = require('../config/db');
+const Sequelize = require('sequelize');
 const moment = require('moment');
+
 module.exports = function(sequelize, DataTypes){
     var tr = sequelize.define('tr',{
         username:{
             type:DataTypes.CHAR(20),
             allowNull:false,
             references: {
-                model: user,
+                model: 'user',
                 key: 'username',
                 deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
             }
@@ -14,23 +17,23 @@ module.exports = function(sequelize, DataTypes){
             type:DataTypes.INTEGER,
             allowNull:false,
             references: {
-                model: task,
+                model: 'task',
                 key: 'task_id',
                 deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
             }
         },
         state:{
-            type:DataTypes,INTEGER,
+            type:DataTypes.INTEGER,
             allowNull:false
         },
-        createdAt: {
+        createdAt:{
             type: DataTypes.DATE,
             get() {
                 return moment(this.getDataValue('createdAt')).format('YYYY-MM-DD HH:mm:ss');
             }
         },
         // 更新时间
-        updatedAt: {
+        updatedAt:{
             type: DataTypes.DATE,
             get() {
                 return moment(this.getDataValue('updatedAt')).format('YYYY-MM-DD HH:mm:ss');
