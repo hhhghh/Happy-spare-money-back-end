@@ -4,6 +4,12 @@ const moment = require('moment');
 
 module.exports = function(sequelize, DataTypes){
     return sequelize.define('teamlabel',{
+        id:{
+            type:DataTypes.INTEGER,
+            primaryKey:true,
+            allowNull:false,
+            autoIncrement:true
+        },
         team_id:{
             type:DataTypes.INTEGER,
             allowNull:false,

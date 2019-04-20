@@ -4,6 +4,12 @@ const moment = require('moment');
 
 module.exports = function(sequelize, DataTypes){
     return sequelize.define('tr',{
+        id:{
+            type:DataTypes.INTEGER,
+            primaryKey:true,
+            allowNull:false,
+            autoIncrement:true
+        },
         username:{
             type:DataTypes.CHAR(20),
             allowNull:false,

@@ -1,4 +1,5 @@
 const moment = require('moment');
+const Sequelize = require('sequelize');
 module.exports = function (sequelize, DataTypes){
     return sequelize.define('team',{
         team_id:{
@@ -11,6 +12,15 @@ module.exports = function (sequelize, DataTypes){
             type:DataTypes.CHAR(45),
             allowNull:false
         },
+        leader:{
+            type:DataTypes.CHAR(20),
+            allowNull:false,
+            references: {
+                model: 'user',
+                key: 'username',
+                deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
+            }
+        },
         logo:{
             type:DataTypes.CHAR(45),
             allowNull:false,
@@ -21,8 +31,9 @@ module.exports = function (sequelize, DataTypes){
             allowNull:false,
             defaultValue:'The group leader was too lazy to write an introduction.'
         },
-        tag:{
-            type:DataTypes.CHAR(45)
+        limit:{
+            type:DataTypes.INTEGER,
+            defaultValue: 0
         },
         createdAt: {
             type: DataTypes.DATE,
