@@ -24,7 +24,7 @@ class TeamModel {
      * @returns {Promise<Model>}
      * @param team_id
      */
-    static async getTeamDetail(team_id) {
+    static async getTeamById(team_id) {
         return await Team.findOne({
             where: {
                 team_id

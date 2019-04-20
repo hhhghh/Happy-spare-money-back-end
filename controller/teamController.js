@@ -43,16 +43,15 @@ class TeamController {
     }
 
     /**
-     * 获取文章详情
      * @param ctx
      * @returns {Promise.<void>}
      */
-    static async detail(ctx) {
+    static async getTeamById(ctx) {
         let team_id = ctx.params.team_id;
         if (team_id) {
             try {
                 // 查询team详情模型
-                let data = await TeamModel.getTeamDetail(team_id);
+                let data = await TeamModel.getTeamById(team_id);
                 ctx.response.status = 200;
                 ctx.body = {
                     code: 200,

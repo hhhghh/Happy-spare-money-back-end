@@ -1,37 +1,30 @@
+const db = require('../config/db');
+const Sequelize = require('sequelize');
 const moment = require('moment');
-module.exports = function (sequelize, DataTypes){
-    return sequelize.define('team',{
+
+module.exports = function(sequelize, DataTypes){
+    return sequelize.define('teamlabel',{
         team_id:{
             type:DataTypes.INTEGER,
-            primaryKey:true,
             allowNull:false,
-            autoIncrement:true
+            references: {
+                model: 'team',
+                key: 'team_id',
+                deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
+            }
         },
-        team_name:{
+        label:{
             type:DataTypes.CHAR(45),
             allowNull:false
         },
-        logo:{
-            type:DataTypes.CHAR(45),
-            allowNull:false,
-            defaultValue:'default url waiting be set'
-        },
-        description:{
-            type:DataTypes.CHAR(100),
-            allowNull:false,
-            defaultValue:'The group leader was too lazy to write an introduction.'
-        },
-        tag:{
-            type:DataTypes.CHAR(45)
-        },
-        createdAt: {
+        createdAt:{
             type: DataTypes.DATE,
             get() {
                 return moment(this.getDataValue('createdAt')).format('YYYY-MM-DD HH:mm:ss');
             }
         },
         // 更新时间
-        updatedAt: {
+        updatedAt:{
             type: DataTypes.DATE,
             get() {
                 return moment(this.getDataValue('updatedAt')).format('YYYY-MM-DD HH:mm:ss');
@@ -42,5 +35,5 @@ module.exports = function (sequelize, DataTypes){
         // 为 false MySQL创建的表名称会是复数 users
         // 如果指定的表名称本就是复数形式则不变
         freezeTableName: true
-    })
+    });
 };

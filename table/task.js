@@ -1,6 +1,6 @@
 const moment = require('moment');
 module.exports = function(sequelize, DataTypes){
-    var task = sequelize.define('task',{
+    return sequelize.define('task',{
         task_id:{
             type:DataTypes.INTEGER,
             primaryKey:true,
@@ -64,5 +64,4 @@ module.exports = function(sequelize, DataTypes){
         // 如果指定的表名称本就是复数形式则不变
         freezeTableName: true
     });
-    return task;
 };

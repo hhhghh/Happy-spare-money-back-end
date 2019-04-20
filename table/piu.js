@@ -1,11 +1,12 @@
 const moment = require('moment');
+const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes){
-    var piu = sequelize.define('piu',{
+    return sequelize.define('piu',{
         ins_name:{
             type:DataTypes.CHAR(20),
             allowNull:false,
             references: {
-                model: user,
+                model: 'user',
                 key: 'username',
                 deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
             }
@@ -14,7 +15,7 @@ module.exports = function(sequelize, DataTypes){
             type:DataTypes.CHAR(20),
             allowNull:false,
             references: {
-                model: user,
+                model: 'user',
                 key: 'username',
                 deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
             }
@@ -38,5 +39,4 @@ module.exports = function(sequelize, DataTypes){
         // 如果指定的表名称本就是复数形式则不变
         freezeTableName: true
     });
-    return piu;
 };
