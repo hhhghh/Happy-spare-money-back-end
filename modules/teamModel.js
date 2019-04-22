@@ -24,21 +24,53 @@ class TeamModel {
         })
     }
 
+    static async createTeamMember(team_id, username) {
+        return await Members.create({
+            team_id : team_id,
+            member_username : username
+        })
+    }
+
+    static async createTeamLabel(team_id, label) {
+        return await Teamlabel.create({
+            team_id : team_id,
+            label : label
+        })
+    }
+
     //  根据组名来查找小组
     static async getTeamByName(team_name) {
+        Team.hasMany(Teamlabel, {foreignKey : 'team_id'});
+        Teamlabel.belongsTo(Team, {foreignKey : 'team_id'});
+        Team.hasMany(Members, {foreignKey : 'team_id'});
+        Members.belongsTo(Team, {foreignKey : 'team_id'});
         return await Team.findAll({
             where: {
-                team_name : team_name
-            }
+                team_name : team_name,
+            },
+            include: [{
+                model: Teamlabel,
+            },{
+                model: Members,
+            }],
         })
     }
 
     // 根据小组id来查找小组
     static async getTeamByTeamId(team_id) {
+        Team.hasMany(Teamlabel, {foreignKey : 'team_id'});
+        Teamlabel.belongsTo(Team, {foreignKey : 'team_id'});
+        Team.hasMany(Members, {foreignKey : 'team_id'});
+        Members.belongsTo(Team, {foreignKey : 'team_id'});
         return await Team.findOne({
             where: {
-                team_id : team_id
-            }
+                team_id : team_id,
+            },
+            include: [{
+                model: Teamlabel,
+            },{
+                model: Members,
+            }],
         })
     }
 
@@ -46,12 +78,16 @@ class TeamModel {
     static async getTeamByLabel(label) {
         Team.hasMany(Teamlabel, {foreignKey : 'team_id'});
         Teamlabel.belongsTo(Team, {foreignKey : 'team_id'});
+        Team.hasMany(Members, {foreignKey : 'team_id'});
+        Members.belongsTo(Team, {foreignKey : 'team_id'});
         return await Team.findAll({
             include: [{
                 model: Teamlabel,
                 where: {
                     label : label,
                 }
+            },{
+                model: Members,
             }],
         })
     }
@@ -106,6 +142,7 @@ class TeamModel {
             }
         })
     }
+
     static async deleteTeamLabel(team_id) {
         return await Teamlabel.destroy({
             where: {
@@ -113,6 +150,7 @@ class TeamModel {
             }
         })
     }
+
     static async deleteTeamPit(team_id) {
         return await Pit.destroy({
             where: {
@@ -120,6 +158,7 @@ class TeamModel {
             }
         })
     }
+
     static async deleteTeam(team_id) {
         return await Team.destroy({
             where: {
@@ -168,15 +207,14 @@ class TeamModel {
     }
 
     // 修改小组全部信息
-    static async updateTeamDescription(team_id, leader, new_data) {
+    static async updateTeamDescription(new_data) {
         await Team.update({
             logo: new_data.logo,
             description: new_data.description,
             limit: new_data.limit
         }, {
             where: {
-                team_id : team_id,
-                leader : leader
+                team_id : new_data.team_id
             }
         })
     }

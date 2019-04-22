@@ -1,25 +1,57 @@
 const TeamModel = require('../modules/teamModel');
 
 class TeamController {
-    /**
-     * 创建team
-     */
-    static async createGroup(ctx) {
-        // 接收客服端
-        let req = ctx.request.body;
-        if (req.team_name
-            && req.leader
-        ) {
-            try {
-                const ret = await TeamModel.createTeam(req);
-                // 把刚刚新建的文章ID查询文章详情，且返回新创建的文章信息
-                const data = await TeamModel.getTeamByTeamId(ret.team_id);
 
-                ctx.response.status = 200;
-                ctx.body = {
-                    code: 200,
-                    msg: '创建team成功',
-                    data: data
+    // 200 成功，412 异常, 413 组长不存在，414 部分成员不存在，416 参数不齐全
+    static async createGroup(ctx) {
+        let req = ctx.request.body;
+        if (req.team_name && req.leader) {
+            try {
+                let leader = await TeamModel.getUserByUsername(req.leader);
+                if (leader === null) {
+                    ctx.response.status = 413;
+                    ctx.body = {
+                        code: 413,
+                        msg: '组长不存在',
+                        data: null
+                    }
+                } else {
+                    let members = req.members;
+                    let wrongMembers = req.members;
+                    let flag = true;
+                    for (let i = 0; i < members.length; i++) {
+                        let user = await TeamModel.getUserByUsername(members[i].username);
+                        if (user === null) {
+                            flag = false;
+                        } else {
+                            wrongMembers.splice(i, 1);
+                            i--;
+                        }
+                    }
+                    if (flag) {
+                        const ret = await TeamModel.createTeam(req);
+                        let labels = req.labels;
+                        for (let i = 0; i < labels.length; i++) {
+                            await TeamModel.createTeamLabel(ret.team_id, labels[i].label);
+                        }
+                        for (let i = 0; i < members.length; i++) {
+                            await TeamModel.createTeamMember(ret.team_id, members[i].username);
+                        }
+                        const data = await TeamModel.getTeamByTeamId(ret.team_id);
+                        ctx.response.status = 200;
+                        ctx.body = {
+                            code: 200,
+                            msg: '创建team成功',
+                            data: data
+                        }
+                    } else {
+                        ctx.response.status = 414;
+                        ctx.body = {
+                            code: 414,
+                            msg: '部分成员不存在',
+                            data: wrongMembers
+                        }
+                    }
                 }
 
             } catch (err) {
@@ -37,19 +69,26 @@ class TeamController {
                 msg: '参数不齐全',
             }
         }
-
     }
 
-    // 200 成功，412 异常
+    // 200 成功，412 异常, 413 没有小组
     static async getGroupByGroupId(team_id) {
         let result = null;
         try {
             let data = await TeamModel.getTeamByTeamId(team_id);
-            result = {
-                code: 200,
-                msg: '查询成功',
-                data: data
-            };
+            if (data === null) {
+                result = {
+                    code: 413,
+                    msg: '查询成功,没有该小组',
+                    data: null
+                };
+            } else {
+                result = {
+                    code: 200,
+                    msg: '查询成功',
+                    data: data
+                };
+            }
         } catch (err) {
             result = {
                 code: 412,
@@ -60,16 +99,24 @@ class TeamController {
         return result;
     }
 
-    // 200 成功，412 异常
+    // 200 成功，412 异常, 413 没有小组
     static async getGroupByGroupName(team_name) {
         let result = null;
         try {
             let data = await TeamModel.getTeamByName(team_name);
-            result = {
-                code: 200,
-                msg: '查询成功',
-                data: data
-            };
+            if (data.length === 0) {
+                result = {
+                    code: 413,
+                    msg: '查询成功,没有该小组',
+                    data: null
+                };
+            } else {
+                result = {
+                    code: 200,
+                    msg: '查询成功',
+                    data: data
+                };
+            }
         } catch (err) {
             result = {
                 code: 412,
@@ -125,13 +172,21 @@ class TeamController {
     static async getMembersByGroupId(team_id) {
         let result = null;
         try {
-            let data = await TeamModel.getUserByTeamId(team_id);
-            result = {
-                code: 200,
-                msg: '查询成功',
-                data: data
-            };
-
+            let team = await TeamModel.getTeamByTeamId(team_id);
+            if (team === null) {
+                result = {
+                    code: 412,
+                    msg: '查询失败，没有该小组',
+                    data: null
+                };
+            } else {
+                let data = await TeamModel.getUserByTeamId(team_id);
+                result = {
+                    code: 200,
+                    msg: '查询成功',
+                    data: data
+                };
+            }
         } catch (err) {
             result = {
                 code: 412,
@@ -147,18 +202,26 @@ class TeamController {
         let result = null;
         try {
             let team = await TeamModel.getTeamByTeamId(team_id);
-            if (team.leader !== leader) {
+            if (team === null) {
                 result = {
                     code: 413,
-                    msg: '查询成功',
+                    msg: '查询失败，没有该小组',
                     data: false
                 };
             } else {
-                result = {
-                    code: 200,
-                    msg: '查询成功',
-                    data: true
-                };
+                if (team.leader !== leader) {
+                    result = {
+                        code: 413,
+                        msg: '查询成功',
+                        data: false
+                    };
+                } else {
+                    result = {
+                        code: 200,
+                        msg: '查询成功',
+                        data: true
+                    };
+                }
             }
         } catch (err) {
             result = {
@@ -174,19 +237,28 @@ class TeamController {
     static async isGroupMember(team_id, member_username) {
         let result = null;
         try {
-            let team = await TeamModel.getUserByTeamIdUsername(team_id, member_username);
-            if (team.length === 0) {
+            let team = await TeamModel.getTeamByTeamId(team_id);
+            if (team === null) {
                 result = {
                     code: 413,
-                    msg: '查询成功',
+                    msg: '查询失败，没有该小组',
                     data: false
                 };
             } else {
-                result = {
-                    code: 200,
-                    msg: '查询成功',
-                    data: true
-                };
+                let team = await TeamModel.getUserByTeamIdUsername(team_id, member_username);
+                if (team.length === 0) {
+                    result = {
+                        code: 413,
+                        msg: '查询成功',
+                        data: false
+                    };
+                } else {
+                    result = {
+                        code: 200,
+                        msg: '查询成功',
+                        data: true
+                    };
+                }
             }
         } catch (err) {
             result = {
@@ -362,16 +434,22 @@ class TeamController {
         return result;
     }
 
-    // 200 成功，412 异常,413 组长不正确
+    // 200 成功，412 异常，413 组长不正确, 414 不能删除组长，415 小组没有该用户
     static async deleteUserFromGrope(team_id, leader, username) {
         let result = null;
         try {
             let isLeader = await TeamModel.getTeamByTeamId(team_id);
             if (isLeader.leader === leader) {
                 let team = await TeamModel.getUserByTeamIdUsername(team_id, username);
-                if (team.length === 0) {
+                if (isLeader.leader === username) {
                     result = {
-                        code: 412,
+                        code: 414,
+                        msg: '删除失败，不能删除组长',
+                        data: false
+                    };
+                } else if (team.length === 0) {
+                    result = {
+                        code: 415,
                         msg: '删除失败，user不在小组中',
                         data: false
                     };
@@ -400,25 +478,42 @@ class TeamController {
         return result;
     }
 
-    // 200 成功，412 异常,413 成员不正确
+    // 200 成功，412 异常，413 成员不正确，414 组长不能退出，415 该小组不存在
     static async deleteUserFromGrope2(team_id, username) {
         let result = null;
         try {
-                let team = await TeamModel.getUserByTeamIdUsername(team_id, username);
-                if (team.length === 0) {
+            let teams = await TeamModel.getTeamByTeamId(team_id);
+            if (teams === null) {
+                result = {
+                    code: 415,
+                    msg: '查询失败，没有该小组',
+                    data: false
+                };
+            } else {
+                if (teams.leader === username) {
                     result = {
-                        code: 413,
-                        msg: '删除失败，user不在小组中',
+                        code: 414,
+                        msg: '删除失败,组长不能退出',
                         data: false
                     };
                 } else {
-                    await TeamModel.deleteMember(team_id, username);
-                    result = {
-                        code: 200,
-                        msg: '删除成功',
-                        data: true
-                    };
+                    let team = await TeamModel.getUserByTeamIdUsername(team_id, username);
+                    if (team.length === 0) {
+                        result = {
+                            code: 413,
+                            msg: '删除失败，user不在小组中',
+                            data: false
+                        };
+                    } else {
+                        await TeamModel.deleteMember(team_id, username);
+                        result = {
+                            code: 200,
+                            msg: '删除成功',
+                            data: true
+                        };
+                    }
                 }
+            }
         } catch (err) {
             result = {
                 code: 412,
@@ -429,7 +524,7 @@ class TeamController {
         return result;
     }
 
-    // 200 成功，412 异常,413 组长不正确,414 成员不正确
+    // 200 成功，412 异常，413 组长不正确，414 成员不正确
     static async updateTeamLeader(team_id, leader, username) {
         let result = null;
         try {
@@ -467,12 +562,18 @@ class TeamController {
         return result;
     }
 
-    // 200 成功，412 异常,413 组长不正确
+    // 200 成功，412 异常，413 组长不正确
     static async deleteGroup(team_id, leader) {
         let result = null;
         try {
             let team = await TeamModel.getTeamByTeamId(team_id);
-            if (team.leader !== leader) {
+            if (team === null) {
+                result = {
+                    code: 413,
+                    msg: '删除失败，没有该小组',
+                    data: false
+                };
+            } else if (team.leader !== leader) {
                 result = {
                     code: 413,
                     msg: '删除失败，组长不正确',
@@ -498,6 +599,69 @@ class TeamController {
             };
         }
         return result;
+    }
+
+    // 200 成功，412 异常，413 组长不存在/小组不存在，414 组长不正确
+    static async modifyGroup(ctx) {
+        let req = ctx.request.body;
+        if (req.team_id && req.leader) {
+            try {
+                let team = await TeamModel.getTeamByTeamId(req.team_id);
+                if (team === null) {
+                    ctx.response.status = 413;
+                    ctx.body = {
+                        code: 413,
+                        msg: '小组不存在',
+                        data: null
+                    }
+                } else {
+                    let leader = await TeamModel.getUserByUsername(req.leader);
+                    if (leader === null) {
+                        ctx.response.status = 413;
+                        ctx.body = {
+                            code: 413,
+                            msg: '组长不存在',
+                            data: null
+                        }
+                    } else {
+                        if (team.leader === req.leader) {
+                            await TeamModel.updateTeamDescription(req);
+                            await TeamModel.deleteTeamLabel(req.team_id);
+                            for (let i = 0; i < req.labels.length; i++) {
+                                await TeamModel.createTeamLabel(req.team_id, req.labels[i].label);
+                            }
+                            ctx.response.status = 200;
+                            ctx.body = {
+                                code: 200,
+                                msg: '修改小组信息成功',
+                                data: null
+                            }
+                        } else {
+                            ctx.response.status = 414;
+                            ctx.body = {
+                                code: 414,
+                                msg: '组长不正确',
+                                data: null
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                ctx.response.status = 412;
+                ctx.body = {
+                    code: 412,
+                    msg: '修改小组失败',
+                    data: err
+                }
+            }
+        } else {
+            ctx.response.status = 416;
+            ctx.body = {
+                code: 416,
+                msg: '参数不齐全',
+            }
+        }
+
     }
 
 }
