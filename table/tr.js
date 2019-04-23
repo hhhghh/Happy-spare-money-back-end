@@ -3,7 +3,13 @@ const Sequelize = require('sequelize');
 const moment = require('moment');
 
 module.exports = function(sequelize, DataTypes){
-    var tr = sequelize.define('tr',{
+    return sequelize.define('tr',{
+        id:{
+            type:DataTypes.INTEGER,
+            primaryKey:true,
+            allowNull:false,
+            autoIncrement:true
+        },
         username:{
             type:DataTypes.CHAR(20),
             allowNull:false,
@@ -45,5 +51,4 @@ module.exports = function(sequelize, DataTypes){
         // 如果指定的表名称本就是复数形式则不变
         freezeTableName: true
     });
-    return tr;
 };

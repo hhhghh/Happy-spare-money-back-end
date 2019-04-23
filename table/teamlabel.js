@@ -1,48 +1,36 @@
-const moment = require('moment');
+const db = require('../config/db');
 const Sequelize = require('sequelize');
-module.exports = function (sequelize, DataTypes){
-    return sequelize.define('team',{
-        team_id:{
+const moment = require('moment');
+
+module.exports = function(sequelize, DataTypes){
+    return sequelize.define('teamlabel',{
+        id:{
             type:DataTypes.INTEGER,
             primaryKey:true,
             allowNull:false,
             autoIncrement:true
         },
-        team_name:{
-            type:DataTypes.CHAR(45),
-            allowNull:false
-        },
-        leader:{
-            type:DataTypes.CHAR(20),
+        team_id:{
+            type:DataTypes.INTEGER,
             allowNull:false,
             references: {
-                model: 'user',
-                key: 'username',
+                model: 'team',
+                key: 'team_id',
                 deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
             }
         },
-        logo:{
+        label:{
             type:DataTypes.CHAR(45),
-            allowNull:false,
-            defaultValue:'default url waiting be set'
+            allowNull:false
         },
-        description:{
-            type:DataTypes.CHAR(100),
-            allowNull:false,
-            defaultValue:'The group leader was too lazy to write an introduction.'
-        },
-        limit:{
-            type:DataTypes.INTEGER,
-            defaultValue: 0
-        },
-        createdAt: {
+        createdAt:{
             type: DataTypes.DATE,
             get() {
                 return moment(this.getDataValue('createdAt')).format('YYYY-MM-DD HH:mm:ss');
             }
         },
         // 更新时间
-        updatedAt: {
+        updatedAt:{
             type: DataTypes.DATE,
             get() {
                 return moment(this.getDataValue('updatedAt')).format('YYYY-MM-DD HH:mm:ss');
@@ -53,5 +41,5 @@ module.exports = function (sequelize, DataTypes){
         // 为 false MySQL创建的表名称会是复数 users
         // 如果指定的表名称本就是复数形式则不变
         freezeTableName: true
-    })
+    });
 };

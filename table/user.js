@@ -1,6 +1,6 @@
 const moment = require('moment');
 module.exports = function(sequelize, DataTypes){
-    var user = sequelize.define('user',{
+    return sequelize.define('user',{
         username:{
             type:DataTypes.CHAR(20),
             primaryKey:true,
@@ -75,5 +75,4 @@ module.exports = function(sequelize, DataTypes){
         // 如果指定的表名称本就是复数形式则不变
         freezeTableName: true
     });
-    return user;
 };
