@@ -37,9 +37,9 @@ app.use(async (ctx, next) => {
 
 // routes
 app.use(routers.index.routes(), routers.index.allowedMethods())
-app.use(routers.users.routes(), routers.users.allowedMethods())
 app.use(routers.team_api.routes(), routers.team_api.allowedMethods())
 app.use(routers.task_api.routes(), routers.task_api.allowedMethods())
+app.use(routers.user_api.routes(), routers.user_api.allowedMethods())
 
 // error-handling
 app.on('error', (err, ctx) => {
