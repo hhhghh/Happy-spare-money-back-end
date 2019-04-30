@@ -13,6 +13,7 @@ module.exports = function(sequelize, DataTypes){
         username:{
             type:DataTypes.CHAR(20),
             allowNull:false,
+            unique: 'one_reciever_to_one_task',
             references: {
                 model: 'user',
                 key: 'username',
@@ -22,6 +23,7 @@ module.exports = function(sequelize, DataTypes){
         task_id:{
             type:DataTypes.INTEGER,
             allowNull:false,
+            unique: 'one_reciever_to_one_task',
             references: {
                 model: 'task',
                 key: 'task_id',
