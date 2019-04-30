@@ -209,6 +209,7 @@ class TeamModel {
     // 修改小组全部信息
     static async updateTeamDescription(new_data) {
         await Team.update({
+            team_name: new_data.team_name,
             logo: new_data.logo,
             description: new_data.description,
             limit: new_data.limit
