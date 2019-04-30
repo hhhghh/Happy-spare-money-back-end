@@ -143,6 +143,20 @@ class TaskModel {
             }
         })
     }
+
+    static async getTaskByRestrict(restriction) {
+        return await Task.findAll({
+            where: restriction
+        })
+    }
+
+    static async deleteTaskByTaskID(task_id) {
+        return await Task.destroy({
+            where: {
+                task_id: task_id
+            }
+        })
+    }
 }
 
 
