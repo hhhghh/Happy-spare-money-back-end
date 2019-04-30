@@ -3,35 +3,33 @@ const Sequelize = require('sequelize');
 const moment = require('moment');
 
 module.exports = function(sequelize, DataTypes){
-    return sequelize.define('tr',{
+    return sequelize.define('teamtask',{
         id:{
             type:DataTypes.INTEGER,
             primaryKey:true,
             allowNull:false,
             autoIncrement:true
         },
-        username:{
-            type:DataTypes.CHAR(20),
-            allowNull:false,
-            unique: 'one_reciever_to_one_task',
-            references: {
-                model: 'user',
-                key: 'username',
-                deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
-            }
-        },
         task_id:{
             type:DataTypes.INTEGER,
             allowNull:false,
-            unique: 'one_reciever_to_one_task',
             references: {
                 model: 'task',
                 key: 'task_id',
                 deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
             }
         },
-        state:{
+        team_id:{
             type:DataTypes.INTEGER,
+            allowNull:false,
+            references: {
+                model: 'task',
+                key: 'task_id',
+                deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
+            }
+        },
+        isolate:{
+            type:DataTypes.BOOL,
             allowNull:false
         },
         createdAt:{

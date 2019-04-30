@@ -44,8 +44,3 @@
 ```
 
 ## Notes
-
-* 2019.4.13 4:23
-    更新了数据库连接的内容，数据库的配置文件在 `config/database_config.js` 中，测试连接代码在 `controller/test_database_connect.js` 中，请查看
-
-    > 过几天删了这个文件吧？感觉是没用的玩意
