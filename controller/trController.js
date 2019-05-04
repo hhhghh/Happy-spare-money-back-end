@@ -18,7 +18,7 @@ class TRController {
             }
         } catch (err) {
             result = {
-                code: 412,
+                code: 500,
                 msg: "Params wrong, or constrait did not pass (already recieved, cannot receive again).",
                 data: err
             }
@@ -42,7 +42,7 @@ class TRController {
             }
         } catch (err) {
             result = {
-                code: 412,
+                code: 500,
                 msg: '查询失败',
                 data: err
             }
@@ -66,8 +66,27 @@ class TRController {
             }
         } catch (err) {
             result = {
-                code: 412,
+                code: 500,
                 msg: '查询失败',
+                data: err
+            }
+        }
+        return result
+    }
+
+    static async searchTRBySomeRestriction(terms) {
+        let result = undefined
+        try {
+            let data = await TRModel.searchTRByRestrict(terms)
+            result = {
+                code: 200,
+                msg: "Success",
+                data: data
+            }
+        } catch (err) {
+            result = {
+                code: 500,
+                msg: "查询出错",
                 data: err
             }
         }
@@ -85,8 +104,27 @@ class TRController {
             }
         } catch (err) {
             result = {
-                code: 412,
-                msg: 'Failed, check your params',
+                code: 500,
+                msg: 'Failed, database wrong.',
+                data: err
+            }
+        }
+        return result
+    }
+
+    static async confirmComplement(username, task_id, score) {
+        let result = undefined
+        try {
+            let data = await TRModel.confirmComplement(username, task_id, score)
+            result = {
+                code: 200, 
+                msg: 'Success',
+                data: data
+            }
+        } catch (err) {
+            result = {
+                code: 401,
+                msg: "失败，数据库未知错误",
                 data: err
             }
         }
