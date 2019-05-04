@@ -23,18 +23,23 @@ module.exports = function(sequelize, DataTypes){
         score:{
             type:DataTypes.INTEGER
         },
-        number:{
+        max_accepter_number:{
             type:DataTypes.INTEGER
         },
-        publisher:{
+        publisher: {
             type:DataTypes.CHAR(20),
 			allowNull:false
         },
-        state:{
+        state: {
             type:DataTypes.CHAR(45)
+            // unpublished
+            // processing
+            // over
         },
-        type:{
+        type: {
             type:DataTypes.INTEGER
+            // 1: 问卷
+            // 2: 取快递
         },
         starttime:{
             type:DataTypes.DATE

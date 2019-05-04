@@ -20,7 +20,7 @@ class TaskController {
             }
         } catch (err) {
             result = {
-                code: 412,
+                code: 500,
                 msg: "创建失败",
                 data: err
             }
@@ -44,7 +44,7 @@ class TaskController {
             }
         } catch (err) {
             result = {
-                code: 412,
+                code: 500,
                 msg: '查询失败',
                 data: err
             }
@@ -63,7 +63,7 @@ class TaskController {
             }
         } catch (err) {
             result = {
-                code: 412,
+                code: 500,
                 msg: '查询失败',
                 data: err
             }
@@ -82,7 +82,7 @@ class TaskController {
             }
         } catch (err) {
             result = {
-                code: 412,
+                code: 500,
                 msg: '查询失败',
                 data: err
             }
@@ -101,7 +101,7 @@ class TaskController {
             }
         } catch (err) {
             result = {
-                code: 412,
+                code: 500,
                 msg: '查询失败',
                 data: err
             }
@@ -120,7 +120,7 @@ class TaskController {
             }
         } catch (err) {
             result = {
-                code: 412,
+                code: 500,
                 msg: '查询失败，请检查参数',
                 data: err
             }
@@ -128,18 +128,38 @@ class TaskController {
         return result
     }
 
-    static async deleteTask(task_id) {
+    static async deleteTaskByTaskID(task_id) {
         let result
         try {
             let data = await TaskModel.deleteTaskByTaskID(task_id)
             result = {
                 code: 200, 
-                msg: 'Success'
+                msg: 'Success',
+                data: data
             }
         } catch (err) {
             result = {
-                code: 412,
+                code: 500,
                 msg: '查询失败，请检查参数',
+                data: err
+            }
+        }
+        return result
+    }
+
+    static async searchTaskByAccepter(username) {
+        let result = undefined
+        try {
+            let data = await TaskModel.searchTaskByAccepter(username)
+            result = {
+                code: 200, 
+                msg: 'Success',
+                data: data
+            }
+        } catch (err) {
+            result = {
+                code: 500,
+                msg: "查询失败，数据库未知错误",
                 data: err
             }
         }
