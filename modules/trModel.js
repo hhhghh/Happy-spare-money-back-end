@@ -44,12 +44,39 @@ class TRModel {
     }
 
     static async deleteTR(username, task_id) {
-        return await TR.destory({
+        return await TR.destroy({
             where: {
                 username: username,
                 task_id: task_id
             }
         })
+    }
+    
+    static async searchTRByRestrict(restriction) {
+        return await TR.findAll({
+            where: restriction
+        })
+    }
+
+    static async confirmComplement(username, task_id, score) {
+        return await Promise.all([
+            TR.update({
+                state: 2
+            }, {
+                where: {
+                    username: username,
+                    task_id: task_id
+                }
+            }),
+            User.update({
+                score: score
+            }, {
+                where: {
+                    username: username
+                }
+            })
+        ])
+        // 评分直接更新了，TODO... 还待考虑到底怎么操作
     }
 }
 

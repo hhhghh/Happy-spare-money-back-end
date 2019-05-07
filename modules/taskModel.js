@@ -157,6 +157,19 @@ class TaskModel {
             }
         })
     }
+
+    static async searchTaskByAccepter(username) {
+        Task.hasMany(TR, {foreignKey: 'task_id'})
+        TR.belongsTo(Task, {foreignKey: 'task_id'})
+        return await TR.findAll({
+            where: {
+                username: username
+            },
+            include: [{
+                model: Task
+            }]
+        })
+    }
 }
 
 

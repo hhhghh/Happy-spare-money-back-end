@@ -4,84 +4,69 @@ const tr_controller = require('../controller/trController')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 
-router.prefix('/api/task')
+router.prefix('/api/v1')
 
-/**
-
-GET: /api/task? <>
-参数任意组合，符合要求即可
-
-    GET: /task?type={:type}&range={:range}&username={:username}
-    返回一个任务
-
-    GET: /task?acceptable=true&type={type}&range={range}&state={state}&username={}
-    获得任务
-
-    GET: /task?release_user={username}
-    获得任务
-
-POST /api/task
-发布任务
-
-DEL /api/task?task_id={}
-删除任务
-
-*/
-
-/**
- * 处理 Task 相关的 GET 请求
- */
-router.get('/', async (ctx) => {
-    let query_params = ctx.query
-    let result = null
-    // 检查 acceptable 提供一组额外的查询
-    if (query_params.acceptable) {
-        delete query_params.acceptable
-        // 添加判断acceptable的代码
-        // TODO
-        // 
-    }
+// 获得TASK，通过range, type, username
+router.get('/task', async (ctx) => {
+    let query = ctx.query
+    let result = undefined
     // range 检查是否需要转换为合适的参数形式
-    if (query_params.range) 
-        query_params = checkRangeAndConvert(query_params)
-    
-    result = await task_controller.searchTaskBySomeRestriction(query_params)
+    if (query.range && 
+        query.type &&
+        query.username) {
+        let query_terms = {
+            range: query.range,
+            type: query.type,
+            // username: query.username
+        }
+        query_terms = checkParamsAndConvert(query_terms, "range")
+        query_terms = checkParamsAndConvert(query_terms, "type")
+        result = await task_controller.searchTaskBySomeRestriction(query_terms)
+    } else {
+        result = {
+            code: 412,
+            msg: "Params wrong, please check."
+        }
+    }
     ctx = response(ctx, result)
 })
 
-/**
- * 需要参数
- * title, introduction, money, score, number, publisher, state, type
- */
-router.post('/', async (ctx) => {
-    let post_data = ctx.request.body
+// 发布任务, 提供所有必要信息
+router.post('/task', async (ctx) => {
+    let post_body = ctx.request.body
     let result = undefined
-    if (post_data.title && post_data.introduction && post_data.money 
-        && post_data.score && post_data.number && post_data.publisher 
-        && post_data.state && post_data.type) {
-            result = await task_controller.releaseTask(post_data)
+    if (post_body.title && post_body.introduction && post_body.money 
+        && post_body.score && post_body.max_accepter_number && post_body.publisher 
+        && post_body.type) {
+        let post_data = {
+            title: post_body.title,
+            introduction: post_body.introduction,
+            money: post_body.money,
+            score: post_body.score,
+            max_accepter_number: post_body.max_accepter_number,
+            publisher: post_body.publisher,
+            state: "processing",
+            type: post_body.type
+        }
+        result = await task_controller.releaseTask(post_data)
     } else {
        result = {
            code: 412,
-           msg: "参数列表不完整"
+           msg: "Params are not enough, need [title, introduction, money, score, max_accepter_number, publisher, type]",
        } 
     }
     ctx = response(ctx, result)
 })
 
-/**
- * 取消任务
- * POST: 删除一个任务
- */
-router.del('/', async (ctx) => {
+router.del('/task', async (ctx) => {
     let query_params = ctx.query
     let result = undefined
-    console.log(query_params)
-    if (query_params.task_id /** 这里要更改为判断取消任务的条件 */) {
-        result = await task_controller.deleteTask(query_params.task_id)
-        if (result.code == 412) {
-            console.log(result)
-        }
+    if (query_params.task_id) {
+        result = await task_controller.deleteTaskByTaskID(query_params.task_id)
+        // Need authorize...
+        // TODO...
+        // 
+        // 
     } else {
         result = {
             code: 412,
@@ -91,42 +76,172 @@ router.del('/', async (ctx) => {
     ctx = response(ctx, result)
 })
 
-// router.get('/task_state', async (ctx) => {
-//     let query_params = ctx.query
-//     let result = undefined
-//     if (query_params.task_id && query_params.username) {
-//         result = await task_controller.searchTaskState(query_params.task_id, query_params.username)
-//     } else {
-//         result = {
-//             code: 412,
-//             msg: "Params wrong, API denied"
-//         }
-//     }
-// })
+router.get('/task/findByPublisher', async (ctx) => {
+    let query_params = ctx.query
+    let result = undefined
+    if (query_params.username) {
+        let query_terms = {
+            publisher: query_params.username
+        }
+        result = await task_controller.searchTaskBySomeRestriction(query_terms)
+    } else {
+        result = {
+            code: 412,
+            msg: "Params is not enough..."
+        }
+    }
+    ctx = response(ctx, result)
+})
+
+router.get('/task/findByTaskId', async (ctx) => {
+    let query_params = ctx.query
+    let result = undefined
+    if (query_params.task_id) {
+        let query_terms = {
+            task_id: query_params.task_id
+        }
+        result = await task_controller.searchTaskBySomeRestriction(query_terms)
+    } else {
+        result = {
+            code: 412,
+            msg: "Params is not enough..."
+        }
+    }
+    ctx = response(ctx, result)
+})
+
+// 
+router.get('/task/findByAccepter', async (ctx) => {
+    let query_params = ctx.query
+    let result = undefined
+    if (query_params.username) {
+        let query_terms = {
+            username: query_params.username
+        }
+        result = await task_controller.searchTaskByAccepter(query_terms.username)
+    } else {
+        result = {
+            code: 412,
+            msg: "Params is not enough..."
+        }
+    }
+    ctx = response(ctx, result)
+})
+
+router.get('/task/state', async (ctx) => {
+    let query = ctx.query
+    let result = undefined
+    if (query.task_id && query.username) {
+        let query_terms = {
+            username: query.username,
+            task_id: query.task_id
+        }
+        result = await tr_controller.searchTRBySomeRestriction(query_terms)
+    } else {
+        result = {
+            code: 412,
+            msg: "Params is not enough"
+        }
+    }
+    ctx = response(ctx, result)
+})
+
+
+router.get('/task/acceptance', async (ctx) => {
+    let query = ctx.query
+    let result = undefined
+    if (query.task_id && query.username) {
+        let query_terms = {
+            username: query.username,
+            task_id: query.task_id
+        }
+        result = await tr_controller.searchTRBySomeRestriction(query_terms)
+    } else {
+        result = {
+            code: 412,
+            msg: "Params is not enough"
+        }
+    }
+    ctx = response(ctx, result)
+}) 
+
+router.post('/task/acceptance', async (ctx) => {
+    let post_body = ctx.request.body
+    let result = undefined
+    if (post_body.username && post_body.task_id) {
+        console.log("Username and task_id got")
+        result = await tr_controller.recieveATask(post_body.username, 
+            post_body.task_id)
+    } else {
+        result = {
+            code: 412,
+            msg: "Params wrong, API denied"
+        }
+    }
+    ctx = response(ctx, result)
+})
+
+router.del('/task/acceptance', async (ctx) => {
+    let post_body = ctx.query
+    let result = undefined
+    if (post_body.task_id && post_body.username) {
+        result = await tr_controller.deleteTR(post_body.username, post_body.task_id)
+    } else {
+        result = {
+            code: 412,
+            msg: "Params wrong, API denied"
+        }
+    }
+    ctx = response(ctx, result)
+})
+
+router.post('/task/complement', async (ctx) => {
+    let post_body = ctx.request.body
+    let result = undefined
+    
+    if (post_body.task_id
+        && post_body.username
+        && post_body.score) {
+        result = await tr_controller.confirmComplement(post_body.username, post_body.task_id, post_body.score)
+    } else {
+        result = {
+            code: 412,
+            msg: "Params wrong..."
+        }
+    }
+    ctx = response(ctx, result)
+})
 
 /**
- * 检查 range 参数项，并返回可供查询的range
- * @param {*} range 可能输入为 1,2,3,4 这种格式，或all
+ * 检查 type 参数项
+ * 可能输入为 1,2,3,4 这种格式，或all
+ * 
+ * @param query_params  JSON格式的查询字符串
+ * @param which         检查的参数名称
  */
-let checkRangeAndConvert = (query_params) => {
-    if (query_params.range.toLowerCase() == 'all') {
+let checkParamsAndConvert  = (query_params, which) => {
+    if (query_params[which].toLowerCase() == 'all') {
         // 直接删去就好，无需任何限制
-        delete query_params.range
-    } else if (query_params.range.indexOf(',') != -1) {
+        delete query_params[which]
+    } else if (query_params[which].indexOf(',') != -1) {
         // 说明是输入数组形式，改成 Op.or
-        let range = query_params.range
-        range = range.split(',').map(Number)
-        query_params.range = {
-            [Op.or]: range
+        let term = query_params[which]
+        term = term.split(',').map(Number)
+        query_params[which] = {
+            [Op.or]: term
         }
     }
     return query_params
 }
 
-
-
 let response = (ctx, result) => {
-    ctx.response.status = result.code;
+    if (Number.isInteger(result.code)) 
+        ctx.response.status = result.code
+    else
+        ctx.response.status = 500
+    if (!result.data) {
+        result.data = undefined
+    }
     if (result.code == 200) {
         ctx.body = {
             code: result.code,
@@ -136,12 +251,11 @@ let response = (ctx, result) => {
     } else {
         ctx.body = {
             code: result.code,
-            msg: result.msg
+            msg: result.msg,
+            data: result.data
         }
     }
     return ctx;
 }
-
-
 
 module.exports = router
