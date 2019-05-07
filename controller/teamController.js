@@ -19,7 +19,7 @@ class TeamController {
                     let members = req.members;
                     let flag = true;
                     for (let i = 0; i < members.length; i++) {
-                        let user = await TeamModel.getUserByUsername(members[i].username);
+                        let user = await TeamModel.getUserByUsername(members[i].member_username);
                         if (user === null) {
                             flag = false;
                             break;
@@ -32,7 +32,7 @@ class TeamController {
                             await TeamModel.createTeamLabel(ret.team_id, labels[i].label);
                         }
                         for (let i = 0; i < members.length; i++) {
-                            await TeamModel.createTeamMember(ret.team_id, members[i].username);
+                            await TeamModel.createTeamMember(ret.team_id, members[i].member_username);
                         }
                         const data = await TeamModel.getTeamByTeamId(ret.team_id);
                         ctx.response.status = 200;
@@ -44,7 +44,7 @@ class TeamController {
                     } else {
                         let wrongMembers = req.members;
                         for (let i = 0; i < wrongMembers.length; i++) {
-                            let user = await TeamModel.getUserByUsername(members[i].username);
+                            let user = await TeamModel.getUserByUsername(members[i].member_username);
                             if (user !== null) {
                                 wrongMembers.splice(i, 1);
                                 i--;

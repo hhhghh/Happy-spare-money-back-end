@@ -8,6 +8,6 @@ module.exports = {
     index: index,
     task_api: task_api,
     team_api: team_api,
-    user_api: user_api
+    user_api: user_api,
     tr_api: tr_api
 }
