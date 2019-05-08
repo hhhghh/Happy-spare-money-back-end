@@ -49,8 +49,10 @@ class TeamModel {
                 team_name : team_name,
             },
             include: [{
+                attributes: ['team_id', 'label'],
                 model: Teamlabel,
             },{
+                attributes: ['team_id', 'member_username'],
                 model: Members,
             }],
         })
@@ -67,8 +69,30 @@ class TeamModel {
                 team_id : team_id,
             },
             include: [{
+                attributes: ['team_id', 'label'],
                 model: Teamlabel,
             },{
+                attributes: ['team_id', 'member_username'],
+                model: Members,
+            }],
+        })
+    }
+
+    // 根据小组id来查找小组
+    static async getTeamByTeamId2(team_id) {
+        Team.hasMany(Teamlabel, {foreignKey : 'team_id'});
+        Teamlabel.belongsTo(Team, {foreignKey : 'team_id'});
+        Team.hasMany(Members, {foreignKey : 'team_id'});
+        Members.belongsTo(Team, {foreignKey : 'team_id'});
+        return await Team.findAll({
+            where: {
+                team_id : team_id,
+            },
+            include: [{
+                attributes: ['team_id', 'label'],
+                model: Teamlabel,
+            },{
+                attributes: ['team_id', 'member_username'],
                 model: Members,
             }],
         })
@@ -80,16 +104,24 @@ class TeamModel {
         Teamlabel.belongsTo(Team, {foreignKey : 'team_id'});
         Team.hasMany(Members, {foreignKey : 'team_id'});
         Members.belongsTo(Team, {foreignKey : 'team_id'});
-        return await Team.findAll({
+
+        let team = await Team.findAll({
             include: [{
                 model: Teamlabel,
                 where: {
-                    label : label,
+                    label: label,
                 }
-            },{
-                model: Members,
-            }],
-        })
+            }]
+        });
+        if (team.length === 0)
+            return [];
+        let result;
+        const TeamModel = require('../modules/teamModel');
+        result = await TeamModel.getTeamByTeamId2(team[0].team_id);
+        for (let i = 1; i < team.length; i++) {
+            result.push(await TeamModel.getTeamByTeamId(team[i].team_id));
+        }
+        return result;
     }
 
     // 获取小组权限,使用根据小组id来查找小组
