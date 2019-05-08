@@ -80,7 +80,7 @@ class TeamController {
     static async getGroupByGroupId(team_id) {
         let result = null;
         try {
-            let data = await TeamModel.getTeamByTeamId(team_id);
+            let data = await TeamModel.getTeamByTeamId2(team_id);
             if (data === null) {
                 result = {
                     code: 413,
@@ -291,7 +291,7 @@ class TeamController {
     }
 
     // 200 正常，412 异常，413 需要组长验证，414 不允许添加
-    static async addUserToGrope(team_id, leader, username) {
+    static async addUserToGrope(team_id, leader, user) {
         let result = null;
         try {
             let team = await TeamModel.getTeamByTeamId(team_id);
@@ -301,70 +301,64 @@ class TeamController {
                     msg: '没有该小组',
                     data: false
                 };
-            } else if (team.limit === 0) {
-                let user = await TeamModel.getUserByUsername(username);
-                if (user === null) {
+            } else if (team.limit === 0 || (team.limit === 1 && team.leader === leader)) {
+                let wrongUser = user.slice(0);
+                for (let i = 0; i < wrongUser.length; i++) {
+                    let users = await TeamModel.getUserByUsername(user[i].username);
+                    if (users !== null) {
+                        wrongUser.splice(i, 1);
+                        i--;
+                    }
+                }
+                if (user.length === wrongUser.length) {
                     result = {
                         code: 412,
                         msg: '添加失败，没有user',
-                        data: false
+                        data: wrongUser
                     };
                 } else {
-                    let team = await TeamModel.getUserByTeamIdUsername(team_id, username);
-                    if (team.length === 0) {
-                        await TeamModel.createMembers(team_id, username);
+                    let wrongUser2 = user.slice(0);
+                    for (let i = 0; i < wrongUser2.length; i++) {
+                        let members = await TeamModel.getUserByTeamIdUsername(team_id, user[i].username);
+                        if (members.length === 0) {
+                            wrongUser2.splice(i, 1);
+                            i--;
+                        }
+                    }
+                    if (user.length === wrongUser2.length) {
+                        result = {
+                            code: 412,
+                            msg: '添加失败，user已经在小组中',
+                            data: wrongUser2
+                        };
+                    } else {
+                        for (let i = 0; i < user.length; i++) {
+                            await TeamModel.createMembers(team_id, user[i].username);
+                        }
                         result = {
                             code: 200,
                             msg: '添加成功',
                             data: true
                         };
-                    } else {
-                        result = {
-                            code: 412,
-                            msg: '添加失败，user已经在小组中',
-                            data: false
-                        };
                     }
                 }
-            } else if (team.limit === 1) {
-                let isLeader = await TeamModel.getTeamByTeamId(team_id);
-                if (isLeader.leader === leader) {
-                    let user = await TeamModel.getUserByUsername(username);
-                    if (user === null) {
-                        result = {
-                            code: 412,
-                            msg: '添加失败，没有user',
-                            data: false
-                        };
-                    } else {
-                        let team = await TeamModel.getUserByTeamIdUsername(team_id, username);
-                        if (team.length === 0) {
-                            await TeamModel.createMembers(team_id, username);
-                            result = {
-                                code: 200,
-                                msg: '添加成功',
-                                data: true
-                            };
-                        } else {
-                            result = {
-                                code: 412,
-                                msg: '添加失败，user已经在小组中',
-                                data: false
-                            };
-                        }
-                    }
-                } else {
-                    result = {
-                        code: 413,
-                        msg: '添加失败，leader不是组长, 需要验证',
-                        data: false
-                    };
-                }
+            } else if (team.limit === 1 && team.leader !== leader) {
+                result = {
+                    code: 413,
+                    msg: '添加失败，leader不是组长, 需要验证',
+                    data: false
+                };
             } else if (team.limit === 2) {
                 result = {
                     code: 414,
                     msg: '添加失败，该小组不允许添加',
                     data: false
+                };
+            } else {
+                result = {
+                    code: 412,
+                    msg: '添加失败',
+                    data: err
                 };
             }
         } catch (err) {
