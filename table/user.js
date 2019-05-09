@@ -35,7 +35,7 @@ module.exports = function(sequelize, DataTypes){
             allowNull:false
         },
         avatar:{
-            type:DataTypes.CHAR(128),
+            type:DataTypes.CHAR(255),
             defaultValue:'default url waiting be set'
         },
         nickname:{
