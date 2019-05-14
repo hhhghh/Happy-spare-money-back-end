@@ -14,7 +14,12 @@ module.exports = function(sequelize, DataTypes){
         score:{
             type:DataTypes.INTEGER,
             allowNull:false,
-            defaultValue: 50,
+            defaultValue: 0,
+        },
+        task_complete:{
+            type:DataTypes.INTEGER,
+            allowNull:false,
+            defaultValue: 0,
         },
         money:{
             type:DataTypes.FLOAT,
