@@ -34,6 +34,11 @@ module.exports = function(sequelize, DataTypes){
             type:DataTypes.INTEGER,
             allowNull:false
         },
+        score:{
+            type:DataTypes.INTEGER,
+            allowNull:false,
+            defaultValue: 5,
+        },
         createdAt:{
             type: DataTypes.DATE,
             get() {

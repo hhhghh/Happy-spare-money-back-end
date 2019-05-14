@@ -22,7 +22,7 @@ module.exports = function (sequelize, DataTypes){
             }
         },
         logo:{
-            type:DataTypes.CHAR(45),
+            type:DataTypes.CHAR(255),
             allowNull:false,
             defaultValue:'default url waiting be set'
         },

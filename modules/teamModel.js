@@ -116,7 +116,6 @@ class TeamModel {
         if (team.length === 0)
             return [];
         let result;
-        const TeamModel = require('../modules/teamModel');
         result = await TeamModel.getTeamByTeamId2(team[0].team_id);
         for (let i = 1; i < team.length; i++) {
             result.push(await TeamModel.getTeamByTeamId(team[i].team_id));
@@ -132,17 +131,33 @@ class TeamModel {
         Members.belongsTo(Team, {foreignKey : 'team_id'});
         Team.hasMany(Teamlabel, {foreignKey : 'team_id'});
         Teamlabel.belongsTo(Team, {foreignKey : 'team_id'});
-        return await Team.findAll({
+        // return await Team.findAll({
+        //     include: [{
+        //         model: Members,
+        //         where: {
+        //             member_username : member_username
+        //         }
+        //     },{
+        //         model: Teamlabel,
+        //     }],
+        // });
+
+        let team = await Team.findAll({
             include: [{
                 model: Members,
                 where: {
                     member_username : member_username
                 }
-            },{
-                model: Teamlabel,
-            }],
+            }]
         });
-
+        if (team.length === 0)
+            return [];
+        let result;
+        result = await TeamModel.getTeamByTeamId2(team[0].team_id);
+        for (let i = 1; i < team.length; i++) {
+            result.push(await TeamModel.getTeamByTeamId(team[i].team_id));
+        }
+        return result;
     }
 
     // 根据小组id来得到小组成员

@@ -32,9 +32,6 @@ module.exports = function(sequelize, DataTypes){
         },
         state: {
             type:DataTypes.CHAR(45)
-            // unpublished
-            // processing
-            // over
         },
         type: {
             type:DataTypes.INTEGER
@@ -46,6 +43,9 @@ module.exports = function(sequelize, DataTypes){
         },
         endtime:{
             type:DataTypes.DATE
+        },
+        questionnaire_path:{
+            type:DataTypes.CHAR(255)
         },
         content:{
             type:DataTypes.CHAR(45)
