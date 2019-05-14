@@ -1,4 +1,5 @@
 const UserModel = require('../modules/userModel')
+const formidable = require('formidable')
 
 class UserController {
     /**
@@ -7,10 +8,16 @@ class UserController {
      * @returns {Promise.<void>}
      */
     static async register(ctx) {
-        // 接手客户端请求
-        let req = ctx.request.body;
-    
-        try {
+        var form = new formidable.IncomingForm();
+        form.parse(ctx.req, function(err, fields, files){
+            ctx.response.body = {
+                status: 200,
+                description: 'ok',
+                result: files
+              }
+            
+        });
+        /*try {
             const user = await UserModel.getUserInfo(req.info.username);
             if (user != null) {
                 ctx.status = 409;
@@ -114,8 +121,16 @@ class UserController {
                     result = {
                         code: 200,
                         msg: 'success',
-                        data: data
-                   } 
+                        data: {
+                            "username": data.username,
+                            "name": data.true_name,
+                            "school": data.school_name,
+                            "grade": data.grade,
+                            "phone": data.phone_number,
+                            "wechat": data.wechat,
+                            "qq": data.QQ
+                        } 
+                    }
                 }
             }
         } catch(error) {
@@ -155,8 +170,15 @@ class UserController {
                     result = {
                         code: 200,
                         msg: 'success',
-                        data: data
-                   } 
+                        data: {
+                            "orgname": data.username,
+                            "score": 100,
+                            "school": "SYSU",
+                            "wechat": null,
+                            "qq": null,
+                            "phone_number": null
+                        }
+                    } 
                 }
             }
         } catch(error) {
@@ -288,6 +310,238 @@ class UserController {
                 data: req
             }
         }
+    }
+
+    static async UserBlacklistUser(ctx) {
+        let req = ctx.request.body
+        let username1 = req.username1
+        let username2 = req.username2
+        if (username1 && username2) {
+            try {
+            const result = await UserModel.UserBlacklistUser(username1, username2)
+            if (result == 0) {
+                ctx.status = 200
+                ctx.body = {
+                    code: 200,
+                    msg: '拉黑成功',
+                    data: result
+                }
+            }
+            else if (result == 1) {
+                ctx.status = 402
+                ctx.body = {
+                    code: 402,
+                    msg: '被拉黑机构或用户不存在',
+                    data: result
+                }   
+            }
+            else if (result == 2) {
+                ctx.status = 403
+                ctx.body = {
+                    code: 403,
+                    msg: '用户不存在',
+                    data: result
+                }   
+            }
+            else if (result == 3) {
+                ctx.status = 405
+                ctx.body = {
+                    code: 405,
+                    msg: '机构不能拉黑用户',
+                    data: result
+                }   
+            }
+            else if (result == 4) {
+                ctx.status = 406
+                ctx.body = {
+                    code: 406,
+                    msg: '已拉黑',
+                    data: result
+                }   
+            }
+        } catch(err) {
+            ctx.status = 500;
+            ctx.body = {
+                code: 500,
+                msg: '服务器异常',
+                data: err
+            }    
+        }
+        }
+    }
+
+    static async teamBlacklistOrg(ctx) {
+        let req = ctx.request.body
+        let ins_name = req.ins_name
+        let team_id = req.team_id
+        if (ins_name && team_id) {
+            try {
+            const result = await UserModel.TeamBlacklistOrg(ins_name, team_id)
+            if (result == 0) {
+                ctx.status = 200
+                ctx.body = {
+                    code: 200,
+                    msg: '拉黑成功',
+                    data: result
+                }
+            }
+            else if (result == 1) {
+                ctx.status = 402
+                ctx.body = {
+                    code: 402,
+                    msg: '被拉黑机构不存在',
+                    data: result
+                }   
+            }
+            else if (result == 2) {
+                ctx.status = 403
+                ctx.body = {
+                    code: 403,
+                    msg: '该用户不是机构',
+                    data: result
+                }   
+            }
+            else if (result == 3) {
+                ctx.status = 405
+                ctx.body = {
+                    code: 405,
+                    msg: '小组不存在',
+                    data: result
+                }   
+            }
+            else if (result == 4) {
+                ctx.status = 406
+                ctx.body = {
+                    code: 406,
+                    msg: '已拉黑，不能重复拉黑',
+                    data: result
+                }   
+            }
+        } catch(err) {
+            ctx.status = 500;
+            ctx.body = {
+                code: 500,
+                msg: '服务器异常',
+                data: err
+            }
+        }
+        }    
+    }
+
+    static async UserCancelBlack(ctx) {
+        let req = ctx.request.body
+        let username1 = req.username1
+        let username2 = req.username2
+        if (username1 && username2) {
+            try {
+            const result = await UserModel.UserCancelBlack(username1, username2)
+            if (result == 0) {
+                ctx.status = 200
+                ctx.body = {
+                    code: 200,
+                    msg: '取消拉黑成功',
+                    data: result
+                }
+            }
+            else if (result == 1) {
+                ctx.status = 402
+                ctx.body = {
+                    code: 402,
+                    msg: '取消拉黑的机构或用户不存在',
+                    data: result
+                }   
+            }
+            else if (result == 2) {
+                ctx.status = 403
+                ctx.body = {
+                    code: 403,
+                    msg: '用户不存在',
+                    data: result
+                }   
+            }
+            else if (result == 4) {
+                ctx.status = 405
+                ctx.body = {
+                    code: 405,
+                    msg: '没有拉黑过的用户或机构不能取消拉黑',
+                    data: result
+                }   
+            }
+            else if (result == 3) {
+                ctx.status = 406
+                ctx.body = {
+                    code: 406,
+                    msg: '机构不能取消拉黑',
+                    data: result
+                }   
+            }
+        } catch(err) {
+            ctx.status = 500;
+            ctx.body = {
+                code: 500,
+                msg: '服务器异常',
+                data: err
+            }    
+        }
+        }
+    }
+
+    static async teamCancelBlack(ctx) {
+        let req = ctx.request.body
+        let ins_name = req.ins_name
+        let team_id = req.team_id
+        if (ins_name && team_id) {
+            try {
+            const result = await UserModel.teamCancelBlack(ins_name, team_id)
+            if (result == 0) {
+                ctx.status = 200
+                ctx.body = {
+                    code: 200,
+                    msg: '取消屏蔽成功',
+                    data: result
+                }
+            }
+            else if (result == 1) {
+                ctx.status = 402
+                ctx.body = {
+                    code: 402,
+                    msg: '取消拉黑机构不存在',
+                    data: result
+                }   
+            }
+            else if (result == 2) {
+                ctx.status = 403
+                ctx.body = {
+                    code: 403,
+                    msg: '该用户不是机构',
+                    data: result
+                }   
+            }
+            else if (result == 3) {
+                ctx.status = 405
+                ctx.body = {
+                    code: 405,
+                    msg: '小组不存在',
+                    data: result
+                }   
+            }
+            else if (result == 4) {
+                ctx.status = 406
+                ctx.body = {
+                    code: 406,
+                    msg: '没有拉黑无法取消拉黑',
+                    data: result
+                }   
+            }
+        } catch(err) {
+            ctx.status = 500;
+            ctx.body = {
+                code: 500,
+                msg: '服务器异常',
+                data: err
+            }
+        }
+        }    
     }
 
     static async getUserAvatar(username) {

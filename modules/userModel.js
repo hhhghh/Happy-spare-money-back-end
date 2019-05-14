@@ -1,6 +1,10 @@
 const db = require('../config/db');
 const sequelize = db.sequelize;
 const User = sequelize.import('../table/user');
+const Piu = sequelize.import('../table/piu')
+const Team = sequelize.import('../table/team')
+const Pit = sequelize.import('../table/pit')
+const Tr = sequelize.import('../table/tr')
 
 User.sync({force: false});
 
@@ -39,23 +43,7 @@ class UserModel {
                 username: username
             }
         })
-        if (data != null) {
-            return {
-                username: data.username,
-                score: data.score,
-                money: data.money,
-                true_name: data.true_name,
-                school_name: data.school_name,
-                grade: data.grade,
-                avatar: data.avatar,
-                nickname: data.nickname,
-                wechat: data.wechat,
-                QQ: data.QQ,
-                phone_number: data.phone_number,
-                account_state: data.account_state
-            }
-        }
-        return null
+        return data
     }
 
 
@@ -161,6 +149,154 @@ class UserModel {
         } 
     }
 
+    static async UserBlacklistUser(username1, username2) {
+        const user1 = await User.findOne({
+            where: {
+                username: username1
+            }
+        })
+        if (user1 === null) {
+            return 1
+        }
+        const user2 = await User.findOne({
+            where: {
+                username: username2
+            }
+        })
+        if (user2 === null) {
+            return 2
+        }
+        if (user2.account_state == 1) {
+            return 3
+        }
+        const relate = await Piu.findOne({
+            where: {
+                ins_name: username1,
+                username: username2
+            }
+        })
+        if (relate !== null) {
+            return 4
+        }
+        await Piu.create({
+            ins_name: username1,
+            username: username2
+        })
+        return 0
+    }
+
+    static async TeamBlacklistOrg(ins_name, team_id) {
+        const ins = await User.findOne({
+            where: {
+                username: ins_name
+            }
+        })
+        if (ins === null) {
+            return 1
+        }
+        if (ins.account_state != 1) {
+            return 2
+        }
+        const team = await Team.findOne({
+            where: {
+                team_id: team_id
+            }
+        })
+        if (team === null) {
+            return 3
+        }
+        const relate = await Pit.findOne({
+            where: {
+                ins_name: ins_name,
+                team_id: team_id
+            }
+        })
+        if (relate !== null) {
+            return 4
+        }
+        await Pit.create({
+            ins_name: ins_name,
+            team_id: team_id
+        })
+        return 0    
+    }
+
+    static async UserCancelBlack(username1, username2) {
+        const user1 = await User.findOne({
+            where: {
+                username: username1
+            }
+        })
+        if (user1 === null) {
+            return 1
+        }
+        const user2 = await User.findOne({
+            where: {
+                username: username2
+            }
+        })
+        if (user2 === null) {
+            return 2
+        }
+        if (user2.account_state == 1) {
+            return 3
+        }
+        const relate = await Piu.findOne({
+            where: {
+                ins_name: username1,
+                username: username2
+            }
+        })
+        if (relate === null) {
+            return 4
+        }
+        await Piu.destroy({
+            where: {
+                ins_name: username1,
+                username: username2
+            }
+        })
+        return 0    
+    }
+
+    static async teamCancelBlack(ins_name, team_id) {
+        const ins = await User.findOne({
+            where: {
+                username: ins_name
+            }
+        })
+        if (ins === null) {
+            return 1
+        }
+        if (ins.account_state != 1) {
+            return 2
+        }
+        const team = await Team.findOne({
+            where: {
+                team_id: team_id
+            }
+        })
+        if (team === null) {
+            return 3
+        }
+        const relate = await Pit.findOne({
+            where: {
+                ins_name: ins_name,
+                team_id: team_id
+            }
+        })
+        if (relate === null) {
+            return 4
+        }
+        await Pit.destroy({
+            where: {
+                ins_name: ins_name,
+                team_id: team_id    
+            }
+        })
+        return 0    
+    }
+
     static async getUserAvatar(username) {
         const data = await User.findOne({
             where: {
@@ -171,6 +307,10 @@ class UserModel {
             return 1;
         }
         return 0;   
+    }
+
+    static async getAcceptedFinishedTasks(username) {
+
     }
 }
 
