@@ -24,7 +24,7 @@ module.exports = function (sequelize, DataTypes){
         logo:{
             type:DataTypes.CHAR(255),
             allowNull:false,
-            defaultValue:'default url waiting be set'
+            defaultValue:'http://139.196.79.193:3000/awesomeface.png'
         },
         description:{
             type:DataTypes.CHAR(100),

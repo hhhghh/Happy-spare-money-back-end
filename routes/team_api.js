@@ -127,23 +127,6 @@ router.post('/Member/Addition/', async (ctx) => {
     ctx = response(ctx, result)
 });
 
-// router.patch('/teamMembers/', async (ctx) => {
-//     let query_params = ctx.query;
-//     let result = null;
-//     if (query_params.team_id && query_params.leader && query_params.username) {
-//         result = await TeamController.addUserToGrope(query_params.team_id, query_params.leader, query_params.username)
-//     } else if (query_params.team_id && query_params.username) {
-//         result = await TeamController.addUserToGrope2(query_params.team_id, query_params.username)
-//     } else {
-//         result = {
-//             code: 400,
-//             msg: 'Wrong query param.',
-//             data: null
-//         }
-//     }
-//     ctx = response(ctx, result)
-// });
-
 router.post('/Leader/', async (ctx) => {
     let query_params = ctx.request.body;
     let result = null;
@@ -203,26 +186,6 @@ router.del('/', async (ctx) => {
     }
     ctx = response(ctx, result)
 });
-
-// router.del('/team/', async (ctx) => {
-//     let query_params = ctx.query;
-//     let result = null;
-//     if (query_params.team_id && query_params.leader && query_params.username) {
-//         result = await TeamController.deleteUserFromGrope(query_params.team_id, query_params.leader, query_params.username)
-//     } else if (query_params.team_id && query_params.username) {
-//         result = await TeamController.deleteUserFromGrope2(query_params.team_id, query_params.username)
-//     } else if (query_params.team_id && query_params.leader) {
-//         result = await TeamController.deleteGroup(query_params.team_id, query_params.leader);
-//     } else {
-//         result = {
-//             code: 400,
-//             msg: 'Wrong query param.',
-//             data: null
-//         }
-//     }
-//     ctx = response(ctx, result)
-// });
-
 
 
 let response = (ctx, result) => {
