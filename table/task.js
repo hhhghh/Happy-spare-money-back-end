@@ -1,4 +1,5 @@
 const moment = require('moment');
+const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes){
     return sequelize.define('task',{
         task_id:{
@@ -28,7 +29,7 @@ module.exports = function(sequelize, DataTypes){
         },
         publisher: {
             type:DataTypes.CHAR(20),
-			allowNull:false
+            allowNull:false
         },
         state: {
             type:DataTypes.CHAR(45)

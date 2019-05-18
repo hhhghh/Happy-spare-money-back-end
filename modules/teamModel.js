@@ -7,7 +7,7 @@ const Teamlabel = sequelize.import('../table/teamlabel');
 const Members = sequelize.import('../table/members');
 const Pit = sequelize.import('../table/pit');
 
-// User.sync({force: false});
+User.sync({force: false});
 Team.sync({force: false});
 Teamlabel.sync({force: false});
 Members.sync({force: false});
