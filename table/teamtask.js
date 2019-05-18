@@ -13,6 +13,7 @@ module.exports = function(sequelize, DataTypes){
         task_id:{
             type:DataTypes.INTEGER,
             allowNull:false,
+            unique: "one_task_id_one_team_id",
             references: {
                 model: 'task',
                 key: 'task_id',
@@ -22,14 +23,15 @@ module.exports = function(sequelize, DataTypes){
         team_id:{
             type:DataTypes.INTEGER,
             allowNull:false,
+            unique: "one_task_id_one_team_id",
             references: {
-                model: 'task',
-                key: 'task_id',
+                model: 'team',
+                key: 'team_id',
                 deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
             }
         },
         isolate:{
-            type:DataTypes.BOOL,
+            type: DataTypes.BOOLEAN,
             allowNull:false
         },
         createdAt:{

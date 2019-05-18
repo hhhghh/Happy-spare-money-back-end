@@ -31,23 +31,38 @@ class TRController {
      * @param ctx
      * @returns {Promise.<void>}
      */
-    static async searchByTaskId(task_id) {
+    static async searchByTaskId(ctx) {
         let result = undefined
-        try {
-            let data = await TRModel.getTRByTaskId(task_id);
-            result = {
-                code: 200, 
-                msg: '查询成功',
-                data: data
+        if (ctx.query.task_id) {
+            let task_id = ctx.query.task_id
+            try {
+                let data = await TRModel.searchByTaskId(task_id);
+                result = {
+                    code: 200, 
+                    msg: 'Success',
+                    data: data
+                }
+            } catch (err) {
+                result = {
+                    code: 500,
+                    msg: 'Failed',
+                    data: err
+                }
             }
-        } catch (err) {
+        } else {
             result = {
-                code: 500,
-                msg: '查询失败',
-                data: err
+                code: 412,
+                msg: "Params not enough",
+                data: []
             }
         }
-        return result
+
+        ctx.response.status  =  result.code
+        ctx.body = {
+            code: result.code,
+            msg: result.msg,
+            data: result.data
+        }
     }
 
     /**
@@ -112,23 +127,78 @@ class TRController {
         return result
     }
 
-    static async confirmComplement(username, task_id, score) {
+    static async confirmComplement(ctx) {
         let result = undefined
-        try {
-            let data = await TRModel.confirmComplement(username, task_id, score)
-            result = {
-                code: 200, 
-                msg: 'Success',
-                data: data
+        
+        if (ctx.request.post.username &&
+            ctx.request.post.task_id &&
+            ctx.request.post.score) {
+            try {
+                let data = await TRModel.confirm_complement(ctx.request.post.username, 
+                                                            ctx.request.post.task_id, 
+                                                            ctx.request.post.score);
+                result = {
+                    code: 200, 
+                    msg: 'Success',
+                    data: data
+                }
+            } catch (err) {
+                result = {
+                    code: 500,
+                    msg: "Failed",
+                    data: err
+                }
             }
-        } catch (err) {
+        } else {
             result = {
-                code: 401,
-                msg: "失败，数据库未知错误",
-                data: err
+                code: 412,
+                msg: 'Param is not enough',
+                data: []
             }
         }
-        return result
+
+        ctx.response.status  =  result.code
+        ctx.body = {
+            code: result.code,
+            msg: result.msg,
+            data: result.data
+        }
+    }
+
+    static async completeTask(ctx) {
+        let post_body = ctx.request.body
+        let result = undefined
+        
+        if (post_body.task_id
+            && post_body.username) {
+            try {
+                result = await TRModel.accepter_make_complement(post_body.username, post_body.task_id)
+                result = {
+                    code: 200,
+                    msg: "Success",
+                    data: result
+                }
+            } catch (err) {
+                result = {
+                    code: 500,
+                    msg: "Failed",
+                    data: err
+                }
+            }
+        } else {
+            result = {
+                code: 412,
+                msg: "Params wrong...",
+                data: []
+            }
+        }
+
+        ctx.response.status = result.code
+        ctx.body = {
+            code: result.code,
+            msg: result.msg,
+            data: result.data
+        }
     }
 }
 
