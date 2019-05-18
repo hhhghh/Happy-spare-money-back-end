@@ -4,8 +4,6 @@ const sequelize = db.sequelize;
 const models = require('../table/all_tables')
 const Op = Sequelize.Op
 
-models.TR.sync({force: false});
-
 class TRModel {
     /**
      * 添加 Task Recivers

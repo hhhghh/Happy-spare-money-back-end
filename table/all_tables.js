@@ -46,6 +46,18 @@ const status_code = {
 	}
 }
 
+User.sync({force: false});
+Task.sync({force: false});
+TR.sync({force: false});
+TeamTask.sync({force: false});
+PIT.sync({force: false});
+PIU.sync({force: false});
+Members.sync({force: false});
+TeamLabel.sync({force: false});
+Team.sync({force: false});
+
+sequelize.sync({force: false});
+
 module.exports = {
     User: User,
     Task: Task,

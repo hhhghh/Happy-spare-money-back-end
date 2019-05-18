@@ -5,17 +5,14 @@ const models = require('../table/all_tables')
 
 const Op = Sequelize.Op
 
-models.Task.sync({force: false});
-
 class TaskModel {
     /**
      * 创建 task 模型
      * @param data
      * @returns {Promise<*>}
      */
-    static async createTask(data) {
-        return await models.Task.create({
-            task_id: data.task_id,
+    static async createTask(data, range) {
+        let task = await models.Task.create({
             title: data.title,
             introduction: data.introduction,
             money: data.money,
@@ -29,7 +26,21 @@ class TaskModel {
             content: data.content,
             createdAt: data.createdAt,
             updatedAt: data.updatedAt
+        });
+    
+        let create_param = []
+        for (let i = 0; i < range.length; i++) {
+            create_param.push({
+                team_id: range[i],
+                task_id: task.get('task_id')
+            })
+        }
+
+        await models.TeamTask.bulkCreate({
+            create_param
         })
+        
+        return task
     }
 
     /**
@@ -51,7 +62,7 @@ class TaskModel {
          */
         // let tr_where, task_where;
         restriction = checkParamsAndConvert(restriction, ['range', 'type'])
-
+        
         let task_ids = await models.TeamTask.findAll({
             where: {
                 team_id: restriction.range,
@@ -95,7 +106,7 @@ class TaskModel {
      * @param task_id
      */
     static async getTaskDetail(task_id) {
-        return await models.Task.findOne({
+        return await models.Task.findByPk({
             where: {
                 task_id: task_id
             }
@@ -146,12 +157,43 @@ class TaskModel {
      * 查询可接受的任务列表
      * @param username username of the user who want to search
      */
-    static async getTaskByUserRelease(username) {
-        return await models.Task.findAll({
+    static async searchTaskByUserRelease(restriction) {
+        restriction = checkParamsAndConvert(restriction, ['range', 'type'])
+        
+        let task_ids = await models.TeamTask.findAll({
             where: {
-                publisher: username
-            }
-        })
+                team_id: restriction.range,
+                isolate: false
+            },
+            attributes: ['task_id'],
+            raw: true
+        });
+
+        task_ids = task_ids.map((item) => {
+            return item.task_id
+        });
+
+
+        if (task_ids.length == 0) {
+            // No task can be found, then reutrn []
+            return [];
+        } 
+
+        let tasks = await models.Task.findAll({
+            where: {
+                task_id: {
+                    [Op.or]: task_ids
+                },
+                type: restriction.type,
+                publisher: restriction.username
+            },
+            include: [{
+                model: models.User,
+                attributes: ['username', 'avatar']
+            }]
+        });
+        
+        return tasks
     }
 
      /**
@@ -225,20 +267,43 @@ class TaskModel {
         })
     }
 
-    static async searchTaskByAccepter(username) {
+    static async searchTaskByAccepter(restriction) {    
+        restriction = checkParamsAndConvert(restriction, ['range', 'type'])
         
-        return await models.TR.findAll({
+        let task_ids = await models.TeamTask.findAll({
             where: {
-                username: username
+                team_id: restriction.range,
+                isolate: false
+            },
+            attributes: ['task_id'],
+            raw: true
+        });
+
+        task_ids = task_ids.map((item) => {
+            return item.task_id
+        });
+
+
+        if (task_ids.length == 0) {
+            // No task can be found, then reutrn []
+            return [];
+        } 
+
+        let tasks = await models.Task.findAll({
+            where: {
+                task_id: {
+                    [Op.or]: task_ids
+                },
+                type: restriction.type,
+                publisher: restriction.username
             },
             include: [{
-                model: models.Task,
-                include: [{
-                    model: models.User,
-                    attributes: ['username', 'avatar']
-                }]
+                model: models.User,
+                attributes: ['username', 'avatar']
             }]
-        })
+        });
+        
+        return tasks
     }
 }
 
@@ -253,7 +318,8 @@ class TaskModel {
 function checkParamsAndConvert(query_params, whichs) {
     let _check_single = (query_params, which) => {
         console.log('Change ', which)
-        if (query_params[which].toLowerCase() == 'all') {
+        if (query_params[which] == undefined
+            || query_params[which].toLowerCase() == 'all') {
             // 无需任何限制
             query_params[which] = {
                 [Op.or]: []

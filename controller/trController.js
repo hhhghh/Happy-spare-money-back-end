@@ -134,7 +134,7 @@ class TRController {
             ctx.request.post.task_id &&
             ctx.request.post.score) {
             try {
-                let data = await TRModel.confirm_complement(ctx.request.post.username, 
+                let data = await TRModel.comfirm_complement(ctx.request.post.username, 
                                                             ctx.request.post.task_id, 
                                                             ctx.request.post.score);
                 result = {

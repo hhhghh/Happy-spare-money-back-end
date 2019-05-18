@@ -1,4 +1,4 @@
-const taskModel = require('../modules/taskModel');
+const TaskModel = require('../modules/taskModel');
 
 class TaskController {
     /**
@@ -18,7 +18,7 @@ class TaskController {
         // 检查参数
         if (query.range && query.type && query.username) {
             try {
-                result = await taskModel.searchTask(query)
+                result = await TaskModel.searchTask(query)
                 result = {
                     code: 200,
                     msg: 'Success',
@@ -56,7 +56,7 @@ class TaskController {
         let result = undefined
         if (post_body.title && post_body.introduction && post_body.money 
             && post_body.score && post_body.max_accepter_number && post_body.publisher 
-            && post_body.type) {
+            && post_body.type && post_body.range) {
             let post_data = {
                 title: post_body.title,
                 introduction: post_body.introduction,
@@ -65,21 +65,26 @@ class TaskController {
                 max_accepter_number: post_body.max_accepter_number,
                 publisher: post_body.publisher,
                 state: 0,
-                type: post_body.type
+                type: post_body.type,
+                starttime: post_body.starttime,
+                endtime: post_body.endtime,
+                content: post_body.content,
             }
             try {
-                result = await TaskModel.createTask(post_data)
+                result = await TaskModel.createTask(post_data, post_body.range)
                 result = {
                     code: 200,
                     msg: "Success",
                     data: result
                 }
+                
             } catch (err) {
                 result = {
                     code: 500,
                     msg: "Failed",
                     data: err
                 }
+                console.log(err)
             }
         } else {
             result = {
@@ -159,23 +164,39 @@ class TaskController {
         return result
     }
 
-    static async searchTaskByUserRelease(username) {
-        let result
-        try {
-            let data = await TaskModel.getTaskByUserRelease(username);
-            result = {
-                code: 200, 
-                msg: '查询成功',
-                data: data
+    static async searchTaskByUserRelease(ctx) {
+        let query_params = ctx.query
+        let result = undefined
+        if (query_params.publisher) {
+            try {
+                result = await TaskModel.searchTaskByUserRelease(query_params)
+                result = {
+                    code: 200, 
+                    msg: 'Success',
+                    data: result
+                }
+            } catch (err) {
+                console.log(err)
+                result = {
+                    code: 500,
+                    msg: 'Failed',
+                    data: err
+                }
             }
-        } catch (err) {
+        } else {
             result = {
-                code: 500,
-                msg: '查询失败',
-                data: err
+                code: 412,
+                msg: "Params is not enough...",
+                data: []
             }
         }
-        return result
+
+        ctx.response.status = result.code
+        ctx.body = {
+            code: result.code,
+            msg: result.msg,
+            data: result.data
+        }
     }
 
     static async searchTaskBySomeRestriction(restrictions) {
@@ -216,24 +237,38 @@ class TaskController {
         return result
     }
 
-    static async searchTaskByAccepter(username) {
-        let result = undefined
-        try {
-            let data = await TaskModel.searchTaskByAccepter(username)
-            result = {
-                code: 200, 
-                msg: 'Success',
-                data: data
+    static async searchTaskByAccepter(ctx) {
+        let query_params = ctx.query
+        if (query_params.username) {
+            try {
+                result = await TaskModel.searchTaskByAccepter(query_params)
+                result = {
+                    code: 200, 
+                    msg: 'Success',
+                    data: result
+                }
+            } catch (err) {
+                result = {
+                    code: 500,
+                    msg: "Failed",
+                    data: err
+                }
             }
-        } catch (err) {
-            console.log(err)
+        } else {
             result = {
-                code: 500,
-                msg: "查询失败，数据库未知错误",
-                data: err
+                code: 412,
+                msg: "Params is not enough..."
             }
         }
-        return result
+        let result = undefined
+       
+
+        ctx.response.status = result.code
+        ctx.body = {
+            code: result.code,
+            msg: result.msg,
+            data: result.data
+        }
     }
 }
 

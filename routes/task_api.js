@@ -30,22 +30,7 @@ router.del('/task', async (ctx) => {
     ctx = response(ctx, result)
 })
 
-router.get('/task/findByPublisher', async (ctx) => {
-    let query_params = ctx.query
-    let result = undefined
-    if (query_params.username) {
-        let query_terms = {
-            publisher: query_params.username
-        }
-        result = await task_controller.searchTaskBySomeRestriction(query_terms)
-    } else {
-        result = {
-            code: 412,
-            msg: "Params is not enough..."
-        }
-    }
-    ctx = response(ctx, result)
-})
+router.get('/task/findByPublisher', task_controller.searchTaskByUserRelease)
 
 router.get('/task/findByTaskId', async (ctx) => {
     let query_params = ctx.query
@@ -54,7 +39,8 @@ router.get('/task/findByTaskId', async (ctx) => {
         let query_terms = {
             task_id: query_params.task_id
         }
-        result = await task_controller.searchTaskBySomeRestriction(query_terms)
+        result = await task_controller.searchTaskById(query_terms.task_id)
+        console.log(result)
     } else {
         result = {
             code: 412,
@@ -64,22 +50,7 @@ router.get('/task/findByTaskId', async (ctx) => {
     ctx = response(ctx, result)
 })
 
-router.get('/task/findByAccepter', async (ctx) => {
-    let query_params = ctx.query
-    let result = undefined
-    if (query_params.username) {
-        let query_terms = {
-            username: query_params.username
-        }
-        result = await task_controller.searchTaskByAccepter(query_terms.username)
-    } else {
-        result = {
-            code: 412,
-            msg: "Params is not enough..."
-        }
-    }
-    ctx = response(ctx, result)
-})
+router.get('/task/findByAccepter', task_controller.searchTaskByAccepter)
 
 router.get('/task/state', async (ctx) => {
     let query = ctx.query
@@ -151,5 +122,12 @@ router.post('/task/complement', tr_controller.completeTask)
 router.post('/task/comfirm', tr_controller.confirmComplement)
 
 router.get('/task/accepter', tr_controller.searchByTaskId)
+
+function response(ctx, result) {
+    ctx.response.code = result.code
+    ctx.body.data = result.data
+    ctx.body.code = result.code
+    ctx.body.msg = result.msg
+}
 
 module.exports = router
