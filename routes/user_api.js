@@ -1,7 +1,7 @@
 const router = require('koa-router')()
 const UserController = require('../controller/userController')
 
-router.prefix('/api/user')
+router.prefix('/api/v1/user')
 
 router.post('/create', UserController.register);
 
@@ -10,6 +10,14 @@ router.post('/login', UserController.login);
 router.post('/recharge', UserController.updateUserMoney);
 
 router.post('/score', UserController.updateUserScore);
+
+router.post('/userblacklist', UserController.UserBlacklistUser);
+
+router.post('/teamblacklist', UserController.teamBlacklistOrg);
+
+router.post('/usercancelblack', UserController.UserCancelBlack);
+
+router.post('/teamcancelblack', UserController.teamCancelBlack);
 
 router.put('/update', UserController.updateUserInfo);
 
