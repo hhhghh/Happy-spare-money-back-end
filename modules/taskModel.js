@@ -34,11 +34,15 @@ class TaskModel {
                 team_id: range[i],
                 task_id: task.get('task_id')
             })
+
+            await models.TeamTask.create({
+                team_id: range[i],
+                task_id: task.get('task_id'),
+                isolate: false
+            })
         }
 
-        await models.TeamTask.bulkCreate({
-            create_param
-        })
+        console.log(create_param)
         
         return task
     }
