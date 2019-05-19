@@ -1,4 +1,5 @@
 const moment = require('moment');
+const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes){
     return sequelize.define('task',{
         task_id:{
@@ -23,24 +24,29 @@ module.exports = function(sequelize, DataTypes){
         score:{
             type:DataTypes.INTEGER
         },
-        number:{
+        max_accepter_number:{
             type:DataTypes.INTEGER
         },
-        publisher:{
+        publisher: {
             type:DataTypes.CHAR(20),
-			allowNull:false
+            allowNull:false
         },
-        state:{
+        state: {
             type:DataTypes.CHAR(45)
         },
-        type:{
+        type: {
             type:DataTypes.INTEGER
+            // 1: 问卷
+            // 2: 取快递
         },
         starttime:{
             type:DataTypes.DATE
         },
         endtime:{
             type:DataTypes.DATE
+        },
+        questionnaire_path:{
+            type:DataTypes.CHAR(255)
         },
         content:{
             type:DataTypes.CHAR(45)

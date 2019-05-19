@@ -55,4 +55,15 @@ app.on('error', (err, ctx) => {
   console.error('server error', err, ctx)
 });
 
+const path = require('path')
+const static = require('koa-static')
+const staticPath = './static'
+
+app.use(static(
+	path.join(__dirname, staticPath)
+))
+
+
+
+
 module.exports = app

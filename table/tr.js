@@ -13,26 +13,27 @@ module.exports = function(sequelize, DataTypes){
         username:{
             type:DataTypes.CHAR(20),
             allowNull:false,
-            unique: 'one_reciever_to_one_task',
-            references: {
-                model: 'user',
-                key: 'username',
-                deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
-            }
+            unique: 'one_reciever_to_one_task'
         },
         task_id:{
             type:DataTypes.INTEGER,
             allowNull:false,
-            unique: 'one_reciever_to_one_task',
-            references: {
-                model: 'task',
-                key: 'task_id',
-                deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
-            }
+            unique: 'one_reciever_to_one_task'
         },
         state:{
-            type:DataTypes.INTEGER,
+            type: DataTypes.INTEGER,
             allowNull:false
+            // 0: waiting to be done
+            // 1: accpeter complete, waiting publisher confirm
+            // 2: publisher confirmed, over
+        },
+        accpeter_mark: {
+            type: DataTypes.INTEGER
+        },
+        score:{
+            type:DataTypes.INTEGER,
+            allowNull:false,
+            defaultValue: 5,
         },
         createdAt:{
             type: DataTypes.DATE,
