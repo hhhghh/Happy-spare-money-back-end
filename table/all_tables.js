@@ -11,9 +11,6 @@ const Members = sequelize.import('./members')
 const TeamLabel = sequelize.import('./teamlabel')
 const Team = sequelize.import('./team')
 
-TeamLabel.belongsTo(Team)
-Team.hasMany(TeamLabel)
-
 // Task.belongsToMany(User, {through: TR, foreignKey: 'task_id'})
 // User.belongsToMany(Task, {through: TR, foreignKey: 'username'})
 
