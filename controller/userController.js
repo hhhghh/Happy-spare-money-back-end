@@ -1,6 +1,9 @@
 const UserModel = require('../modules/userModel')
 const formidable = require('formidable')
 const path = require('path')
+const session = require("koa-session2")
+const Store = require("../utils/Store.js")
+const redis = new Store();
 
 
 class UserController {
@@ -66,7 +69,7 @@ class UserController {
      */
     static async login(ctx) {
         let req = ctx.request.body;
-        try {
+        //try {
             const flag = await UserModel.getUserByUsernameAndPassword(req.type, req.username, req.password); 
             if (flag === 1) {
                 ctx.status = 412;
@@ -85,21 +88,23 @@ class UserController {
                 }    
             }
             else if(flag === 0) {
+                ctx.session.username = JSON.stringify(req.username);
+                ctx.cookies.set("login", req.username);
                 ctx.status = 200;
                 ctx.body = {
                     code: 200,
-                    msg: 'success',
-                    data: null 
+                    msg: '登录成功',
+                    data: req.username 
                 }
             }
-        } catch(err) {
-            ctx.status = 500;
-                ctx.body = {
-                    code: 500,
-                    msg: 'failed',
-                    data: err
-                }
-        }
+        // } catch(err) {
+        //     ctx.status = 500;
+        //         ctx.body = {
+        //             code: 500,
+        //             msg: 'failed',
+        //             data: err
+        //         }
+        // }
     }
 
     /**
@@ -282,6 +287,36 @@ class UserController {
 
     static async updateUserScore(ctx) {
         let req = ctx.request.body;
+        const SESSIONID = ctx.cookies.get('SESSIONID');
+        console.log(SESSIONID + "no empty")
+
+        if (!SESSIONID) {
+            ctx.status = 412;
+                ctx.body = {
+                    code: 412,
+                    msg: '没有携带SESSIONID，去登录吧~',
+                    data: 'error' 
+                } 
+                return false;
+        }
+        // 如果有SESSIONID，就去redis里拿数据
+        const redisData = await redis.get(SESSIONID);
+
+        if (!redisData) {
+            ctx.status = 412;
+                ctx.body = {
+                    code: 412,
+                    msg: 'SESSIONID已经过期，去登录吧~',
+                    data: SESSIONID
+                } 
+        }
+
+        if (redisData && redisData.username) {
+            console.log(`登录了，uid为${redisData.username}`);
+            return;
+        }   
+
+        //const username = JSON.parse(redisData.username);
         try {
             const data = await UserModel.getUserInfo(req.username);
             if (data === null) {
