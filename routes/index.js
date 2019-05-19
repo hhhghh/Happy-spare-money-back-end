@@ -40,8 +40,4 @@ router.get('/json', async (ctx, next) => {
     }
 });
 
-const UserController = require('../controller/userController');
-router.post('/user', UserController.create);
-router.get('/user/:username', UserController.detail);
-
 module.exports = router;
