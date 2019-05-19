@@ -109,12 +109,8 @@ class TaskModel {
      * @returns {Promise<Model>}
      * @param task_id
      */
-    static async getTaskDetail(task_id) {
-        return await models.Task.findByPk({
-            where: {
-                task_id: task_id
-            }
-        })
+    static async searchTaskById(task_id) {
+        return await models.Task.findByPk(task_id)
     }
 
     /**
@@ -189,7 +185,7 @@ class TaskModel {
                     [Op.or]: task_ids
                 },
                 type: restriction.type,
-                publisher: restriction.username
+                publisher: restriction.publisher
             },
             include: [{
                 model: models.User,

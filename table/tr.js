@@ -27,9 +27,6 @@ module.exports = function(sequelize, DataTypes){
             // 1: accpeter complete, waiting publisher confirm
             // 2: publisher confirmed, over
         },
-        accpeter_mark: {
-            type: DataTypes.INTEGER
-        },
         createdAt:{
             type: DataTypes.DATE,
             get() {
