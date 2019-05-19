@@ -1,5 +1,7 @@
 const UserModel = require('../modules/userModel')
 const formidable = require('formidable')
+const path = require('path')
+
 
 class UserController {
     /**
@@ -8,17 +10,23 @@ class UserController {
      * @returns {Promise.<void>}
      */
     static async register(ctx) {
-        var form = new formidable.IncomingForm();
-        form.parse(ctx.req, function(err, fields, files){
-            ctx.response.body = {
-                status: 200,
-                description: 'ok',
-                result: files
-              }
-            
-        });
-        /*try {
-            const user = await UserModel.getUserInfo(req.info.username);
+        function formidablePromise (req, opts) {
+            return new Promise(function (resolve, reject) {
+              var form = new formidable.IncomingForm(opts)
+              form.keepExtensions = true;
+              form.uploadDir = path.join(__dirname, '/files')
+              form.parse(req, function (err, fields, files) {
+                if (err) return reject(err)
+                console.log(files)
+                resolve({ fields: fields, files: files })
+              })
+            })
+          }
+
+        var body = await formidablePromise(ctx.req, null);
+        var info = body.fields
+        try {
+            const user = await UserModel.getUserInfo(info.username);
             if (user != null) {
                 ctx.status = 409;
                 ctx.body = {
@@ -28,7 +36,7 @@ class UserController {
                 }   
                 return
             }
-            const res = await UserModel.createUser(req.type, req.info);
+            const res = await UserModel.createUser(info.type, info);
             ctx.status = 200;
             ctx.body = {
                 code: 200,
