@@ -1,4 +1,5 @@
 const TaskModel = require('../modules/taskModel');
+const TRModel = require('../modules/trModel')
 
 class TaskController {
     /**
@@ -238,6 +239,7 @@ class TaskController {
     static async deleteTaskByTaskID(task_id) {
         let result
         try {
+            await TRModel.deleteTRByTaskId(task_id)
             let data = await TaskModel.deleteTaskByTaskID(task_id)
             result = {
                 code: 200, 

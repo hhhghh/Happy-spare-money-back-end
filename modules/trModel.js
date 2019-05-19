@@ -47,6 +47,22 @@ class TRModel {
         })
     }
     
+    static async deleteTRByTaskId(task_id) {
+        return await models.TR.destroy({
+            where: {
+                task_id: task_id
+            }
+        })
+    }
+
+    static async deleteTRByUsername(username) {
+        return await models.TR.destroy({
+            where: {
+                username: username
+            }
+        })
+    }
+
     static async searchTRByRestrict(restriction) {
         return await models.TR.findAll({
             where: restriction

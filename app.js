@@ -5,9 +5,13 @@ const json = require('koa-json')
 const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
+const enforceHttps = require('koa-sslify')
 
 const routers = require('./routes/routers')
 const cors = require('koa-cors');
+
+// 使用https
+// app.use(enforceHttps());
 
 // 使用koa-cors
 app.use(cors());

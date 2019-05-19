@@ -21,7 +21,13 @@ class TRController {
                 result = {
                     code: 500,
                     msg: "Constrait error, cannot recieve a task twice",
-                    data: []
+                    data: err
+                }
+            } else if (err.name == 'SequelizeForeignKeyConstraintError') {
+                result = {
+                    code: 500,
+                    msg: "No such a task",
+                    data: err
                 }
             } else {
                 console.log(err)
