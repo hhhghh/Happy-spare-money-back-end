@@ -22,7 +22,7 @@ module.exports = function(sequelize, DataTypes){
             defaultValue:0
         },
         score:{
-            type:DataTypes.INTEGER
+            type:DataTypes.FLOAT
         },
         max_accepter_number:{
             type:DataTypes.INTEGER
@@ -57,7 +57,6 @@ module.exports = function(sequelize, DataTypes){
                 return moment(this.getDataValue('createdAt')).format('YYYY-MM-DD HH:mm:ss');
             }
         },
-        // 更新时间
         updatedAt: {
             type: DataTypes.DATE,
             get() {

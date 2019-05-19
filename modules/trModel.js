@@ -66,7 +66,7 @@ class TRModel {
     }
 
     static async comfirm_complement(username, task_id, score) {
-        return await Promise.all([
+        let result = await Promise.all([
             models.TR.update({
                 state: models.status_code.tr.CONFIRMED_OVER
             }, {
@@ -76,7 +76,7 @@ class TRModel {
                 }
             }),
             models.User.update({
-                // TODO, 更新评分，使用tr中的accepter mark来更新
+                // TODO, 更新评分，使用score来更新
                 
             }, {
                 where: {
@@ -84,6 +84,16 @@ class TRModel {
                 }
             })
         ]) 
+        
+        return await Promise.all([
+            models.TR.findOne({
+                where: {
+                    username: username,
+                    task_id: task_id
+                }
+            }),
+            models.User.findByPk(username)
+        ])
     }
 
 }

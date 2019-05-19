@@ -107,23 +107,39 @@ class TaskController {
      * @param ctx
      * @returns {Promise.<void>}
      */
-    static async searchTaskById(task_id) {
-        let result
-        try {
-            let data = await TaskModel.getTaskDetail(task_id);
-            result = {
-                code: 200, 
-                msg: '查询成功',
-                data: data
+    static async searchTaskById(ctx) {
+        let query_params = ctx.query
+        let result = undefined
+        if (query_params.task_id) {
+            try {
+                result = await TaskModel.searchTaskById(query_params.task_id);
+                result = {
+                    code: 200,
+                    msg: "Success",
+                    data: result
+                }
+            } catch (err) {
+                console.log(err)
+                result = {
+                    code: 500,
+                    msg: "Failed",
+                    data: err
+                }
             }
-        } catch (err) {
+        } else {
             result = {
-                code: 500,
-                msg: '查询失败',
-                data: err
+                code: 412,
+                msg: "Params is not enough...",
+                data: []
             }
         }
-        return result
+        
+        ctx.response.status = result.code
+        ctx.body = {
+            code: result.code,
+            msg: result.msg,
+            data: result.data
+        }
     }
 
     static async searchTaskByType(type) {
@@ -166,6 +182,7 @@ class TaskController {
 
     static async searchTaskByUserRelease(ctx) {
         let query_params = ctx.query
+        console.log(ctx.query.publisher)
         let result = undefined
         if (query_params.publisher) {
             try {
@@ -239,6 +256,7 @@ class TaskController {
 
     static async searchTaskByAccepter(ctx) {
         let query_params = ctx.query
+        let result = undefined
         if (query_params.username) {
             try {
                 result = await TaskModel.searchTaskByAccepter(query_params)
@@ -257,11 +275,10 @@ class TaskController {
         } else {
             result = {
                 code: 412,
-                msg: "Params is not enough..."
+                msg: "Params is not enough...",
+                data: []
             }
         }
-        let result = undefined
-       
 
         ctx.response.status = result.code
         ctx.body = {
@@ -270,6 +287,29 @@ class TaskController {
             data: result.data
         }
     }
+
+    // static async acceptTask(ctx) {
+    //     let post_body = ctx.request.body
+    //     let result = undefined
+
+    //     if (post_body.username && post_body.task_id) {
+    //         result = await tr_controller.recieveATask(post_body.username, 
+    //             post_body.task_id)
+    //     } else {
+    //         result = {
+    //             code: 412,
+    //             msg: "Params wrong, API denied",
+    //             data: []
+    //         }
+    //     }
+
+    //     ctx.response.status = result.code
+    //     ctx.body = {
+    //         code: result.code,
+    //         msg: result.msg,
+    //         data: result.data
+    //     }
+    // }
 }
 
 /**

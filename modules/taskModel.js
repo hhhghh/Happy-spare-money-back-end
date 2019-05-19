@@ -34,11 +34,15 @@ class TaskModel {
                 team_id: range[i],
                 task_id: task.get('task_id')
             })
+
+            await models.TeamTask.create({
+                team_id: range[i],
+                task_id: task.get('task_id'),
+                isolate: false
+            })
         }
 
-        await models.TeamTask.bulkCreate({
-            create_param
-        })
+        console.log(create_param)
         
         return task
     }
@@ -105,12 +109,8 @@ class TaskModel {
      * @returns {Promise<Model>}
      * @param task_id
      */
-    static async getTaskDetail(task_id) {
-        return await models.Task.findByPk({
-            where: {
-                task_id: task_id
-            }
-        })
+    static async searchTaskById(task_id) {
+        return await models.Task.findByPk(task_id)
     }
 
     /**
@@ -185,7 +185,7 @@ class TaskModel {
                     [Op.or]: task_ids
                 },
                 type: restriction.type,
-                publisher: restriction.username
+                publisher: restriction.publisher
             },
             include: [{
                 model: models.User,

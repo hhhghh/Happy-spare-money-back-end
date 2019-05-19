@@ -32,23 +32,7 @@ router.del('/task', async (ctx) => {
 
 router.get('/task/findByPublisher', task_controller.searchTaskByUserRelease)
 
-router.get('/task/findByTaskId', async (ctx) => {
-    let query_params = ctx.query
-    let result = undefined
-    if (query_params.task_id) {
-        let query_terms = {
-            task_id: query_params.task_id
-        }
-        result = await task_controller.searchTaskById(query_terms.task_id)
-        console.log(result)
-    } else {
-        result = {
-            code: 412,
-            msg: "Params is not enough..."
-        }
-    }
-    ctx = response(ctx, result)
-})
+router.get('/task/findByTaskId', task_controller.searchTaskById)
 
 router.get('/task/findByAccepter', task_controller.searchTaskByAccepter)
 
@@ -97,7 +81,8 @@ router.post('/task/acceptance', async (ctx) => {
     } else {
         result = {
             code: 412,
-            msg: "Params wrong, API denied"
+            msg: "Params wrong, API denied",
+            data: []
         }
     }
     ctx = response(ctx, result)
@@ -125,9 +110,11 @@ router.get('/task/accepter', tr_controller.searchByTaskId)
 
 function response(ctx, result) {
     ctx.response.code = result.code
-    ctx.body.data = result.data
-    ctx.body.code = result.code
-    ctx.body.msg = result.msg
+    ctx.body = {
+        code: result.code,
+        msg : result.msg,
+        data: result.data,
+    }
 }
 
 module.exports = router

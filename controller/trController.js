@@ -9,18 +9,27 @@ class TRController {
     static async recieveATask(username, task_id) {
         let result
         try {
-            const ret = await TRModel.receiveTask(username, task_id);
-            const data = await TRModel.searchByTaskId(task_id);
+            let ret = await TRModel.receiveTask(username, task_id);
+            let data = await TRModel.searchByTaskId(task_id);
             result = {
                 code: 200,
                 msg: "Success, result as below",
                 data: data
             }
         } catch (err) {
-            result = {
-                code: 500,
-                msg: "Params wrong, or constrait did not pass (already recieved, cannot receive again).",
-                data: err
+            if (err.name == 'SequelizeUniqueConstraintError') {
+                result = {
+                    code: 500,
+                    msg: "Constrait error, cannot recieve a task twice",
+                    data: []
+                }
+            } else {
+                console.log(err)
+                result = {
+                    code: 500,
+                    msg: "Params wrong, or constrait did not pass (already recieved, cannot receive again).",
+                    data: err
+                }
             }
         }
         return result
@@ -129,14 +138,15 @@ class TRController {
 
     static async confirmComplement(ctx) {
         let result = undefined
-        
-        if (ctx.request.post.username &&
-            ctx.request.post.task_id &&
-            ctx.request.post.score) {
+        let post_body = ctx.request.body
+        console.log(post_body)
+        if (post_body.username &&
+            post_body.task_id &&
+            post_body.score) {
             try {
-                let data = await TRModel.comfirm_complement(ctx.request.post.username, 
-                                                            ctx.request.post.task_id, 
-                                                            ctx.request.post.score);
+                let data = await TRModel.comfirm_complement(post_body.username, 
+                                                            post_body.task_id, 
+                                                            post_body.score);
                 result = {
                     code: 200, 
                     msg: 'Success',
