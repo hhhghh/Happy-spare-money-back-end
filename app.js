@@ -9,6 +9,9 @@ const logger = require('koa-logger')
 const routers = require('./routes/routers')
 const cors = require('koa-cors');
 
+const session = require("koa-session2")
+const Store = require('./controller/Store.js')
+
 // 使用koa-cors
 app.use(cors());
 
@@ -41,6 +44,11 @@ app.use(routers.team_api.routes(), routers.team_api.allowedMethods())
 app.use(routers.task_api.routes(), routers.task_api.allowedMethods())
 app.use(routers.user_api.routes(), routers.user_api.allowedMethods())
 app.use(routers.tr_api.routes(), routers.tr_api.allowedMethods())
+
+app.use(session({
+  store: new Store(),
+  key: "SESSIONID",
+}));
 
 // error-handling
 app.on('error', (err, ctx) => {
