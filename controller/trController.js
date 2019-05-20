@@ -9,7 +9,7 @@ class TRController {
     static async recieveATask(username, task_id) {
         let result
         try {
-            let ret = await TRModel.receiveTask(username, task_id);
+            await TRModel.receiveTask(username, task_id);
             let data = await TRModel.searchByTaskId(task_id);
             result = {
                 code: 200,
@@ -28,7 +28,7 @@ class TRController {
                 result = {
                     code: 500,
                     msg: "Params wrong, or constrait did not pass (already recieved, cannot receive again).",
-                    data: err
+                    data: err.message
                 }
             }
         }
@@ -153,10 +153,11 @@ class TRController {
                     data: data
                 }
             } catch (err) {
+                console.log(err)
                 result = {
                     code: 500,
                     msg: "Failed",
-                    data: err
+                    data: err.message
                 }
             }
         } else {

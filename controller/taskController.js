@@ -11,7 +11,7 @@ class TaskController {
      *  3. username:    Can be seen by this user. Controller will delete all tasks shielded by the user.
      * 
      * @param ctx Just ctx of KOA
-     * @author Gongzq5
+     * 
      */
     static async searchTask(ctx) {
         let query = ctx.query, result = undefined;
@@ -55,7 +55,7 @@ class TaskController {
         let post_body = ctx.request.body
         let result = undefined
         if (post_body.title && post_body.introduction && post_body.money 
-            && post_body.score && post_body.max_accepter_number && post_body.publisher 
+            && post_body.score != undefined && post_body.max_accepter_number && post_body.publisher 
             && post_body.type && post_body.range) {
             let post_data = {
                 title: post_body.title,
@@ -64,7 +64,6 @@ class TaskController {
                 score: post_body.score,
                 max_accepter_number: post_body.max_accepter_number,
                 publisher: post_body.publisher,
-                state: 0,
                 type: post_body.type,
                 starttime: post_body.starttime,
                 endtime: post_body.endtime,
