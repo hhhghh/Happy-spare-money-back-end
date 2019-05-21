@@ -670,14 +670,113 @@ class UserController {
     
     static async getAcceptedFinishedTasks(username) {
         let result;
-        const data = await UserModel.getAcceptedFinishedTasks(username);
-        result = {
-            code: 200,
-            msg: "success",
-            data: data
+        try{
+            const user = await UserModel.getUserInfo(username)
+            if (user === null) {
+                result = {
+                    code: 412,
+                    msg: "用户不存在",
+                    data: null
+                }   
+            }
+            else {
+                const data = await UserModel.getAcceptedFinishedTasks(username);
+                result = {
+                    code: 200,
+                    msg: "success",
+                    data: data
+                }
+            }
+        } catch(error) {
+            result = {
+                code: 500,
+                msg: "服务器异常",
+                data: error
+            }
         }
         return result;
 
+    }
+
+    static async getPublishedWaitedTasks(username) {
+        let result;
+        try{
+            const user = await UserModel.getUserInfo(username)
+            if (user === null) {
+                result = {
+                    code: 412,
+                    msg: "用户不存在",
+                    data: null
+                }   
+            }
+            else {
+                const data = await UserModel.getPublishedWaitedTasks(username);
+                result = {
+                    code: 200,
+                    msg: "success",
+                    data: data
+                }
+            }
+        } catch(error) {
+            result = {
+                code: 500,
+                msg: "服务器异常",
+                data: error
+            }
+        }
+        return result;   
+    }
+
+    static async setRate(ctx) {
+        console.log()
+        const flag = await UserController.judgeCookies(ctx);
+        console.log(1)
+        if (flag == -1 || flag == -2) {
+            console.log(2)
+            ctx.status = 401;
+            ctx.body = {
+                code: 401,
+                msg: 'failed',
+                data: null
+            }
+        } 
+        else if(flag == 0) {
+            console.log(3)
+            const SESSIONID = ctx.cookies.get('SESSIONID');
+            const redisData = await redis.get(SESSIONID);
+            const user = redisData.username
+            
+            var taskId = ctx.request.body.taskId
+            var value = ctx.request.body.value
+
+            const task = await UserModel.getTaskByTaskId(taskId) 
+            if (task === null) {
+                ctx.status = 400;
+                ctx.body = {
+                    code: 400,
+                    msg: 'failed',
+                    data: null
+                }
+            }
+            else {
+                if (task.publisher == user) {
+                    ctx.status = 200;
+                    ctx.body = {
+                        code: 200,
+                        msg: 'success',
+                        data: value
+                    }   
+                }
+                else {
+                    ctx.status = 401;
+                    ctx.body = {
+                        code: 401,
+                        msg: 'failed',
+                        data: null
+                    }   
+                }
+            }
+        }
     }
 
     
