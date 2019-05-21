@@ -188,35 +188,6 @@ class TeamController {
         return result;
     }
 
-    // 200 成功，412 异常
-    static async getMembersByGroupId(team_id) {
-        let result = null;
-        try {
-            let team = await TeamModel.getTeamByTeamId(team_id);
-            if (team === null) {
-                result = {
-                    code: 412,
-                    msg: '查询失败，没有该小组',
-                    data: null
-                };
-            } else {
-                let data = await TeamModel.getUserByTeamId(team_id);
-                result = {
-                    code: 200,
-                    msg: '查询成功',
-                    data: data
-                };
-            }
-        } catch (err) {
-            result = {
-                code: 412,
-                msg: '查询失败',
-                data: err
-            };
-        }
-        return result;
-    }
-
     // 200 成功是组长，412 异常，212 不是组长，213 没有小组
     static async isGroupLeader(team_id, leader) {
         let result = null;

@@ -1,0 +1,24 @@
+Questionnaire = {
+    "questions": [
+        {
+            "type": "0",
+            "question": "question1",
+            "choice": {
+                "A": "A",
+                "B": "B"
+            }
+        },
+        {
+            "type": "1",
+            "question": "question2",
+            "choice": {
+                "A": "A",
+                "B": "B"
+            }
+        },
+        {
+            "type": "2",
+            "question": "question3"
+        }
+    ]
+}
