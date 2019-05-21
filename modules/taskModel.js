@@ -1,8 +1,8 @@
 const db = require('../config/db');
 const Sequelize = require('sequelize')
 const sequelize = db.sequelize;
+const sd = require('silly-datetime')
 const models = require('../table/all_tables')
-
 const Op = Sequelize.Op
 
 class TaskModel {
@@ -19,7 +19,7 @@ class TaskModel {
             score: data.score,
             number: data.number,
             publisher: data.publisher,
-            state: data.state,
+            state: models.status_code.task.WAITING_ACCPET,
             type: data.type,
             starttime: data.starttime,
             endtime: data.endtime,
@@ -34,11 +34,13 @@ class TaskModel {
                 team_id: range[i],
                 task_id: task.get('task_id')
             })
-        }
 
-        await models.TeamTask.bulkCreate({
-            create_param
-        })
+            await models.TeamTask.create({
+                team_id: range[i],
+                task_id: task.get('task_id'),
+                isolate: false
+            })
+        }
         
         return task
     }
@@ -82,19 +84,27 @@ class TaskModel {
             return [];
         } 
 
+        let time = sd.format(new Date(), 'YYYY-MM-DD HH:mm:ss');
         let tasks = await models.Task.findAll({
             where: {
                 task_id: {
                     [Op.or]: task_ids
                 },
-                type: restriction.type
+                type: restriction.type,
+                endtime: {
+                    [Op.gt]: time
+                }
             },
             include: [{
                 model: models.User,
                 attributes: ['username', 'avatar']
+            }, {
+                model: models.TR,
+                attributes: [[sequelize.fn('COUNT', 'count'), 'count']]
             }]
         });
 
+        // [[sequelize.fn('COUNT', sequelize.col('hats')), 'no_hats']]
         // find tasks that not be shield be the user. using piu table
         // 奇奇怪怪的屏蔽，回头看情况再写吧……
         return tasks;
@@ -105,12 +115,8 @@ class TaskModel {
      * @returns {Promise<Model>}
      * @param task_id
      */
-    static async getTaskDetail(task_id) {
-        return await models.Task.findByPk({
-            where: {
-                task_id: task_id
-            }
-        })
+    static async searchTaskById(task_id) {
+        return await models.Task.findByPk(task_id)
     }
 
     /**
@@ -185,7 +191,7 @@ class TaskModel {
                     [Op.or]: task_ids
                 },
                 type: restriction.type,
-                publisher: restriction.username
+                publisher: restriction.publisher
             },
             include: [{
                 model: models.User,
@@ -205,7 +211,7 @@ class TaskModel {
          await models.TR.create({
              username: username,
              task_id: task_id,
-             state: 'in_progress'
+             state: models.status_code.tr.WAITING_TO_BE_DONE
          })
      }
 
@@ -289,19 +295,21 @@ class TaskModel {
             return [];
         } 
 
-        let tasks = await models.Task.findAll({
-            where: {
-                task_id: {
-                    [Op.or]: task_ids
+        let tasks = await // Promise.all([
+            models.Task.findAll({
+                where: {
+                    task_id: {
+                        [Op.or]: task_ids
+                    },
+                    type: restriction.type,
+                    publisher: restriction.username
                 },
-                type: restriction.type,
-                publisher: restriction.username
-            },
-            include: [{
-                model: models.User,
-                attributes: ['username', 'avatar']
-            }]
-        });
+                include: [{
+                    model: models.User,
+                    attributes: ['username', 'avatar']
+                }]
+            })
+        // ])
         
         return tasks
     }

@@ -1,13 +1,20 @@
 const yaml = require('js-yaml');
 const fs   = require('fs');
+const util = require('util');
+const p_readFile = util.promisify(fs.readFile);
 
-let file = './static/swagger.yaml';
-// Get document, or throw exception on error
-try {
-    let doc = yaml.safeLoad(fs.readFileSync(file, 'utf8'));
-    console.log(doc);
-
-    fs.writeFileSync('./static/swagger.txt', `module.exports = ${JSON.stringify(doc, null, 2)}`);
-} catch (e) {
-    console.log(e);
+class AnalysisModel {
+    static async AnalysisQuestionnaire(filePath) {
+        try {
+            let data = await p_readFile(filePath, 'utf8');
+            let doc = yaml.safeLoad(data);
+            let newFile = '.' + filePath.split('.')[1] + '.json';
+            fs.writeFileSync(newFile, `Questionnaire = ${JSON.stringify(doc, null, 4)}`);
+            fs.unlinkSync(filePath);
+        } catch (e) {
+            console.log(e);
+        }
+    }
 }
+
+module.exports = AnalysisModel;
