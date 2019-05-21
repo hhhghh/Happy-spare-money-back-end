@@ -64,7 +64,7 @@ class TaskModel {
          */
         // let tr_where, task_where;
         restriction = checkParamsAndConvert(restriction, ['range', 'type'])
-        
+        console.log(restriction)
         let task_ids = await models.TeamTask.findAll({
             where: {
                 team_id: restriction.range,
@@ -74,9 +74,13 @@ class TaskModel {
             raw: true
         });
 
+        console.log(task_ids)
+
         task_ids = task_ids.map((item) => {
             return item.task_id
         });
+
+        console.log(task_ids)
 
 
         if (task_ids.length == 0) {
@@ -100,7 +104,8 @@ class TaskModel {
                 attributes: ['username', 'avatar']
             }, {
                 model: models.TR,
-                attributes: [[sequelize.fn('COUNT', 'count'), 'count']]
+                // attributes: [[sequelize.fn('count', 'count'), 'count']]
+                attributes: [[Sequelize.fn('count', Sequelize.col('trs.task_id')), 'count']]
             }]
         });
 
