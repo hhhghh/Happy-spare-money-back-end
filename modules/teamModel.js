@@ -45,6 +45,7 @@ class TeamModel {
         Team.hasMany(Members, {foreignKey : 'team_id'});
         Members.belongsTo(Team, {foreignKey : 'team_id'});
         return await Team.findAll({
+            attributes: ['team_id', 'team_name', 'leader', 'logo', 'description', 'limit'],
             where: {
                 team_name : team_name,
             },
@@ -65,6 +66,7 @@ class TeamModel {
         Team.hasMany(Members, {foreignKey : 'team_id'});
         Members.belongsTo(Team, {foreignKey : 'team_id'});
         return await Team.findOne({
+            attributes: ['team_id', 'team_name', 'leader', 'logo', 'description', 'limit'],
             where: {
                 team_id : team_id,
             },
@@ -85,6 +87,7 @@ class TeamModel {
         Team.hasMany(Members, {foreignKey : 'team_id'});
         Members.belongsTo(Team, {foreignKey : 'team_id'});
         return await Team.findAll({
+            attributes: ['team_id', 'team_name', 'leader', 'logo', 'description', 'limit'],
             where: {
                 team_id : team_id,
             },
@@ -158,15 +161,6 @@ class TeamModel {
             result.push(await TeamModel.getTeamByTeamId(team[i].team_id));
         }
         return result;
-    }
-
-    // 根据小组id来得到小组成员
-    static async getUserByTeamId(team_id) {
-        return await Members.findAll({
-            where: {
-                team_id : team_id
-            }
-        })
     }
 
     // 返回用户是否是该小组组长，使用根据小组id来查找小组

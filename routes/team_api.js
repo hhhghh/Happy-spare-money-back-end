@@ -19,7 +19,7 @@ router.get('/Leader/', async (ctx) => {
             data: null
         }
     }
-    ctx = response(ctx, result);
+    response(ctx, result);
 });
 
 router.get('/Member/', async (ctx) => {
@@ -34,7 +34,7 @@ router.get('/Member/', async (ctx) => {
             data: null
         }
     }
-    ctx = response(ctx, result);
+    response(ctx, result);
 });
 
 router.get('/Name/', async (ctx) => {
@@ -49,7 +49,7 @@ router.get('/Name/', async (ctx) => {
             data: null
         }
     }
-    ctx = response(ctx, result);
+    response(ctx, result);
 });
 
 router.get('/Label/', async (ctx) => {
@@ -64,7 +64,7 @@ router.get('/Label/', async (ctx) => {
             data: null
         }
     }
-    ctx = response(ctx, result);
+    response(ctx, result);
 });
 
 router.get('/MemberName/', async (ctx) => {
@@ -79,7 +79,7 @@ router.get('/MemberName/', async (ctx) => {
             data: null
         }
     }
-    ctx = response(ctx, result);
+    response(ctx, result);
 });
 
 router.get('/Id/', async (ctx) => {
@@ -94,7 +94,7 @@ router.get('/Id/', async (ctx) => {
             data: null
         }
     }
-    ctx = response(ctx, result);
+    response(ctx, result);
 });
 
 router.post('/Member/Invitation/', async (ctx) => {
@@ -109,7 +109,7 @@ router.post('/Member/Invitation/', async (ctx) => {
             data: null
         }
     }
-    ctx = response(ctx, result)
+    response(ctx, result)
 });
 
 router.post('/Member/Addition/', async (ctx) => {
@@ -124,7 +124,7 @@ router.post('/Member/Addition/', async (ctx) => {
             data: null
         }
     }
-    ctx = response(ctx, result)
+    response(ctx, result)
 });
 
 router.post('/Leader/', async (ctx) => {
@@ -139,7 +139,7 @@ router.post('/Leader/', async (ctx) => {
             data: null
         }
     }
-    ctx = response(ctx, result)
+    response(ctx, result)
 });
 
 router.del('/Member/Dislodge/', async (ctx) => {
@@ -154,7 +154,7 @@ router.del('/Member/Dislodge/', async (ctx) => {
             data: null
         }
     }
-    ctx = response(ctx, result)
+    response(ctx, result)
 });
 
 router.del('/Member/Departure/', async (ctx) => {
@@ -169,7 +169,7 @@ router.del('/Member/Departure/', async (ctx) => {
             data: null
         }
     }
-    ctx = response(ctx, result)
+    response(ctx, result)
 });
 
 router.del('/', async (ctx) => {
@@ -184,8 +184,9 @@ router.del('/', async (ctx) => {
             data: null
         }
     }
-    ctx = response(ctx, result)
+    response(ctx, result)
 });
+
 
 
 let response = (ctx, result) => {
