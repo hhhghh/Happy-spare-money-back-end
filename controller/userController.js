@@ -7,6 +7,33 @@ const redis = new Store();
 
 
 class UserController {
+
+    /**
+     * 判断前端请求是否携带了cookies
+     * 若携带了还会判断session是否过期
+     * @param ctx
+     * @returns
+     *  -1: 请求未携带cookies
+     *  -2：携带了cookies但是cookies过期了
+     *   0：cookies认证成功
+     */
+    static async judgeCookies(ctx) {
+        const SESSIONID = ctx.cookies.get('SESSIONID');
+
+        //没有携带cookies
+        if (!SESSIONID) {
+            return -1
+        }
+        // 如果有SESSIONID，就去redis里拿数据
+        const redisData = await redis.get(SESSIONID);
+
+        //携带了cookies但session已过期
+        if (!redisData) {
+            return -2
+        }    
+
+        return 0 
+    }
     /**
      * 用户注册
      * @param ctx
@@ -69,7 +96,7 @@ class UserController {
      */
     static async login(ctx) {
         let req = ctx.request.body;
-        //try {
+        try {
             const flag = await UserModel.getUserByUsernameAndPassword(req.type, req.username, req.password); 
             if (flag === 1) {
                 ctx.status = 412;
@@ -88,23 +115,52 @@ class UserController {
                 }    
             }
             else if(flag === 0) {
-                ctx.session.username = JSON.stringify(req.username);
-                ctx.cookies.set("login", req.username);
+                ctx.session.username = req.username;
                 ctx.status = 200;
                 ctx.body = {
                     code: 200,
                     msg: '登录成功',
-                    data: req.username 
+                    data: ctx.session.username
                 }
             }
-        // } catch(err) {
-        //     ctx.status = 500;
-        //         ctx.body = {
-        //             code: 500,
-        //             msg: 'failed',
-        //             data: err
-        //         }
-        // }
+        } catch(err) {
+            ctx.status = 500;
+            ctx.body = {
+                code: 500,
+                msg: 'failed',
+                data: err
+            }
+        }
+    }
+
+    static async logout(ctx) {
+        const flag = await UserController.judgeCookies(ctx);
+        if (flag == -1) {
+            ctx.status = 401;
+            ctx.body = {
+                code: 401,
+                msg: '未携带cookies',
+            }
+        } 
+        else if (flag == -2) {
+            ctx.status = 402;
+            ctx.body = {
+                code: 402,
+                msg: 'cookies已过期，已自动登出',
+            }
+        }        
+        else if(flag == 0) {
+            const SESSIONID = ctx.cookies.get('SESSIONID');
+            const redisData = await redis.get(SESSIONID);
+            const user = redisData.username
+
+            await redis.destroy(SESSIONID);
+            ctx.status = 200;
+            ctx.body = {
+                code: 200,
+                msg: user + '登出成功'
+            }
+        }
     }
 
     /**
@@ -288,7 +344,6 @@ class UserController {
     static async updateUserScore(ctx) {
         let req = ctx.request.body;
         const SESSIONID = ctx.cookies.get('SESSIONID');
-        console.log(SESSIONID + "no empty")
 
         if (!SESSIONID) {
             ctx.status = 412;
@@ -304,19 +359,16 @@ class UserController {
 
         if (!redisData) {
             ctx.status = 412;
-                ctx.body = {
-                    code: 412,
-                    msg: 'SESSIONID已经过期，去登录吧~',
-                    data: SESSIONID
-                } 
+            ctx.body = {
+                code: 412,
+                msg: 'SESSIONID已经过期，去登录吧~',
+                data: 'error'
+            } 
+            return false
         }
 
-        if (redisData && redisData.username) {
-            console.log(`登录了，uid为${redisData.username}`);
-            return;
-        }   
-
-        //const username = JSON.parse(redisData.username);
+        const username = JSON.parse(redisData.username);
+        console.log(username)
         try {
             const data = await UserModel.getUserInfo(req.username);
             if (data === null) {
@@ -615,6 +667,20 @@ class UserController {
         }
         return result;    
     }
+    
+    static async getAcceptedFinishedTasks(username) {
+        let result;
+        const data = await UserModel.getAcceptedFinishedTasks(username);
+        result = {
+            code: 200,
+            msg: "success",
+            data: data
+        }
+        return result;
+
+    }
+
+    
 }
 
 module.exports = UserController;

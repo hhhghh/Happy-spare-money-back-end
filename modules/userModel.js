@@ -5,8 +5,15 @@ const Piu = sequelize.import('../table/piu')
 const Team = sequelize.import('../table/team')
 const Pit = sequelize.import('../table/pit')
 const Tr = sequelize.import('../table/tr')
+const Task = sequelize.import('../table/task')
+const All_Tables = require('../table/all_tables')
 
 User.sync({force: false});
+Piu.sync({force: false})
+Team.sync({force: false})
+Pit.sync({force: false})
+Tr.sync({force: false})
+Task.sync({force: false})
 
 class UserModel {
     /**
@@ -310,6 +317,13 @@ class UserModel {
     }
 
     static async getAcceptedFinishedTasks(username) {
+        const data = await Tr.findAll({
+            where: {
+                username: username,
+                state: All_Tables.status_code.tr.CONFIRMED_OVER
+            }
+        })
+        return data
 
     }
 }
