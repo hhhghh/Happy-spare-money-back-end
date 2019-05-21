@@ -1,4 +1,6 @@
 const TeamModel = require('../modules/teamModel');
+require('../config/basicStr');
+const fs = require('fs');
 
 class TeamController {
 
@@ -610,6 +612,11 @@ class TeamController {
                         }
                     } else {
                         if (team.leader === req.leader) {
+                            if (req.logo !== team.logo && team.logo !== defaultLogo) {
+                                let tem = team.logo.split('/');
+                                let filePath = './static/' + tem[3] + '/' + tem[4] + '/' + tem[5];
+                                fs.unlinkSync(filePath);
+                            }
                             await TeamModel.updateTeamDescription(req);
                             await TeamModel.deleteTeamLabel(req.team_id);
                             for (let i = 0; i < req.teamlabels.length; i++) {

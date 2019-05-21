@@ -1,5 +1,6 @@
 const moment = require('moment');
 const Sequelize = require('sequelize');
+require('../config/basicStr');
 module.exports = function (sequelize, DataTypes){
     return sequelize.define('team',{
         team_id:{
@@ -24,12 +25,12 @@ module.exports = function (sequelize, DataTypes){
         logo:{
             type:DataTypes.CHAR(255),
             allowNull:false,
-            defaultValue:'http://139.196.79.193:3000/awesomeface.png'
+            defaultValue: defaultLogo
         },
         description:{
             type:DataTypes.CHAR(100),
             allowNull:false,
-            defaultValue:'The group leader was too lazy to write an introduction.'
+            defaultValue: defaultDescription
         },
         limit:{
             type:DataTypes.INTEGER,
