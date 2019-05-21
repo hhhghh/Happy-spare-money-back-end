@@ -41,8 +41,8 @@ app.use(async (ctx, next) => {
 app.use(session({
   store: new Store(),
   key: "SESSIONID",
-  duration: 30*60*1000,
-  activeDuration: 5* 60*1000,
+  maxAge: 600000,
+  rolling: true
 }));
 
 // routes

@@ -7,6 +7,8 @@ router.post('/create', UserController.register);
 
 router.post('/login', UserController.login);
 
+router.post('/logout', UserController.logout);
+
 router.post('/recharge', UserController.updateUserMoney);
 
 router.post('/score', UserController.updateUserScore);
@@ -18,6 +20,8 @@ router.post('/teamblacklist', UserController.teamBlacklistOrg);
 router.post('/usercancelblack', UserController.UserCancelBlack);
 
 router.post('/teamcancelblack', UserController.teamCancelBlack);
+
+router.post('/setRate', UserController.setRate);
 
 router.put('/update', UserController.updateUserInfo);
 
@@ -67,6 +71,38 @@ router.get('/getavatar', async(ctx) => {
         }
     }
     ctx = response(ctx, result);    
+});
+
+router.get('/getAcceptedFinishedTasks', async(ctx) => {
+    let query_params = ctx.query;
+    let result = null;
+    if (query_params.username) {
+        result = await UserController.getAcceptedFinishedTasks(query_params.username);
+    }
+    else {
+        result = {
+            code: 400,
+            msg: 'Wrong query param.',
+            data: null    
+        }
+    }
+    ctx = response(ctx, result)
+})
+
+router.get('/getPublishedWaitedTasks', async(ctx) => {
+    let query_params = ctx.query;
+    let result = null;
+    if (query_params.username) {
+        result = await UserController.getPublishedWaitedTasks(query_params.username);
+    }
+    else {
+        result = {
+            code: 400,
+            msg: 'Wrong query param.',
+            data: null    
+        }
+    }
+    ctx = response(ctx, result)
 })
 
 let response = (ctx, result) => {

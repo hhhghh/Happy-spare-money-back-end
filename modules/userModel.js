@@ -5,8 +5,15 @@ const Piu = sequelize.import('../table/piu')
 const Team = sequelize.import('../table/team')
 const Pit = sequelize.import('../table/pit')
 const Tr = sequelize.import('../table/tr')
+const Task = sequelize.import('../table/task')
+const All_Tables = require('../table/all_tables')
 
 User.sync({force: false});
+Piu.sync({force: false})
+Team.sync({force: false})
+Pit.sync({force: false})
+Tr.sync({force: false})
+Task.sync({force: false})
 
 class UserModel {
     /**
@@ -310,7 +317,61 @@ class UserModel {
     }
 
     static async getAcceptedFinishedTasks(username) {
+        const tasks = await Tr.findAll({
+            where: {
+                username: username,
+                state: All_Tables.status_code.tr.CONFIRMED_OVER
+            }
+        })
+        let data = []
+        for (var i = 0; i < tasks.length; i++) {
+            const ts = await Task.findOne({
+                where: {
+                    task_id: tasks[i].task_id
+                }
+            })
+            data.push({
+                "taskId": ts.task_id,
+                "title": ts.title,
+                "introduction": ts.intro == null ? null : ts.intro,
+                "starttime": ts.starttime,
+                "endtime": ts.endtime,
+                "score": ts.score,
+                "money": ts.money
+            })
+        }
+        return data
+    }
 
+    static async getPublishedWaitedTasks(username) {
+        const tasks = await Task.findAll({
+            where: {
+                publisher: username,
+                state: All_Tables.status_code.task.WAITING_ACCPET
+            }
+        })
+        let data = []
+        for (var i = 0; i < tasks.length; i++) {
+            var ts = tasks[i]
+            data.push({
+                "taskId": ts.task_id,
+                "title": ts.title,
+                "introduction": ts.intro == null ? null : ts.intro,
+                "starttime": ts.starttime,
+                "endtime": ts.endtime,
+                "score": ts.score,
+                "money": ts.money
+            })    
+        }
+        return data
+    }
+
+    static async getTaskByTaskId(taskId) {
+        return await Task.findOne({
+            where: {
+                task_id: taskId
+            }
+        })
     }
 }
 
