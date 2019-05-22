@@ -44,7 +44,8 @@ app.use(session({
   store: new Store(),
   key: "SESSIONID",
   maxAge: 600000,
-  rolling: true
+  rolling: true,
+  domain: '139.196.79.193'
 }));
 
 // routes
