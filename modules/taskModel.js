@@ -105,7 +105,7 @@ class TaskModel {
             }, {
                 model: models.TR,
                 // attributes: [[sequelize.fn('count', 'count'), 'count']]
-                attributes: [[Sequelize.fn('count', Sequelize.col('trs.task_id')), 'count']]
+                // attributes: [[Sequelize.fn('count', Sequelize.col('trs.task_id')), 'count']]
             }]
         });
 

@@ -20,11 +20,11 @@ Task.belongsTo(User, {foreignKey: 'publisher'})
 User.hasMany(TR, {foreignKey: 'username'})
 TR.belongsTo(User, {foreignKey: 'username'})
 
-User.hasMany(Task, {foreignKey: 'publisher'})
-Task.belongsTo(User, {foreignKey: 'publisher'})
-
 Task.hasMany(TR, {foreignKey: 'task_id'})
 TR.belongsTo(Task, {foreignKey: 'task_id'})
+
+User.hasMany(Task, {foreignKey: 'publisher'})
+Task.belongsTo(User, {foreignKey: 'publisher'})
 
 const status_code = {
 	tr: {
