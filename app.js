@@ -13,7 +13,9 @@ const session = require("koa-session2");
 const Store = require('./utils/Store.js');
 
 // 使用koa-cors
-app.use(cors());
+app.use(cors({
+  credentials: true
+}));
 
 // error handler
 onerror(app);
