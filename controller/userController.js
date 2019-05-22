@@ -14,12 +14,11 @@ class UserController {
      * @param ctx
      * @returns
      *  -1: 请求未携带cookies
-     *  -2：携带了cookies但是cookies过期了
+     *  -2：携带了cookies但是cookies已过期
      *   0：cookies认证成功
      */
     static async judgeCookies(ctx) {
         const SESSIONID = ctx.cookies.get('SESSIONID');
-
         //没有携带cookies
         if (!SESSIONID) {
             return -1
@@ -34,6 +33,30 @@ class UserController {
 
         return 0 
     }
+
+    /**
+     * 从前端的一个请求中通过cookies获得用户名
+     * @param ctx 
+     * @returns
+     *  -1：未携带cookies
+     *  -2：携带的cookies无效或已过期
+     *  username: 用户名，一个字符串 
+     */
+    static async getUsernameFromCtx(ctx) {
+        const flag = await UserController.judgeCookies(ctx);
+        if (flag == -1) {
+            return -1
+        }
+        else if (flag == -2) {
+
+            return -2
+        }
+        const SESSIONID = ctx.cookies.get('SESSIONID')
+        const redisData = await redis.get(SESSIONID)
+
+        return redisData.username
+    }
+    
     /**
      * 用户注册
      * @param ctx
@@ -43,17 +66,28 @@ class UserController {
         function formidablePromise (req, opts) {
             return new Promise(function (resolve, reject) {
               var form = new formidable.IncomingForm(opts)
-              form.keepExtensions = true;
-              form.uploadDir = path.join(__dirname, '/files')
+              form.keepExtensions = true;     
+              form.uploadDir = 'static/uploads/user/';
               form.parse(req, function (err, fields, files) {
                 if (err) return reject(err)
-                console.log(files)
                 resolve({ fields: fields, files: files })
               })
             })
           }
 
         var body = await formidablePromise(ctx.req, null);
+        if (body != null) {
+            if (body.files != null) {
+                if (body.files.avatar != null) {
+                    if (body.files.avatar.path != null) {
+                        body.files.avatar.path = body.fields.username + '.jpeg';
+                    }    
+                }
+            }
+        }
+
+        console.log(body.files.avatar.path)
+
         var info = body.fields
         try {
             const user = await UserModel.getUserInfo(info.username);
@@ -115,12 +149,17 @@ class UserController {
                 }    
             }
             else if(flag === 0) {
-                ctx.session.username = req.username;
+                const SESSIONID = ctx.cookies.get('SESSIONID')
+                if (SESSIONID) {
+                    
+                    await redis.destroy(SESSIONID)
+                }
+                ctx.session.username = req.username
                 ctx.status = 200;
                 ctx.body = {
                     code: 200,
                     msg: '登录成功',
-                    data: ctx.session.username
+                    data: ctx.session
                 }
             }
         } catch(err) {
