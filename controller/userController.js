@@ -81,12 +81,13 @@ class UserController {
                     })
                 }
                 if (err) return reject(err)
-                resolve({ fields: fields, files: files, oldpath: oldpath })
+                resolve({ fields: fields, files: files, newpath: newpath, oldpath: oldpath })
               })
             })
           }
 
         var body = await formidablePromise(ctx.req, null);
+
 
         var info = body.fields
         try {
@@ -103,7 +104,8 @@ class UserController {
                 }
                 return
             }
-            const res = await UserModel.createUser(info.type, info);
+            const res = await UserModel.createUser(info.type, info, body.newpath);
+            console.log(body.newpath)
             ctx.status = 200;
             ctx.body = {
                 code: 200,
