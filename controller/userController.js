@@ -1,6 +1,7 @@
 const UserModel = require('../modules/userModel')
 const formidable = require('formidable')
 const path = require('path')
+const fs = require('fs')
 const session = require("koa-session2")
 const Store = require("../utils/Store.js")
 const redis = new Store();
@@ -69,24 +70,23 @@ class UserController {
               form.keepExtensions = true;     
               form.uploadDir = 'static/uploads/user/';
               form.parse(req, function (err, fields, files) {
+                var extname = path.extname(files.avatar.path)
+                var oldpath = files.avatar.path
+                var newpath = form.uploadDir + fields.username + extname
+                if (!fs.existsSync(newpath)) {
+                    fs.rename(oldpath, newpath, function(err) {
+                        if (err) {
+                            throw err
+                        }
+                    })
+                }
                 if (err) return reject(err)
-                resolve({ fields: fields, files: files })
+                resolve({ fields: fields, files: files, oldpath: oldpath })
               })
             })
           }
 
         var body = await formidablePromise(ctx.req, null);
-        if (body != null) {
-            if (body.files != null) {
-                if (body.files.avatar != null) {
-                    if (body.files.avatar.path != null) {
-                        body.files.avatar.path = body.fields.username + '.jpeg';
-                    }    
-                }
-            }
-        }
-
-        console.log(body.files.avatar.path)
 
         var info = body.fields
         try {
@@ -97,7 +97,10 @@ class UserController {
                     code: 409,
                     msg: '该用户已存在',
                     data: null 
-                }   
+                }
+                if (fs.existsSync(body.oldpath)) {
+                    fs.unlinkSync(body.oldpath)
+                }
                 return
             }
             const res = await UserModel.createUser(info.type, info);
