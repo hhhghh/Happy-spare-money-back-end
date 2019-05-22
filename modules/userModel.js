@@ -21,7 +21,7 @@ class UserModel {
      * @param data
      * @returns {Promise<*>} 
      */
-    static async createUser(type, info) {
+    static async createUser(type, info, avatar) {
         return await User.create({
             username: info.username,
             password: info.password,
@@ -30,7 +30,7 @@ class UserModel {
             true_name: info.true_name,
             school_name: info.school_name,
             grade: info.grade,
-            avatar: info.avatar,
+            avatar: avatar,
             nickname: info.nickname,
             wechat: info.wechat,
             QQ: info.QQ,
