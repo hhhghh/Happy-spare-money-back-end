@@ -105,7 +105,6 @@ class UserController {
                 return
             }
             const res = await UserModel.createUser(info.type, info, body.newpath);
-            console.log(body.newpath)
             ctx.status = 200;
             ctx.body = {
                 code: 200,
@@ -138,7 +137,7 @@ class UserController {
         try {
             const flag = await UserModel.getUserByUsernameAndPassword(req.type, req.username, req.password); 
             if (flag === 1) {
-                ctx.status = 412;
+                ctx.status = 200;
                 ctx.body = {
                     code: 412,
                     msg: '用户名或密码错误',
@@ -159,7 +158,9 @@ class UserController {
                     
                     await redis.destroy(SESSIONID)
                 }
+
                 ctx.session.username = req.username
+
                 ctx.status = 200;
                 ctx.body = {
                     code: 200,
