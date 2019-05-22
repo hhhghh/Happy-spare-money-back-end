@@ -45,7 +45,7 @@ app.use(session({
   key: "SESSIONID",
   maxAge: 600000,
   rolling: true,
-  domain: '139.196.79.193'
+  domain: 'localhost'
 }));
 
 // routes
