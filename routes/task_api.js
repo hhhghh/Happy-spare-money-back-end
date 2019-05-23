@@ -24,7 +24,8 @@ router.del('/task', async (ctx) => {
     } else {
         result = {
             code: 412,
-            msg: "Params wrong, API denied"
+            msg: "Params wrong, API denied",
+            data: []
         }
     }
     ctx = response(ctx, result)

@@ -42,7 +42,8 @@ class TRModel {
                 task_id: task_id
             },
             include: {
-                model: models.User,
+                // model: models.User,
+                association: models.User.hasMany(models.TR, {foreignKey: 'username'}),
                 attributes: ['username', 'avatar']
             }
         })

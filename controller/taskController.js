@@ -16,7 +16,9 @@ class TaskController {
     static async searchTask(ctx) {
         let query = ctx.query, result = undefined;
         // 检查参数
-        if (query.range && query.type && query.username) {
+        if (query.range != undefined && 
+            query.type != undefined && 
+            query.username != undefined) {
             try {
                 result = await TaskModel.searchTask(query)
                 result = {
@@ -48,7 +50,7 @@ class TaskController {
     }
     
     /**
-     * 创建team
+     * 创建 Task
      * title, introduction, money, score, number, publisher, state, type, starttime, endtime
      */
     static async releaseTask(ctx) {
@@ -246,8 +248,8 @@ class TaskController {
         } catch (err) {
             result = {
                 code: 500,
-                msg: '查询失败，请检查参数',
-                data: err
+                msg: '删除出错',
+                data: err.message
             }
         }
         return result
