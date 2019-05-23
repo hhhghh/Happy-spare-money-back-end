@@ -248,8 +248,8 @@ class TaskController {
         } catch (err) {
             result = {
                 code: 500,
-                msg: '查询失败，请检查参数',
-                data: err
+                msg: '删除出错',
+                data: err.message
             }
         }
         return result

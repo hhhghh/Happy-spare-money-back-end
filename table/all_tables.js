@@ -4,24 +4,45 @@ const sequelize = db.sequelize;
 const User = sequelize.import('./user');
 const Task = sequelize.import('./task');
 const TR = sequelize.import('./tr');
-const TeamTask = sequelize.import('./teamtask')
-const PIT = sequelize.import('./pit')
-const PIU = sequelize.import('./piu')
-const Members = sequelize.import('./members')
-const TeamLabel = sequelize.import('./teamlabel')
-const Team = sequelize.import('./team')
+const TeamTask = sequelize.import('./teamtask');
+const PIT = sequelize.import('./pit');
+const PIU = sequelize.import('./piu');
+const Members = sequelize.import('./members');
+const TeamLabel = sequelize.import('./teamlabel');
+const Team = sequelize.import('./team');
 
 // Task.belongsToMany(User, {through: TR, foreignKey: 'task_id'})
 // User.belongsToMany(Task, {through: TR, foreignKey: 'username'})
 
-User.hasMany(Task, {foreignKey: 'publisher'})
-Task.belongsTo(User, {foreignKey: 'publisher'})
+// User.hasMany(Task, {foreignKey: 'publisher'})
+// Task.belongsTo(User, {foreignKey: 'publisher'})
 
-User.hasMany(TR, {foreignKey: 'username'})
-TR.belongsTo(User, {foreignKey: 'username'})
+// User.hasMany(TR, {foreignKey: 'username'})
+// TR.belongsTo(User, {foreignKey: 'username'})
 
-Task.hasMany(TR, {foreignKey: 'task_id'})
-TR.belongsTo(Task, {foreignKey: 'task_id'})
+// Task.hasMany(TR, {foreignKey: 'task_id'})
+// TR.belongsTo(Task, {foreignKey: 'task_id'})
+
+// User.hasMany(Task, {foreignKey: 'publisher'})
+// Task.belongsTo(User, {foreignKey: 'publisher'})
+
+// Team.belongsToMany(User, {through: Members, foreignKey: 'team_id'})
+// User.belongsToMany(Team, {through: Members, foreignKey: 'member_username'})
+
+/* ========================================================================== */
+
+// Team.hasMany(Members, {foreignKey: 'team_id'})
+// User.hasMany(Members, {foreignKey: 'team_id'})
+
+// Team.hasOne(User, {foreignKey: 'leader'})
+
+// Team.hasMany(TeamLabel, {foreignKey: 'team_id'})
+
+Team.belongsToMany(Task, {through: TeamTask, foreignKey: 'team_id'})
+Task.belongsToMany(Team, {through: TeamTask, foreignKey: 'task_id'})
+
+Task.belongsToMany(User, {through: TR, foreignKey: 'task_id'})
+User.belongsToMany(Task, {through: TR, foreignKey: 'username'})
 
 User.hasMany(Task, {foreignKey: 'publisher'})
 Task.belongsTo(User, {foreignKey: 'publisher'})
