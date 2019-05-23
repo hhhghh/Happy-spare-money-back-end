@@ -1,4 +1,6 @@
 const TeamModel = require('../modules/teamModel');
+require('../config/basicStr');
+const fs = require('fs');
 
 class TeamController {
 
@@ -172,35 +174,6 @@ class TeamController {
                     data: null
                 };
             } else {
-                result = {
-                    code: 200,
-                    msg: '查询成功',
-                    data: data
-                };
-            }
-        } catch (err) {
-            result = {
-                code: 412,
-                msg: '查询失败',
-                data: err
-            };
-        }
-        return result;
-    }
-
-    // 200 成功，412 异常
-    static async getMembersByGroupId(team_id) {
-        let result = null;
-        try {
-            let team = await TeamModel.getTeamByTeamId(team_id);
-            if (team === null) {
-                result = {
-                    code: 412,
-                    msg: '查询失败，没有该小组',
-                    data: null
-                };
-            } else {
-                let data = await TeamModel.getUserByTeamId(team_id);
                 result = {
                     code: 200,
                     msg: '查询成功',
@@ -639,6 +612,11 @@ class TeamController {
                         }
                     } else {
                         if (team.leader === req.leader) {
+                            if (req.logo !== team.logo && team.logo !== defaultLogo) {
+                                let tem = team.logo.split('/');
+                                let filePath = './static/' + tem[3] + '/' + tem[4] + '/' + tem[5];
+                                fs.unlinkSync(filePath);
+                            }
                             await TeamModel.updateTeamDescription(req);
                             await TeamModel.deleteTeamLabel(req.team_id);
                             for (let i = 0; i < req.teamlabels.length; i++) {

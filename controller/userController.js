@@ -1,12 +1,63 @@
 const UserModel = require('../modules/userModel')
 const formidable = require('formidable')
 const path = require('path')
+const fs = require('fs')
 const session = require("koa-session2")
 const Store = require("../utils/Store.js")
 const redis = new Store();
 
 
 class UserController {
+
+    /**
+     * 判断前端请求是否携带了cookies
+     * 若携带了还会判断session是否过期
+     * @param ctx
+     * @returns
+     *  -1: 请求未携带cookies
+     *  -2：携带了cookies但是cookies已过期
+     *   0：cookies认证成功
+     */
+    static async judgeCookies(ctx) {
+        const SESSIONID = ctx.cookies.get('SESSIONID');
+        //没有携带cookies
+        if (!SESSIONID) {
+            return -1
+        }
+        // 如果有SESSIONID，就去redis里拿数据
+        const redisData = await redis.get(SESSIONID);
+
+        //携带了cookies但session已过期
+        if (!redisData) {
+            return -2
+        }    
+
+        return 0 
+    }
+
+    /**
+     * 从前端的一个请求中通过cookies获得用户名
+     * @param ctx 
+     * @returns
+     *  -1：未携带cookies
+     *  -2：携带的cookies无效或已过期
+     *  username: 用户名，一个字符串 
+     */
+    static async getUsernameFromCtx(ctx) {
+        const flag = await UserController.judgeCookies(ctx);
+        if (flag == -1) {
+            return -1
+        }
+        else if (flag == -2) {
+
+            return -2
+        }
+        const SESSIONID = ctx.cookies.get('SESSIONID')
+        const redisData = await redis.get(SESSIONID)
+
+        return redisData.username
+    }
+    
     /**
      * 用户注册
      * @param ctx
@@ -16,17 +67,28 @@ class UserController {
         function formidablePromise (req, opts) {
             return new Promise(function (resolve, reject) {
               var form = new formidable.IncomingForm(opts)
-              form.keepExtensions = true;
-              form.uploadDir = path.join(__dirname, '/files')
+              form.keepExtensions = true;     
+              form.uploadDir = 'static/uploads/user/';
               form.parse(req, function (err, fields, files) {
+                var extname = path.extname(files.avatar.path)
+                var oldpath = files.avatar.path
+                var newpath = form.uploadDir + fields.username + extname
+                if (!fs.existsSync(newpath)) {
+                    fs.rename(oldpath, newpath, function(err) {
+                        if (err) {
+                            throw err
+                        }
+                    })
+                }
                 if (err) return reject(err)
-                console.log(files)
-                resolve({ fields: fields, files: files })
+                resolve({ fields: fields, files: files, newpath: newpath, oldpath: oldpath })
               })
             })
           }
 
         var body = await formidablePromise(ctx.req, null);
+
+
         var info = body.fields
         try {
             const user = await UserModel.getUserInfo(info.username);
@@ -36,10 +98,13 @@ class UserController {
                     code: 409,
                     msg: '该用户已存在',
                     data: null 
-                }   
+                }
+                if (fs.existsSync(body.oldpath)) {
+                    fs.unlinkSync(body.oldpath)
+                }
                 return
             }
-            const res = await UserModel.createUser(info.type, info);
+            const res = await UserModel.createUser(info.type, info, body.newpath);
             ctx.status = 200;
             ctx.body = {
                 code: 200,
@@ -69,10 +134,10 @@ class UserController {
      */
     static async login(ctx) {
         let req = ctx.request.body;
-        //try {
+        try {
             const flag = await UserModel.getUserByUsernameAndPassword(req.type, req.username, req.password); 
             if (flag === 1) {
-                ctx.status = 412;
+                ctx.status = 200;
                 ctx.body = {
                     code: 412,
                     msg: '用户名或密码错误',
@@ -88,23 +153,59 @@ class UserController {
                 }    
             }
             else if(flag === 0) {
-                ctx.session.username = JSON.stringify(req.username);
-                ctx.cookies.set("login", req.username);
+                const SESSIONID = ctx.cookies.get('SESSIONID')
+                if (SESSIONID) {
+                    
+                    await redis.destroy(SESSIONID)
+                }
+
+                ctx.session.username = req.username
+
                 ctx.status = 200;
                 ctx.body = {
                     code: 200,
                     msg: '登录成功',
-                    data: req.username 
+                    data: ctx.session
                 }
             }
-        // } catch(err) {
-        //     ctx.status = 500;
-        //         ctx.body = {
-        //             code: 500,
-        //             msg: 'failed',
-        //             data: err
-        //         }
-        // }
+        } catch(err) {
+            ctx.status = 500;
+            ctx.body = {
+                code: 500,
+                msg: 'failed',
+                data: err
+            }
+        }
+    }
+
+    static async logout(ctx) {
+        const flag = await UserController.judgeCookies(ctx);
+        if (flag == -1) {
+            ctx.status = 401;
+            ctx.body = {
+                code: 401,
+                msg: '未携带cookies',
+            }
+        } 
+        else if (flag == -2) {
+            ctx.status = 402;
+            ctx.body = {
+                code: 402,
+                msg: 'cookies已过期，已自动登出',
+            }
+        }        
+        else if(flag == 0) {
+            const SESSIONID = ctx.cookies.get('SESSIONID');
+            const redisData = await redis.get(SESSIONID);
+            const user = redisData.username
+
+            await redis.destroy(SESSIONID);
+            ctx.status = 200;
+            ctx.body = {
+                code: 200,
+                msg: user + '登出成功'
+            }
+        }
     }
 
     /**
@@ -288,7 +389,6 @@ class UserController {
     static async updateUserScore(ctx) {
         let req = ctx.request.body;
         const SESSIONID = ctx.cookies.get('SESSIONID');
-        console.log(SESSIONID + "no empty")
 
         if (!SESSIONID) {
             ctx.status = 412;
@@ -304,19 +404,16 @@ class UserController {
 
         if (!redisData) {
             ctx.status = 412;
-                ctx.body = {
-                    code: 412,
-                    msg: 'SESSIONID已经过期，去登录吧~',
-                    data: SESSIONID
-                } 
+            ctx.body = {
+                code: 412,
+                msg: 'SESSIONID已经过期，去登录吧~',
+                data: 'error'
+            } 
+            return false
         }
 
-        if (redisData && redisData.username) {
-            console.log(`登录了，uid为${redisData.username}`);
-            return;
-        }   
-
-        //const username = JSON.parse(redisData.username);
+        const username = JSON.parse(redisData.username);
+        console.log(username)
         try {
             const data = await UserModel.getUserInfo(req.username);
             if (data === null) {
@@ -615,6 +712,119 @@ class UserController {
         }
         return result;    
     }
+    
+    static async getAcceptedFinishedTasks(username) {
+        let result;
+        try{
+            const user = await UserModel.getUserInfo(username)
+            if (user === null) {
+                result = {
+                    code: 412,
+                    msg: "用户不存在",
+                    data: null
+                }   
+            }
+            else {
+                const data = await UserModel.getAcceptedFinishedTasks(username);
+                result = {
+                    code: 200,
+                    msg: "success",
+                    data: data
+                }
+            }
+        } catch(error) {
+            result = {
+                code: 500,
+                msg: "服务器异常",
+                data: error
+            }
+        }
+        return result;
+
+    }
+
+    static async getPublishedWaitedTasks(username) {
+        let result;
+        try{
+            const user = await UserModel.getUserInfo(username)
+            if (user === null) {
+                result = {
+                    code: 412,
+                    msg: "用户不存在",
+                    data: null
+                }   
+            }
+            else {
+                const data = await UserModel.getPublishedWaitedTasks(username);
+                result = {
+                    code: 200,
+                    msg: "success",
+                    data: data
+                }
+            }
+        } catch(error) {
+            result = {
+                code: 500,
+                msg: "服务器异常",
+                data: error
+            }
+        }
+        return result;   
+    }
+
+    static async setRate(ctx) {
+        console.log()
+        const flag = await UserController.judgeCookies(ctx);
+        console.log(1)
+        if (flag == -1 || flag == -2) {
+            console.log(2)
+            ctx.status = 401;
+            ctx.body = {
+                code: 401,
+                msg: 'failed',
+                data: null
+            }
+        } 
+        else if(flag == 0) {
+            console.log(3)
+            const SESSIONID = ctx.cookies.get('SESSIONID');
+            const redisData = await redis.get(SESSIONID);
+            const user = redisData.username
+            
+            var taskId = ctx.request.body.taskId
+            var value = ctx.request.body.value
+
+            const task = await UserModel.getTaskByTaskId(taskId) 
+            if (task === null) {
+                ctx.status = 400;
+                ctx.body = {
+                    code: 400,
+                    msg: 'failed',
+                    data: null
+                }
+            }
+            else {
+                if (task.publisher == user) {
+                    ctx.status = 200;
+                    ctx.body = {
+                        code: 200,
+                        msg: 'success',
+                        data: value
+                    }   
+                }
+                else {
+                    ctx.status = 401;
+                    ctx.body = {
+                        code: 401,
+                        msg: 'failed',
+                        data: null
+                    }   
+                }
+            }
+        }
+    }
+
+    
 }
 
 module.exports = UserController;

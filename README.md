@@ -7,14 +7,38 @@
     ```bash
     $ npm install -g cnpm --registry=https://registry.npm.taobao.org
     ```
+    
+    或 将npm源替换为taobao源，可自行百度（**!!推荐!!**，cnpm在一些情况下会遇到一些问题）
+    
+    （不推荐混用，会出现问题，切记切记）
 
-2. 在根目录执行
+2. 运行程序
+
+    在根目录执行
 
     ```bash
     cnpm install
+    # 或 npm install
     ```
 
-    如果遇到问题，可以把根目录下的node_modules文件夹删除，重新`cnpm install`
+    安装所有的依赖，如果遇到问题，可以把根目录下的node_modules文件夹删除，重新`cnpm install`
+    
+    开发环境下运行
+    
+    ```bash
+    npm run dev
+    ```
+    
+    `dev`的script是使用了`nodemon`这个包，在这个模式下，任何对服务端代码的修改都会导致服务器的刷新，而无需每次都自己使用`node bin/www`进行刷新
+    
+    上线时使用
+    
+    ```bash
+    node bin/www
+    # 或 npm start
+    ```
+    
+    稳定运行
 
 3. session的存储
     session的存储使用了Redis,需开启Redis服务            
@@ -81,21 +105,15 @@
         以上说明我们已经成功安装了redis。
 
 
-> 执行测试文件
-> 
-> ```
-> node bin/www
-> ```
-> 
-> 正常的话会有输出
-
 ## 目录结构
 
 ```bash
 
 ├─bin               // 自动生成的程序执行入口，里边只有一个www文件  
 ├─config            // 配置文件，现在只有数据库的配置
-├─controller        // 控制器文件夹
+├─controller        // 控制文件夹
+├─modules           // 所有的数据库model
+├─tables            // 数据库建表的文档，使用sequelize进行描述
 ├─docs              // 文档
 ├─node_modules      // 被gitignore了，使用时安装的包
 ├─public            // 公共资源，使用vue的话，还不不知道怎么使用这里的资源
