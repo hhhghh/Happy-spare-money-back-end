@@ -236,22 +236,37 @@ class TaskController {
         return result
     }
 
-    static async deleteTaskByTaskID(task_id) {
-        let result
-        try {
-            let data = await TaskModel.deleteTaskByTaskID(task_id)
-            result = {
-                code: 200, 
-                msg: 'Success',
-                data: data
+    static async deleteTaskByTaskID(ctx) {
+        let query_params = ctx.query
+        let result = undefined
+        if (query_params.task_id != undefined) {
+            if ()
+            try {
+                result = await TaskModel.deleteTaskByTaskID(query_params.task_id)
+                result = {
+                    code: 200, 
+                    msg: 'Success',
+                    data: result
+                }
+            } catch (err) {
+                result = {
+                    code: 500,
+                    msg: 'Failed',
+                    data: err.message
+                }
             }
-        } catch (err) {
+            // Need authorize...
+            // TODO...
+            // 
+            // 
+        } else {
             result = {
-                code: 500,
-                msg: '删除出错',
-                data: err.message
+                code: 412,
+                msg: "Params wrong, API denied",
+                data: []
             }
         }
+
         return result
     }
 
