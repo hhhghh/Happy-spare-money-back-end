@@ -1,12 +1,23 @@
 const TeamModel = require('../modules/teamModel');
+const CookieController = require('./CookieController');
 require('../config/basicStr');
 const fs = require('fs');
 
 class TeamController {
 
-    // 200 成功，412 异常, 212 组长不存在，211 部分成员不存在，400 参数不齐全
+    // 200 成功，412 异常, 212 组长不存在，211 部分成员不存在，220 cookie不正确重新登录，400 参数不齐全
     static async createGroup(ctx) {
         let req = ctx.request.body;
+        let cookie_user = await CookieController.getUsernameFromCtx(ctx);
+        if (cookie_user !== ctx.request.body.leader) {
+            ctx.body = {
+                code: 220,
+                msg: 'cookie超时，请重新登录',
+                data: null
+            };
+            return;
+        }
+
         if (req.team_name && req.leader && req.members) {
             try {
                 let leader = await TeamModel.getUserByUsername(req.leader);
@@ -263,7 +274,8 @@ class TeamController {
         return result;
     }
 
-    // 200 正常，412 异常，210 没有该user，211 user已经在小组中，212 leader不正确, 需要验证，213 没有小组，215 不允许添加
+    // 200 正常，412 异常，210 没有该user，211 user已经在小组中，212 leader不正确, 需要验证，
+    // 213 没有小组，215 不允许添加
     static async addUserToGrope(team_id, leader, user) {
         let result = null;
         try {
@@ -588,9 +600,18 @@ class TeamController {
         return result;
     }
 
-    // 200 成功，412 异常，212 组长不存在或组长不正确， 213小组不存在，400 参数不齐全
+    // 200 成功，412 异常，212 组长不存在或组长不正确， 213小组不存在，220 cookie不正确重新登录，400 参数不齐全
     static async modifyGroup(ctx) {
         let req = ctx.request.body;
+        let cookie_user = await CookieController.getUsernameFromCtx(ctx);
+        if (cookie_user !== ctx.request.body.leader) {
+            ctx.body = {
+                code: 220,
+                msg: 'cookie超时，请重新登录',
+                data: null
+            };
+            return;
+        }
         if (req.team_id && req.leader) {
             try {
                 let team = await TeamModel.getTeamByTeamId(req.team_id);
@@ -654,7 +675,6 @@ class TeamController {
                 msg: '参数不齐全',
             }
         }
-
     }
 
 }

@@ -12,11 +12,10 @@ const cors = require('koa-cors');
 
 const session = require("koa-session2");
 const Store = require('./utils/Store.js');
+require('./config/basicStr');
 
 // 使用koa-cors
-app.use(cors({
-  credentials: true
-}));
+app.use(cors());
 
 // error handler
 onerror(app);
@@ -36,6 +35,7 @@ app.use(views(__dirname + '/views', {
 // logger
 app.use(async (ctx, next) => {
   const start = new Date();
+  ctx.set("Access-Control-Allow-Credentials", true);
   await next();
   const ms = new Date() - start;
   console.log(`${ctx.method} ${ctx.url} - ${ms}ms`)
@@ -44,9 +44,8 @@ app.use(async (ctx, next) => {
 app.use(session({
   store: new Store(),
   key: "SESSIONID",
-  maxAge: 600000,
-  rolling: true,
-  domain: 'localhost'
+  maxAge: 6000000,
+  rolling: true
 }));
 
 // routes
