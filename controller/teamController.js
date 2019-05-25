@@ -1,4 +1,5 @@
 const TeamModel = require('../modules/teamModel');
+const CookieController = require('./CookieController');
 require('../config/basicStr');
 const fs = require('fs');
 
@@ -6,6 +7,9 @@ class TeamController {
 
     // 200 成功，412 异常, 212 组长不存在，211 部分成员不存在，400 参数不齐全
     static async createGroup(ctx) {
+        let cookie_user = await CookieController.getUsernameFromCtx(ctx);
+        console.log(cookie_user)
+        console.log(cookie_user === ctx.request.body.leader)
         let req = ctx.request.body;
         if (req.team_name && req.leader && req.members) {
             try {
