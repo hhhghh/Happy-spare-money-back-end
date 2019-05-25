@@ -30,7 +30,7 @@ class UserModel {
             true_name: info.true_name,
             school_name: info.school_name,
             grade: info.grade,
-            avatar: avatar,
+            avatar: 'http://139.196.79.193:3000/uploads/user/' + info.username + avatar,
             nickname: info.nickname,
             wechat: info.wechat,
             QQ: info.QQ,

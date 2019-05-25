@@ -83,7 +83,7 @@ class UserController {
                     })
                 }
                 if (err) return reject(err)
-                resolve({ fields: fields, files: files, newpath: newpath, oldpath: oldpath })
+                resolve({ fields: fields, files: files, newpath: newpath, oldpath: oldpath, extname: extname })
               })
             })
           }
@@ -106,7 +106,7 @@ class UserController {
                 }
                 return
             }
-            const res = await UserModel.createUser(info.type, info, body.newpath);
+            const res = await UserModel.createUser(info.type, info, body.extname);
             ctx.status = 200;
             ctx.body = {
                 code: 200,
