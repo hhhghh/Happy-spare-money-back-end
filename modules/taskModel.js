@@ -25,7 +25,8 @@ class TaskModel {
             endtime: data.endtime,
             content: data.content,
             createdAt: data.createdAt,
-            updatedAt: data.updatedAt
+            updatedAt: data.updatedAt,
+            questionnaire_path: data.questionnaire_path
         });
     
         let create_param = []
@@ -34,7 +35,6 @@ class TaskModel {
                 team_id: range[i],
                 task_id: task.get('task_id')
             })
-
             await models.TeamTask.create({
                 team_id: range[i],
                 task_id: task.get('task_id'),
@@ -203,6 +203,8 @@ class TaskModel {
             include: [{
                 association: models.Task.belongsTo(models.User, {foreignKey: 'publisher'}),
                 attributes: ['username', 'avatar']
+            }, {
+                association: models.Task.hasMany(models.TR, {foreignKey: 'task_id'})
             }]
         });
         
@@ -326,6 +328,17 @@ class TaskModel {
         // ])
         
         return tasks
+    }
+
+    /**
+     * 
+     * @param {number} task_id 
+     * @return {string} the publisher's username
+     */
+    static async searchPublisherByTaskid(task_id) {
+        return models.Task.findByPk(task_id, {
+            attributes: ['publisher']
+        }).publisher;
     }
 }
 

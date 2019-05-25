@@ -1,4 +1,7 @@
 const TRModel = require('../modules/trModel');
+// Get username from session.
+const getUsernameFromCtx = require('./cookieController').getUsernameFromCtx;
+const checkUndefined = require('../utils/url_params_utils').checkUndefined;
 
 class TRController {
     /**
@@ -6,35 +9,66 @@ class TRController {
      * @param ctx
      * @returns {Promise.<void>}
      */
-    static async recieveATask(username, task_id) {
-        let result
-        try {
-            await TRModel.receiveTask(username, task_id);
-            let data = await TRModel.searchByTaskId(task_id);
-            result = {
-                code: 200,
-                msg: "Success, result as below",
-                data: data
-            }
-        } catch (err) {
-            if (err.name == 'SequelizeUniqueConstraintError') {
+    static async recieveATask(ctx) {
+        let post_body = ctx.request.body
+        let result = undefined
+        let required_param_list = ['username', 'task_id']
+        if (checkUndefined(post_body, required_param_list)) {
+            let current_user = await getUsernameFromCtx(ctx)
+            if (current_user == -1 || current_user == -2) {
                 result = {
-                    code: 500,
-                    msg: "Constrait error, cannot recieve a task twice",
+                    code: 401,
+                    msg: "Should login first",
+                    data: []
+                }
+            } else if (current_user != post_body.username) {
+                result = {
+                    code: 403,
+                    msg: "Can only accept task for yourself",
                     data: []
                 }
             } else {
-                console.log(err)
-                result = {
-                    code: 500,
-                    msg: "Params wrong, or constrait did not pass (already recieved, cannot receive again).",
-                    data: err.message
+                try {
+                    await TRModel.receiveTask(username, task_id);
+                    let data = await TRModel.searchByTaskId(task_id);
+                    result = {
+                        code: 200,
+                        msg: "Success, result as below",
+                        data: data
+                    }
+                } catch (err) {
+                    if (err.name == 'SequelizeUniqueConstraintError') {
+                        result = {
+                            code: 500,
+                            msg: "Constrait error, cannot recieve a task twice",
+                            data: []
+                        }
+                    } else {
+                        console.log(err)
+                        result = {
+                            code: 500,
+                            msg: "Params wrong, or constrait did not pass (already recieved, cannot receive again).",
+                            data: err.message
+                        }
+                    }
                 }
+            }  
+        } else {
+            result = {
+                code: 412,
+                msg: "Params wrong, API denied",
+                data: []
             }
         }
-        return result
-    }
 
+        ctx.response.status = result.code
+        ctx.body = {
+            code: result.code,
+            msg: result.msg,
+            data: result.data
+        }
+
+    }
     /**
      * 获取文章详情
      * @param ctx
@@ -117,23 +151,49 @@ class TRController {
         return result
     }
 
-    static async deleteTR(username, task_id) {
+    static async deleteTR(ctx) {
+        let current_user = await getUsernameFromCtx(ctx)
+        let post_body = ctx.query
         let result = undefined
-        try {
-            let data = await TRModel.deleteTR(username, task_id)
-            result = {
-                code: 200, 
-                msg: 'Seccuss',
-                data: data
+        let required_param_list = ['task_id', 'username']
+        if (checkUndefined(post_body, required_param_list)) {
+            if (post_body.username == current_user) {
+                try {
+                    let data = await TRModel.deleteTR(post_body.username, post_body.task_id)
+                    result = {
+                        code: 200, 
+                        msg: 'Success',
+                        data: data
+                    }
+                } catch (err) {
+                    result = {
+                        code: 500,
+                        msg: 'Failed, database wrong.',
+                        data: err
+                    }
+                }
+            } else {
+                result = {
+                    code: 403,
+                    msg: "Only accepter self can quit a task",
+                    data: []
+                }
             }
-        } catch (err) {
+            
+        } else {
             result = {
-                code: 500,
-                msg: 'Failed, database wrong.',
-                data: err
+                code: 412,
+                msg: "Params wrong, API denied",
+                data: []
             }
         }
-        return result
+        
+        ctx.response.status  =  result.code
+        ctx.body = {
+            code: result.code,
+            msg: result.msg,
+            data: result.data
+        }
     }
 
     static async confirmComplement(ctx) {
@@ -200,6 +260,41 @@ class TRController {
             result = {
                 code: 412,
                 msg: "Params wrong...",
+                data: []
+            }
+        }
+
+        ctx.response.status = result.code
+        ctx.body = {
+            code: result.code,
+            msg: result.msg,
+            data: result.data
+        }
+    }
+
+    
+    static async searchTR(ctx) {
+        let query = ctx.query
+        let result = undefined
+        if (query.task_id && query.username) {
+            try {
+                result = await TRModel.searchTR(query.username, query.task_id)
+                result = {
+                    code: 200, 
+                    msg: "Success",
+                    data: result
+                }
+            } catch (err) {
+                result = {
+                    code: 500,
+                    msg: "Failed",
+                    data: err.message
+                }
+            }
+        } else {
+            result = {
+                code: 412,
+                msg: "Params is not enough",
                 data: []
             }
         }
