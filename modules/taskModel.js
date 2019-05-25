@@ -64,7 +64,7 @@ class TaskModel {
          */
         // let tr_where, task_where;
         restriction = checkParamsAndConvert(restriction, ['range', 'type'])
-        
+        console.log(restriction)
         let task_ids = await models.TeamTask.findAll({
             where: {
                 team_id: restriction.range,
@@ -74,9 +74,13 @@ class TaskModel {
             raw: true
         });
 
+        console.log(task_ids)
+
         task_ids = task_ids.map((item) => {
             return item.task_id
         });
+
+        console.log(task_ids)
 
 
         if (task_ids.length == 0) {
@@ -96,11 +100,13 @@ class TaskModel {
                 }
             },
             include: [{
-                model: models.User,
+                association: models.Task.belongsTo(models.User, {foreignKey: 'publisher'}),
                 attributes: ['username', 'avatar']
             }, {
-                model: models.TR,
-                attributes: [[sequelize.fn('COUNT', 'count'), 'count']]
+                association: models.Task.hasMany(models.TR, {foreignKey: 'task_id'}),
+                // model: models.TR,
+                // attributes: ['task_id', [sequelize.fn('COUNT', Sequelize.col('trs.task_id')), 'count']]
+                // attributes: [[Sequelize.fn('count', Sequelize.col('trs.task_id')), 'count']]
             }]
         });
 
@@ -164,7 +170,7 @@ class TaskModel {
      * @param username username of the user who want to search
      */
     static async searchTaskByUserRelease(restriction) {
-        restriction = checkParamsAndConvert(restriction, ['range', 'type'])
+        restriction = checkParamsAndConvert(restriction, ['range', 'type', 'state'])
         
         let task_ids = await models.TeamTask.findAll({
             where: {
@@ -190,11 +196,12 @@ class TaskModel {
                 task_id: {
                     [Op.or]: task_ids
                 },
+                state: restriction.state,
                 type: restriction.type,
                 publisher: restriction.publisher
             },
             include: [{
-                model: models.User,
+                association: models.Task.belongsTo(models.User, {foreignKey: 'publisher'}),
                 attributes: ['username', 'avatar']
             }]
         });
@@ -239,24 +246,12 @@ class TaskModel {
      */
     static async updateTask(task_id, new_data) {
         await models.Task.update({
-            state: new_data.state,
-            updatedAt: new_data.updatedAt
+            state: new_data.state
         }, {
             where: {
                 task_id: task_id
             }
         })
-    }
-
-    static async getTaskByInUserPage(restriction) {
-        // range = group id, type = task.type, username
-        models.Task.hasMany(models.TeamTask, {foreignKey: "task_id"})
-        models.TeamTask.belongsTo(models.Task, {foreignKey: "task_id"})
-        // models.
-        // // Task 
-        // return await models.Task.findAll({
-            
-        // })
     }
 
     static async getTaskByRestrict(restriction) {
@@ -266,29 +261,43 @@ class TaskModel {
     }
 
     static async deleteTaskByTaskID(task_id) {
-        return await models.Task.destroy({
+        await Promise.all([
+            models.TR.destroy({
+                where: {
+                    task_id: task_id
+                }
+            }),
+            models.TeamTask.destroy({
+                where: {
+                    task_id: task_id
+                }
+            })
+        ])
+        await models.Task.destroy({
             where: {
                 task_id: task_id
             }
         })
+        return "Successfully destroy all task with id = " + task_id + " and related task-reciver and team-task"
     }
 
-    static async searchTaskByAccepter(restriction) {    
-        restriction = checkParamsAndConvert(restriction, ['range', 'type'])
+    static async searchTaskByAccepter(restriction) { 
+        /**
+         * 先根据 restriction.username 在 tr 里寻找 task ids
+         * 然后根据 range 和 type 筛选
+         * 返回时加上对应的 tr 信息
+         *  */   
+        restriction = checkParamsAndConvert(restriction, ['range', 'type', 'state'])
         
-        let task_ids = await models.TeamTask.findAll({
+        let task_ids = await models.TR.findAll({
             where: {
-                team_id: restriction.range,
-                isolate: false
+                username: restriction.username
             },
             attributes: ['task_id'],
             raw: true
-        });
-
-        task_ids = task_ids.map((item) => {
+        }).map((item) => {
             return item.task_id
         });
-
 
         if (task_ids.length == 0) {
             // No task can be found, then reutrn []
@@ -302,11 +311,16 @@ class TaskModel {
                         [Op.or]: task_ids
                     },
                     type: restriction.type,
-                    publisher: restriction.username
+                    state: restriction.state
                 },
                 include: [{
-                    model: models.User,
+                    association: models.Task.belongsTo(models.User, {foreignKey: 'publisher'}),
                     attributes: ['username', 'avatar']
+                }, {
+                    association: models.Task.hasMany(models.TR, {foreignKey: 'task_id'}),
+                    where: {
+                        username: restriction.username
+                    }
                 }]
             })
         // ])

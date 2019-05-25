@@ -32,7 +32,7 @@ module.exports = function(sequelize, DataTypes){
             allowNull:false
         },
         state: {
-            type:DataTypes.CHAR(45)
+            type:DataTypes.INTEGER
         },
         type: {
             type:DataTypes.INTEGER
