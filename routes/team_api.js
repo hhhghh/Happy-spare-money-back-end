@@ -1,5 +1,6 @@
 const router = require('koa-router')();
 const TeamController = require('../controller/teamController');
+const CookieController = require('../controller/CookieController');
 
 router.prefix('/api/v1/team');
 
@@ -98,90 +99,144 @@ router.get('/Id/', async (ctx) => {
 });
 
 router.post('/Member/Invitation/', async (ctx) => {
-    let query_params = ctx.request.body;
     let result = null;
-    if (query_params.team_id && query_params.leader && query_params.user) {
-        result = await TeamController.addUserToGrope(query_params.team_id, query_params.leader, query_params.user)
-    } else {
+    let cookie_user = await CookieController.getUsernameFromCtx(ctx);
+    if (cookie_user !== ctx.request.body.leader) {
         result = {
-            code: 400,
-            msg: 'Wrong query param.',
+            code: 220,
+            msg: 'cookie超时，请重新登录',
             data: null
+        }
+    } else {
+        let query_params = ctx.request.body;
+        if (query_params.team_id && query_params.leader && query_params.user) {
+            result = await TeamController.addUserToGrope(query_params.team_id, query_params.leader, query_params.user)
+        } else {
+            result = {
+                code: 400,
+                msg: 'Wrong query param.',
+                data: null
+            }
         }
     }
     response(ctx, result)
 });
 
 router.post('/Member/Addition/', async (ctx) => {
-    let query_params = ctx.request.body;
     let result = null;
-    if (query_params.team_id && query_params.username) {
-        result = await TeamController.addUserToGrope2(query_params.team_id, query_params.username)
-    } else {
+    let cookie_user = await CookieController.getUsernameFromCtx(ctx);
+    if (cookie_user !== ctx.request.body.leader) {
         result = {
-            code: 400,
-            msg: 'Wrong query param.',
+            code: 220,
+            msg: 'cookie超时，请重新登录',
             data: null
+        }
+    } else {
+        let query_params = ctx.request.body;
+        if (query_params.team_id && query_params.username) {
+            result = await TeamController.addUserToGrope2(query_params.team_id, query_params.username)
+        } else {
+            result = {
+                code: 400,
+                msg: 'Wrong query param.',
+                data: null
+            }
         }
     }
     response(ctx, result)
 });
 
 router.post('/Leader/', async (ctx) => {
-    let query_params = ctx.request.body;
     let result = null;
-    if (query_params.team_id && query_params.leader && query_params.username) {
-        result = await TeamController.updateTeamLeader(query_params.team_id, query_params.leader, query_params.username)
-    } else {
+    let cookie_user = await CookieController.getUsernameFromCtx(ctx);
+    if (cookie_user !== ctx.request.body.leader) {
         result = {
-            code: 400,
-            msg: 'Wrong query param.',
+            code: 220,
+            msg: 'cookie超时，请重新登录',
             data: null
+        }
+    } else {
+        let query_params = ctx.request.body;
+        if (query_params.team_id && query_params.leader && query_params.username) {
+            result = await TeamController.updateTeamLeader(query_params.team_id, query_params.leader, query_params.username)
+        } else {
+            result = {
+                code: 400,
+                msg: 'Wrong query param.',
+                data: null
+            }
         }
     }
     response(ctx, result)
 });
 
 router.del('/Member/Dislodge/', async (ctx) => {
-    let query_params = ctx.query;
     let result = null;
-    if (query_params.team_id && query_params.leader && query_params.username) {
-        result = await TeamController.deleteUserFromGrope(query_params.team_id, query_params.leader, query_params.username)
-    } else {
+    let cookie_user = await CookieController.getUsernameFromCtx(ctx);
+    if (cookie_user !== ctx.request.body.leader) {
         result = {
-            code: 400,
-            msg: 'Wrong query param.',
+            code: 220,
+            msg: 'cookie超时，请重新登录',
             data: null
+        }
+    } else {
+        let query_params = ctx.query;
+        if (query_params.team_id && query_params.leader && query_params.username) {
+            result = await TeamController.deleteUserFromGrope(query_params.team_id, query_params.leader, query_params.username)
+        } else {
+            result = {
+                code: 400,
+                msg: 'Wrong query param.',
+                data: null
+            }
         }
     }
     response(ctx, result)
 });
 
 router.del('/Member/Departure/', async (ctx) => {
-    let query_params = ctx.query;
     let result = null;
-    if (query_params.team_id && query_params.username) {
-        result = await TeamController.deleteUserFromGrope2(query_params.team_id, query_params.username)
-    } else {
+    let cookie_user = await CookieController.getUsernameFromCtx(ctx);
+    if (cookie_user !== ctx.request.body.leader) {
         result = {
-            code: 400,
-            msg: 'Wrong query param.',
+            code: 220,
+            msg: 'cookie超时，请重新登录',
             data: null
+        }
+    } else {
+        let query_params = ctx.query;
+        if (query_params.team_id && query_params.username) {
+            result = await TeamController.deleteUserFromGrope2(query_params.team_id, query_params.username)
+        } else {
+            result = {
+                code: 400,
+                msg: 'Wrong query param.',
+                data: null
+            }
         }
     }
     response(ctx, result)
 });
 
 router.del('/', async (ctx) => {
-    let query_params = ctx.query;
     let result = null;
-    if (query_params.team_id && query_params.leader) {
-        result = await TeamController.deleteGroup(query_params.team_id, query_params.leader);
-    } else {
+    let cookie_user = await CookieController.getUsernameFromCtx(ctx);
+    if (cookie_user !== ctx.request.body.leader) {
         result = {
-            code: 400,
-            msg: 'Wrong query param.',
+            code: 220,
+            msg: 'cookie超时，请重新登录',
             data: null
+        }
+    } else {
+        let query_params = ctx.query;
+        if (query_params.team_id && query_params.leader) {
+            result = await TeamController.deleteGroup(query_params.team_id, query_params.leader);
+        } else {
+            result = {
+                code: 400,
+                msg: 'Wrong query param.',
+                data: null
+            }
         }
     }
     response(ctx, result)

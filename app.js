@@ -12,6 +12,7 @@ const cors = require('koa-cors');
 
 const session = require("koa-session2");
 const Store = require('./utils/Store.js');
+require('./config/basicStr');
 
 // 使用koa-cors
 app.use(cors());
@@ -43,7 +44,7 @@ app.use(async (ctx, next) => {
 app.use(session({
   store: new Store(),
   key: "SESSIONID",
-  maxAge: 600000,
+  maxAge: 6000000,
   rolling: true
 }));
 
