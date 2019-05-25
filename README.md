@@ -20,7 +20,7 @@
     session的存储使用了Redis,需开启Redis服务            
     `Redis中文官方教程：`https://www.redis.net.cn/tutorial/3501.html               
     + Windows操作系统下安装：         
-        - 下载地址：https://github.com/dmajkic/redis/downloads
+        - 下载地址：https://github.com/microsoftarchive/redis/releases
         - 下载到的Redis支持32bit和64bit。根据自己实际情况选择，将64bit的内容cp到自定义盘符安装目录取名redis。 如 C:\reids
         - 打开一个cmd窗口 使用cd命令切换目录到 C:\redis 运行 redis-server.exe redis.conf 。
         - 如果想方便的话，可以把redis的路径加到系统的环境变量里，这样就省得再输路径了，后面的那个redis.conf可以省略，如果省略，会启用默认的。输入之后，会显示如下界面：        
