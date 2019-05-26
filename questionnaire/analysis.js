@@ -9,7 +9,7 @@ class AnalysisModel {
             let data = await p_readFile(filePath, 'utf8');
             let doc = yaml.safeLoad(data);
             let newFile = '.' + filePath.split('.')[1] + '.json';
-            fs.writeFileSync(newFile, `Questionnaire = ${JSON.stringify(doc, null, 4)}`);
+            fs.writeFileSync(newFile, `${JSON.stringify(doc, null, 4)}`);
             fs.unlinkSync(filePath);
         } catch (e) {
             console.log(e);
