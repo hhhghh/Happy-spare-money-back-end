@@ -21,7 +21,7 @@ router.post('/usercancelblack', UserController.UserCancelBlack);
 
 router.post('/teamcancelblack', UserController.teamCancelBlack);
 
-router.post('/getteammembersavatat', UserController.getTeamMembersAvatar)
+router.post('/getteammembersavatat', UserController.getTeamMembersAvatar);
 
 router.post('/setRate', UserController.setRate);
 
