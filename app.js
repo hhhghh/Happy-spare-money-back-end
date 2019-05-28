@@ -15,7 +15,6 @@ const Store = require('./utils/Store.js');
 
 // 使用koa-cors
 app.use(cors({
-  origin:'http://localhost:8080',
   credentials: true,
 }));
 
