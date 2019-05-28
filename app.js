@@ -12,6 +12,7 @@ const cors = require('koa-cors');
 
 const session = require("koa-session2");
 const Store = require('./utils/Store.js');
+require('./config/basicStr');
 
 // 使用koa-cors
 app.use(cors({
@@ -33,14 +34,6 @@ app.use(views(__dirname + '/views', {
   extension: 'pug'
 }));
 
-
-app.use(session({
-  store: new Store(),
-  key: "SESSIONID",
-  maxAge: 600000,
-  rolling: true
-}));
-
 // logger
 app.use(async (ctx, next) => {
   const start = new Date();
@@ -51,6 +44,12 @@ app.use(async (ctx, next) => {
 });
 
 
+app.use(session({
+  store: new Store(),
+  key: "SESSIONID",
+  maxAge: 6000000,
+  rolling: true
+}));
 
 // routes
 app.use(routers.index.routes(), routers.index.allowedMethods());
@@ -59,6 +58,7 @@ app.use(routers.task_api.routes(), routers.task_api.allowedMethods());
 app.use(routers.user_api.routes(), routers.user_api.allowedMethods());
 app.use(routers.tr_api.routes(), routers.tr_api.allowedMethods());
 app.use(routers.file_api.routes(), routers.file_api.allowedMethods());
+app.use(routers.toast_api.routes(), routers.toast_api.allowedMethods());
 
 const koaBody = require('koa-body');
 app.use(koaBody({

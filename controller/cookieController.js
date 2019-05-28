@@ -1,6 +1,5 @@
-
-const session = require("koa-session2")
-const Store = require("../utils/Store.js")
+const session = require("koa-session2");
+const Store = require("../utils/Store.js");
 global.redis = new Store();
 
 class CookieController {
