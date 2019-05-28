@@ -16,7 +16,6 @@ require('./config/basicStr');
 
 // 使用koa-cors
 app.use(cors({
-  origin:'http://127.0.0.1:8005',
   credentials: true,
 }));
 // app.use(cors());
@@ -43,6 +42,7 @@ app.use(async (ctx, next) => {
   const ms = new Date() - start;
   console.log(`${ctx.method} ${ctx.url} - ${ms}ms`)
 });
+
 
 app.use(session({
   store: new Store(),
