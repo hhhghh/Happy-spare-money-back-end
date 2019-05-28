@@ -1,9 +1,7 @@
-const db = require('../config/db');
-const Sequelize = require('sequelize');
 const moment = require('moment');
-
+const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes){
-    return sequelize.define('tr',{
+    return sequelize.define('toast',{
         id:{
             type:DataTypes.INTEGER,
             primaryKey:true,
@@ -13,32 +11,34 @@ module.exports = function(sequelize, DataTypes){
         username:{
             type:DataTypes.CHAR(20),
             allowNull:false,
-            unique: 'one_reciever_to_one_task'
         },
-        task_id:{
+        type: {
             type:DataTypes.INTEGER,
-            allowNull:false,
-            unique: 'one_reciever_to_one_task'
-        },
-        state:{
-            type: DataTypes.INTEGER,
             allowNull:false
-            // 0: waiting to be done
-            // 1: accpeter complete, waiting publisher confirm
-            // 2: publisher confirmed, over
         },
-        questionnaire_path: {
-            type: DataTypes.CHAR(128),
-            allowNull: true
+        message: {
+            type:DataTypes.CHAR(255),
         },
-        createdAt:{
+        msg_username:{
+            type:DataTypes.CHAR(20),
+            allowNull:true,
+        },
+        msg_team_id:{
+            type:DataTypes.INTEGER,
+            allowNull:true
+        },
+        msg_task_id:{
+            type:DataTypes.INTEGER,
+            allowNull:true
+        },
+        createdAt: {
             type: DataTypes.DATE,
             get() {
                 return moment(this.getDataValue('createdAt')).format('YYYY-MM-DD HH:mm:ss');
             }
         },
         // 更新时间
-        updatedAt:{
+        updatedAt: {
             type: DataTypes.DATE,
             get() {
                 return moment(this.getDataValue('updatedAt')).format('YYYY-MM-DD HH:mm:ss');

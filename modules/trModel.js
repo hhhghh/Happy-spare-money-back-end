@@ -6,6 +6,21 @@ const Op = Sequelize.Op
 
 class TRModel {
     /**
+     * Search tr by most common restriction, as username adn task_id
+     * @param {*} username 
+     * @param {*} task_id 
+     * @return {*} An object, such as ` {username: *, task_id: * }`
+     */
+    static async searchTR(username, task_id) {
+        return await models.TR.findOne({
+            where: {
+                username: username,
+                task_id: task_id
+            }
+        })
+    }
+
+    /**
      * 添加 Task Recivers
      * @param  task_id 
      */
@@ -24,11 +39,21 @@ class TRModel {
         if (count[0] >= count[1].max_accepter_number) {
             throw new Error("Max accepter number reached");
         }
-        return await models.TR.create({
-            username: username,
-            task_id: task_id,
-            state: models.status_code.tr.WAITING_TO_BE_DONE
-        })
+        let result = await Promise.all([
+            models.TR.create({
+                username: username,
+                task_id: task_id,
+                state: models.status_code.tr.WAITING_TO_BE_DONE
+            }),
+            models.Task.update({
+                state: models.status_code.task.ACCEPETED_AND_DOING
+            }, {
+                where: {
+                    task_id: task_id
+                }
+            })
+        ]) 
+        return result[0]
     }
     
      /**
@@ -72,20 +97,23 @@ class TRModel {
         })
     }
 
-    static async accepter_make_complement(username, task_id) {
+    static async accepter_make_complement(post_body) {
+        let task_type = await models.Task.findByPk(post_body.task_id).type
+        if (task_type == 1 /** 问卷调查 */ && post_body.questionnaire_path == undefined) {
+            throw Error("Need questionnaire result file")
+        }
         return await models.TR.update({
             state: models.status_code.tr.WAITING_CONFIRM
         }, {
             where: {
-                username: username,
-                task_id: task_id
+                username: post_body.username,
+                task_id: post_body.task_id
             }
         })
-        // 评分直接更新了，TODO... 还待考虑到底怎么操作
     }
 
     static async comfirm_complement(username, task_id, score) {
-        let result = await Promise.all([
+        let user_task_info = await Promise.all([
             models.TR.update({
                 state: models.status_code.tr.CONFIRMED_OVER
             }, {
@@ -94,15 +122,13 @@ class TRModel {
                     task_id: task_id
                 }
             }),
-            models.User.update({
+            models.User.findByPk(username, {
                 // TODO, 更新评分，使用score来更新
-                
-            }, {
-                where: {
-                    username: username
-                }
+                attributes: ['task_complete', 'score']
             })
-        ]) 
+        ])
+        let user_task_count = user_task_info[1].task_comlete;
+        let user_score_current = user_task_info[1].score;
         
         let count = await Promise.all([
             models.TR.count({
@@ -122,8 +148,16 @@ class TRModel {
                 },
                 attributes: ['max_accepter_number'],
                 raw: true
+            }),
+            models.User.update({
+                score: (user_score_current * user_task_count + score) / (user_task_count + 1),
+                task_comlete: user_task_count + 1
+            }, {
+                where: {
+                    username: username
+                }
             })
-        ])
+        ]);
 
         console.log(count)
 

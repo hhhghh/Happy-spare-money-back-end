@@ -1,14 +1,15 @@
 const Redis = require("ioredis")
 const { Store } = require("koa-session2")
+require('../config/basicStr')
 
 class RedisStore extends Store {
     constructor() {
         super();
         this.redis = new Redis({
-            host : '127.0.0.1',//安装好的redis服务器地址
+            host : defaultSessionIP,//安装好的redis服务器地址
             port : 6379,　//端口
             prefix : 'sam:',//存诸前缀
-            ttl : 60 * 60 * 23,//过期时间
+            ttl : 60 * 60 * 24,//过期时间
             db: 0
         });
     }

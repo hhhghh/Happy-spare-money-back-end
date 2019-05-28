@@ -6,11 +6,13 @@ const Team = sequelize.import('../table/team');
 const Teamlabel = sequelize.import('../table/teamlabel');
 const Members = sequelize.import('../table/members');
 const Pit = sequelize.import('../table/pit');
+// const Toast = sequelize.import('../table/toast');
 
 User.sync({force: false});
 Team.sync({force: false});
 Teamlabel.sync({force: false});
 Members.sync({force: false});
+// Toast.sync({force: false});
 
 class TeamModel {
     // 创建小组
@@ -134,16 +136,6 @@ class TeamModel {
         Members.belongsTo(Team, {foreignKey : 'team_id'});
         Team.hasMany(Teamlabel, {foreignKey : 'team_id'});
         Teamlabel.belongsTo(Team, {foreignKey : 'team_id'});
-        // return await Team.findAll({
-        //     include: [{
-        //         model: Members,
-        //         where: {
-        //             member_username : member_username
-        //         }
-        //     },{
-        //         model: Teamlabel,
-        //     }],
-        // });
 
         let team = await Team.findAll({
             include: [{
