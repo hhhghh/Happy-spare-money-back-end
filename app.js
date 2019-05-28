@@ -16,7 +16,6 @@ require('./config/basicStr');
 
 // 使用koa-cors
 app.use(cors({
-  origin:'http://localhost:8080',
   credentials: true,
 }));
 
