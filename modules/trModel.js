@@ -97,16 +97,19 @@ class TRModel {
         })
     }
 
-    static async accepter_make_complement(username, task_id) {
+    static async accepter_make_complement(post_body) {
+        let task_type = await models.Task.findByPk(post_body.task_id).type
+        if (task_type == 1 /** 问卷调查 */ && post_body.questionnaire_path == undefined) {
+            throw Error("Need questionnaire result file")
+        }
         return await models.TR.update({
             state: models.status_code.tr.WAITING_CONFIRM
         }, {
             where: {
-                username: username,
-                task_id: task_id
+                username: post_body.username,
+                task_id: post_body.task_id
             }
         })
-        // 评分直接更新了，TODO... 还待考虑到底怎么操作
     }
 
     static async comfirm_complement(username, task_id, score) {

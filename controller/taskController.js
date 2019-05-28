@@ -1,7 +1,4 @@
 const TaskModel = require('../modules/taskModel');
-const AnalysisModel = require('../questionnaire/analysis.js');
-const FileController = require('../controller/fileController');
-const BasicStr = require('../config/basicStr');
 
 // Get username from session.
 const getUsernameFromCtx = require('./cookieController').getUsernameFromCtx;
@@ -108,21 +105,7 @@ class TaskController {
                     questionnaire_path: post_body.questionnaire_path
                 }
 
-                let serverPath = path.join(__dirname, '../static/uploads/');
-                // 获取上存文件
-                let path = undefined
-
                 try {
-                    let wtfr = await FileController.uploadFile(ctx, {
-                        fileType: 'questionnaire',
-                        path: serverPath
-                    });
-                    
-                    path = defaultIP + '/uploads' + result.imgPath.split('.')[0] + '.json';
-                    AnalysisModel.AnalysisQuestionnaire('./static/uploads' + wtfr.imgPath);
-                    
-                    post_data.questionnaire_path = path
-
                     result = await TaskModel.createTask(post_data, post_body.range)
                     result = {
                         code: 200,

@@ -2,6 +2,8 @@ const TRModel = require('../modules/trModel');
 // Get username from session.
 const getUsernameFromCtx = require('./cookieController').getUsernameFromCtx;
 const checkUndefined = require('../utils/url_params_utils').checkUndefined;
+const FileController = require('../controller/fileController');
+const TaskModel = require('../modules/taskModel');
 
 class TRController {
     /**
@@ -243,7 +245,7 @@ class TRController {
         if (post_body.task_id
             && post_body.username) {
             try {
-                result = await TRModel.accepter_make_complement(post_body.username, post_body.task_id)
+                result = await TRModel.accepter_make_complement(post_body)
                 result = {
                     code: 200,
                     msg: "Success",
@@ -253,7 +255,7 @@ class TRController {
                 result = {
                     code: 500,
                     msg: "Failed",
-                    data: err
+                    data: err.message
                 }
             }
         } else {
@@ -305,6 +307,27 @@ class TRController {
             msg: result.msg,
             data: result.data
         }
+    }
+
+    static async submitQuestionnaire(ctx) {
+        let serverPath = path.join(__dirname, '../static/uploads/');
+        // 获取上存文件
+        let result = await FileController.uploadFile(ctx, {
+            fileType: 'questionnaire',
+            path: serverPath
+        });
+
+        AnalysisModel.AnalysisQuestionnaire('./static/uploads' + result.imgPath);
+
+        let fileUrl = defaultIP + '/uploads' + result.imgPath.split('.')[0] + '.json'
+
+        ctx.body = {
+            code: result.code,
+            msg: result.msg,
+            data: {
+                fileUrl: fileUrl
+            }
+        };
     }
 }
 

@@ -21,4 +21,6 @@ router.get('/task/acceptance', tr_controller.searchTR);
 router.post('/task/acceptance', tr_controller.recieveATask);
 router.del('/task/acceptance', tr_controller.deleteTR);
 
+router.post('/task/questionnaire/result', tr_controller.submitQuestionnaire);
+
 module.exports = router
