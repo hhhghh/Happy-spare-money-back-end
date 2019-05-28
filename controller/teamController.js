@@ -1,5 +1,7 @@
 const TeamModel = require('../modules/teamModel');
+const ToastModel = require('../modules/toastModel');
 const CookieController = require('./CookieController');
+const Toast_info = require('../utils/toast_info');
 require('../config/basicStr');
 const fs = require('fs');
 
@@ -46,7 +48,13 @@ class TeamController {
                         }
                         for (let i = 0; i < members.length; i++) {
                             await TeamModel.createTeamMember(ret.team_id, members[i].member_username);
+                            // if (members[i].member_username !== ret.leader) {
+                            await ToastModel.createToast(members[i].member_username, 1,
+                                Toast_info.t1(ret.team_name),
+                                ret.leader, ret.team_id, null);
+                            // }
                         }
+
                         const data = await TeamModel.getTeamByTeamId(ret.team_id);
                         ctx.response.status = 200;
                         ctx.body = {
@@ -319,6 +327,9 @@ class TeamController {
                     } else {
                         for (let i = 0; i < user.length; i++) {
                             await TeamModel.createMembers(team_id, user[i].username);
+                            await ToastModel.createToast(user[i].username, 1,
+                                Toast_info.t1(team.team_name),
+                                leader, team_id, null);
                         }
                         result = {
                             code: 200,
@@ -403,6 +414,9 @@ class TeamController {
                 } else {
                     let team = await TeamModel.getUserByTeamIdUsername(team_id, username);
                     if (team.length === 0) {
+                        await ToastModel.createToast(team.leader, 0,
+                            Toast_info.t0(username, team.team_name),
+                            username, team_id, null);
                         result = {
                             code: 214,
                             msg: '添加失败，需要组长审核',
@@ -454,6 +468,9 @@ class TeamController {
                     };
                 } else {
                     await TeamModel.deleteMember(team_id, username);
+                    await ToastModel.createToast(username, 2,
+                        Toast_info.t2(team.team_name),
+                        username, team_id, null);
                     result = {
                         code: 200,
                         msg: '删除成功',
@@ -505,6 +522,9 @@ class TeamController {
                         };
                     } else {
                         await TeamModel.deleteMember(team_id, username);
+                        await ToastModel.createToast(team.leader, 5,
+                            Toast_info.t5(username, team.team_name),
+                            username, team_id, null);
                         result = {
                             code: 200,
                             msg: '删除成功',
@@ -538,6 +558,9 @@ class TeamController {
                     };
                 } else {
                     await  TeamModel.updateTeamLeader(team_id, leader, username);
+                    await ToastModel.createToast(username, 4,
+                        Toast_info.t4(team.team_name),
+                        leader, team_id, null);
                     result = {
                         code: 200,
                         msg: '修改组长成功',
@@ -579,6 +602,11 @@ class TeamController {
                     data: false
                 };
             } else {
+                for (let i = 0; i < team.members.length(); i++) {
+                    await ToastModel.createToast(team.members[i].member_username, 3,
+                        Toast_info.t3(team.team_name),
+                        leader, team_id, null);
+                }
                 await TeamModel.deleteTeamMember(team_id);
                 await TeamModel.deleteTeamLabel(team_id);
                 await TeamModel.deleteTeamPit(team_id);

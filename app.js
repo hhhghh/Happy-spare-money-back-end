@@ -55,6 +55,7 @@ app.use(routers.task_api.routes(), routers.task_api.allowedMethods());
 app.use(routers.user_api.routes(), routers.user_api.allowedMethods());
 app.use(routers.tr_api.routes(), routers.tr_api.allowedMethods());
 app.use(routers.file_api.routes(), routers.file_api.allowedMethods());
+app.use(routers.toast_api.routes(), routers.toast_api.allowedMethods());
 
 const koaBody = require('koa-body');
 app.use(koaBody({
