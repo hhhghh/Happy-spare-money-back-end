@@ -155,6 +155,7 @@ class UserController {
                 }    
             }
             else if(flag === 0) {
+                
                 const SESSIONID = ctx.cookies.get('SESSIONID')
                 if (SESSIONID) {
                     if (await CookieController.getUsernameFromCtx(ctx) == req.username) {
