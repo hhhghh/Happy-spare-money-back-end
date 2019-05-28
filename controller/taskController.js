@@ -1,5 +1,9 @@
 const TaskModel = require('../modules/taskModel');
 
+// Get username from session.
+const getUsernameFromCtx = require('./cookieController').getUsernameFromCtx;
+const checkUndefined = require('../utils/url_params_utils').checkUndefined;
+
 class TaskController {
     /**
      * Use range, type and username to get a task, which is the most 
@@ -16,9 +20,8 @@ class TaskController {
     static async searchTask(ctx) {
         let query = ctx.query, result = undefined;
         // 检查参数
-        if (query.range != undefined && 
-            query.type != undefined && 
-            query.username != undefined) {
+        let required_param_list = ['range', 'type', 'username']
+        if (checkUndefined(query, required_param_list)) {
             try {
                 result = await TaskModel.searchTask(query)
                 result = {
@@ -37,7 +40,8 @@ class TaskController {
         } else {
             result = {
                 code: 412,
-                msg: "Params wrong, please check."
+                msg: "Params wrong, please check.",
+                data: []
             }
         }
 
@@ -51,48 +55,79 @@ class TaskController {
     
     /**
      * 创建 Task
-     * title, introduction, money, score, number, publisher, state, type, starttime, endtime
+     * @param {string} title                The title of the task
+     * @param {string} introduction         The introduction of the task
+     * @param {string} money                The money will be given
+     * @param {string} score                The minimize score require
+     * @param {string} max_accepter_number  The max number of accepters
+     * @param {string} publisher            The publisher username
+     * @param {string} type                 The type of the task
+     * @param {string} starttime            The starttime
+     * @param {string} endtime              The endtime
+     * @param {string} content              The content
+     * @return {*} a task
      */
     static async releaseTask(ctx) {
         let post_body = ctx.request.body
         let result = undefined
-        if (post_body.title && post_body.introduction && post_body.money 
-            && post_body.score != undefined && post_body.max_accepter_number && post_body.publisher 
-            && post_body.type && post_body.range) {
-            let post_data = {
-                title: post_body.title,
-                introduction: post_body.introduction,
-                money: post_body.money,
-                score: post_body.score,
-                max_accepter_number: post_body.max_accepter_number,
-                publisher: post_body.publisher,
-                type: post_body.type,
-                starttime: post_body.starttime,
-                endtime: post_body.endtime,
-                content: post_body.content,
-            }
-            try {
-                result = await TaskModel.createTask(post_data, post_body.range)
+        let required_param_list = ['title', 'introduction', 'money', 'score', 
+                                    'max_accepter_number', 'publisher', 'type', 'range',
+                                    'starttime', 'endtime'];
+        
+        if (checkUndefined(post_body, required_param_list)) {
+            // Confirm the publisher is the current user
+            let current_user = await getUsernameFromCtx(ctx);
+
+            if (current_user == -1 || current_user == -2) {
                 result = {
-                    code: 200,
-                    msg: "Success",
-                    data: result
+                    code: 401,
+                    msg: "Please login first.",
+                    data: []
                 }
-                
-            } catch (err) {
+            } else if (current_user != post_body.publisher) {
                 result = {
-                    code: 500,
-                    msg: "Failed",
-                    data: err
+                    code: 403,
+                    msg: "Cannot release a task with publisher of other user.",
+                    data: []
                 }
-                console.log(err)
+            } else {
+                let post_data = {
+                    title: post_body.title,
+                    introduction: post_body.introduction,
+                    money: post_body.money,
+                    score: post_body.score,
+                    max_accepter_number: post_body.max_accepter_number,
+                    publisher: post_body.publisher,
+                    type: post_body.type,
+                    starttime: post_body.starttime,
+                    endtime: post_body.endtime,
+                    content: post_body.content,
+                    questionnaire_path: post_body.questionnaire_path
+                }
+
+                try {
+                    result = await TaskModel.createTask(post_data, post_body.range)
+                    result = {
+                        code: 200,
+                        msg: "Success",
+                        data: result
+                    }
+                    
+                } catch (err) {
+                    result = {
+                        code: 500,
+                        msg: "Failed",
+                        data: err.message
+                    }
+                    console.log(err)
+                }
             }
         } else {
             result = {
                 code: 412,
                 msg: "Params are not enough, need [title, introduction, money, score, max_accepter_number, publisher, type]",
                 data: []
-            } 
+            }
         }
 
         ctx.response.status = result.code
@@ -104,7 +139,7 @@ class TaskController {
     }
 
     /**
-     * 获取文章详情
+     * 获取任务详情
      * @param ctx
      * @returns {Promise.<void>}
      */
@@ -183,7 +218,6 @@ class TaskController {
 
     static async searchTaskByUserRelease(ctx) {
         let query_params = ctx.query
-        console.log(ctx.query.publisher)
         let result = undefined
         if (query_params.publisher) {
             try {
@@ -236,23 +270,56 @@ class TaskController {
         return result
     }
 
-    static async deleteTaskByTaskID(task_id) {
-        let result
-        try {
-            let data = await TaskModel.deleteTaskByTaskID(task_id)
-            result = {
-                code: 200, 
-                msg: 'Success',
-                data: data
+    static async deleteTaskByTaskID(ctx) {
+        let query_params = ctx.query
+        let result = undefined
+        if (query_params.task_id != undefined) {
+            let current_user = await getUsernameFromCtx(ctx);
+            if (current_user == -1 || current_user == -2) {
+                result = {
+                    code: 401,
+                    msg: "Unlogin, please login first",
+                    data: []
+                }
+            } else {
+                try {
+                    task_publisher = TaskModel.searchPublisherByTaskid(query_params.task_id);
+                    if (current_user != task_publisher) {
+                        result = {
+                            code: 403,
+                            msg: "Task can only be deleted by publisher.",
+                            data: []
+                        }
+                    } else {
+                        result = await TaskModel.deleteTaskByTaskID(query_params.task_id)
+                        result = {
+                            code: 200, 
+                            msg: 'Success',
+                            data: result
+                        }
+                    }
+                } catch (err) {
+                    result = {
+                        code: 500,
+                        msg: 'Failed',
+                        data: err.message
+                    }
+                }
             }
-        } catch (err) {
+        } else {
             result = {
-                code: 500,
-                msg: '删除出错',
-                data: err.message
+                code: 412,
+                msg: "Params wrong, API denied",
+                data: []
             }
         }
-        return result
+
+        ctx.response.status = result.code
+        ctx.body = {
+            code: result.code,
+            msg: result.msg,
+            data: result.data
+        }
     }
 
     static async searchTaskByAccepter(ctx) {
@@ -288,53 +355,6 @@ class TaskController {
             data: result.data
         }
     }
-
-    // static async acceptTask(ctx) {
-    //     let post_body = ctx.request.body
-    //     let result = undefined
-
-    //     if (post_body.username && post_body.task_id) {
-    //         result = await tr_controller.recieveATask(post_body.username, 
-    //             post_body.task_id)
-    //     } else {
-    //         result = {
-    //             code: 412,
-    //             msg: "Params wrong, API denied",
-    //             data: []
-    //         }
-    //     }
-
-    //     ctx.response.status = result.code
-    //     ctx.body = {
-    //         code: result.code,
-    //         msg: result.msg,
-    //         data: result.data
-    //     }
-    // }
-}
-
-/**
- * 检查 `query_params[which]` 参数项
- * * 若为 `1,2,3,4` 这种格式, 将其转化为数组
- * * 若为 `all`, 删除该项
- * 
- * @param query_params  JSON格式的查询字符串
- * @param which         检查的参数名称
- */
-function checkParamsAndConvert(query_params, which) {
-    if (query_params[which].toLowerCase() == 'all') {
-        // 直接删去就好，无需任何限制
-        delete query_params[which]
-    } else if (query_params[which].indexOf(',') != -1) {
-        // 说明是输入数组形式，改成 Op.or
-        let term = query_params[which]
-        term = term.split(',').map(Number)
-        query_params[which] = term
-        // {
-        //     [Op.or]: term
-        // }
-    }
-    return query_params
 }
 
 module.exports = TaskController;

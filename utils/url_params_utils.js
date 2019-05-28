@@ -21,6 +21,28 @@ let checkParamsAndConvert  = (query_params, which) => {
     return query_params
 }
 
+/**
+ * Check whether a obj's attributes is undefined
+ * @param {*} obj               The object
+ * @param {Array} checklist     The param list waiting to be test
+ * @return {Boolean}            A boolean          
+ *  * `true`: if all attribute is not undefined
+ *  * `false`: if some in the list is undefined
+ */
+let checkUndefined = (obj, checklist) => {
+    let checkItem = (obj, item) => {
+        return obj[item] != undefined;
+    };
+    if (checklist instanceof Array) {
+        for (let i = 0; i < checklist.length; i++) {
+            if (!checkItem(obj, checklist[i])) return false;
+        }
+        return true;
+    } else {
+        return checkItem(obj, checklist);
+    }
+}
+
 let response = (ctx, result) => {
     if (Number.isInteger(result.code)) 
         ctx.response.status = result.code
@@ -46,5 +68,6 @@ let response = (ctx, result) => {
 }
 
 module.exports = {
-    checkParamsAndConvert: checkParamsAndConvert
+    checkParamsAndConvert: checkParamsAndConvert,
+    checkUndefined: checkUndefined
 }
