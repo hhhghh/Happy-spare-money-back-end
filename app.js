@@ -18,7 +18,7 @@ require('./config/basicStr');
 app.use(cors({
   credentials: true,
 }));
-
+// app.use(cors());
 // error handler
 onerror(app);
 

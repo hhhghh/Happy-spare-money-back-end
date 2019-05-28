@@ -10,7 +10,7 @@ module.exports = function(sequelize, DataTypes){
 			unique:true
         },
         password:{
-            type:DataTypes.CHAR(128),
+            type:DataTypes.TEXT(),
             allowNull:false
         },
         score:{
