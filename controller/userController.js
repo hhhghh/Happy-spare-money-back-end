@@ -83,7 +83,7 @@ class UserController {
                     })
                 }
                 if (err) return reject(err)
-                resolve({ fields: fields, files: files, newpath: newpath, oldpath: oldpath })
+                resolve({ fields: fields, files: files, newpath: newpath, oldpath: oldpath, extname: extname })
               })
             })
           }
@@ -106,7 +106,7 @@ class UserController {
                 }
                 return
             }
-            const res = await UserModel.createUser(info.type, info, body.newpath);
+            const res = await UserModel.createUser(info.type, info, body.extname);
             ctx.status = 200;
             ctx.body = {
                 code: 200,
@@ -155,10 +155,13 @@ class UserController {
                 }    
             }
             else if(flag === 0) {
+                
                 const SESSIONID = ctx.cookies.get('SESSIONID')
                 if (SESSIONID) {
-
-                    await redis.destroy(SESSIONID)
+                    if (await CookieController.getUsernameFromCtx(ctx) == req.username) {
+                        console.log(await CookieController.getUsernameFromCtx(ctx))
+                        await redis.destroy(SESSIONID)
+                    }
                 }
                 ctx.session.username = req.username
                 ctx.status = 200;
@@ -240,6 +243,7 @@ class UserController {
                             "name": data.true_name,
                             "school": data.school_name,
                             "grade": data.grade,
+                            "avatar": data.avatar,
                             "phone": data.phone_number,
                             "wechat": data.wechat,
                             "qq": data.QQ
@@ -690,7 +694,7 @@ class UserController {
             const data = await UserModel.getUserAvatar(username);
             if (data == 1) {
                 result = {
-                code: 400,
+                code: 402,
                 msg: '该用户不存在',
                 data: err
                 }       
@@ -821,6 +825,36 @@ class UserController {
                     }   
                 }
             }
+        }
+    }
+
+    static async getTeamMembersAvatar(ctx) {
+        var members = ctx.request.body.members;
+        console.log(members)
+        var data = [];
+        for (var i = 0; i < members.length; i++) {
+            var user = await UserModel.getUserInfo(members[i].username)
+            if (user == null) {
+                ctx.status = 200
+                ctx.body = {
+                    code: 401,
+                    msg: members[i].username + " 不存在",
+                    data: null
+                }
+                return
+            }
+            var useravatar = await UserController.getUserAvatar(members[i].username)
+            data.push({
+                "username" : members[i].username,
+                "avatar" : useravatar.data
+            })
+        }
+
+        ctx.status = 200
+        ctx.body = {
+            code: 200,
+            msg: "success",
+            data: data
         }
     }
 

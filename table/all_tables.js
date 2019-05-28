@@ -49,9 +49,9 @@ Task.belongsTo(User, {foreignKey: 'publisher'})
 
 const status_code = {
 	tr: {
-    // 0: waiting to be done
-    // 1: accpeter complete, waiting publisher confirm
-    // 2: publisher confirmed, over
+        // 0: waiting to be done
+        // 1: accpeter complete, waiting publisher confirm
+        // 2: publisher confirmed, over
 		WAITING_TO_BE_DONE: 0,
 		WAITING_CONFIRM: 1,
 		CONFIRMED_OVER: 2 
