@@ -22,6 +22,12 @@ class UserModel {
      * @returns {Promise<*>} 
      */
     static async createUser(type, info, avatar) {
+        if (avatar == null) {
+            avatar = 'http://139.196.79.193:3000/awesomeface.png'
+        }
+        else {
+            avatar = 'http://139.196.79.193:3000/uploads/user/' + info.username + avatar    
+        }
         return await User.create({
             username: info.username,
             password: info.password,
@@ -30,7 +36,7 @@ class UserModel {
             true_name: info.true_name,
             school_name: info.school_name,
             grade: info.grade,
-            avatar: 'http://139.196.79.193:3000/uploads/user/' + info.username + avatar,
+            avatar: avatar,
             nickname: info.nickname,
             wechat: info.wechat,
             QQ: info.QQ,

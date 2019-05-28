@@ -34,6 +34,14 @@ app.use(views(__dirname + '/views', {
   extension: 'pug'
 }));
 
+
+app.use(session({
+  store: new Store(),
+  key: "SESSIONID",
+  maxAge: 600000,
+  rolling: true
+}));
+
 // logger
 app.use(async (ctx, next) => {
   const start = new Date();
@@ -43,12 +51,7 @@ app.use(async (ctx, next) => {
   console.log(`${ctx.method} ${ctx.url} - ${ms}ms`)
 });
 
-app.use(session({
-  store: new Store(),
-  key: "SESSIONID",
-  maxAge: 600000,
-  rolling: true
-}));
+
 
 // routes
 app.use(routers.index.routes(), routers.index.allowedMethods());

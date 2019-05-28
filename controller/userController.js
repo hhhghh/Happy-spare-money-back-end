@@ -72,15 +72,18 @@ class UserController {
               form.keepExtensions = true;     
               form.uploadDir = 'static/uploads/user/';
               form.parse(req, function (err, fields, files) {
-                var extname = path.extname(files.avatar.path)
-                var oldpath = files.avatar.path
-                var newpath = form.uploadDir + fields.username + extname
-                if (!fs.existsSync(newpath)) {
-                    fs.rename(oldpath, newpath, function(err) {
-                        if (err) {
-                            throw err
-                        }
-                    })
+                var extname = null
+                if (files.avatar) {
+                    var extname = path.extname(files.avatar.path)
+                    var oldpath = files.avatar.path
+                    var newpath = form.uploadDir + fields.username + extname
+                    if (!fs.existsSync(newpath)) {
+                        fs.rename(oldpath, newpath, function(err) {
+                            if (err) {
+                                throw err
+                            }
+                        })
+                    }
                 }
                 if (err) return reject(err)
                 resolve({ fields: fields, files: files, newpath: newpath, oldpath: oldpath, extname: extname })
@@ -154,12 +157,13 @@ class UserController {
                     data: 'error' 
                 }    
             }
-            else if(flag === 0) {
+            else if(flag == 0) {
                 
-                const SESSIONID = ctx.cookies.get('SESSIONID')
+                var SESSIONID = ctx.cookies.get('SESSIONID')
                 if (SESSIONID) {
-                    if (await CookieController.getUsernameFromCtx(ctx) == req.username) {
-                        console.log(await CookieController.getUsernameFromCtx(ctx))
+                    const user = await CookieController.getUsernameFromCtx(ctx)
+                    if (user == req.username) {
+                        console.log(user)
                         await redis.destroy(SESSIONID)
                     }
                 }
