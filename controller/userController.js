@@ -155,6 +155,7 @@ class UserController {
                 }    
             }
             else if(flag === 0) {
+                
                 const SESSIONID = ctx.cookies.get('SESSIONID')
                 if (SESSIONID) {
                     if (await CookieController.getUsernameFromCtx(ctx) == req.username) {
@@ -693,7 +694,7 @@ class UserController {
             const data = await UserModel.getUserAvatar(username);
             if (data == 1) {
                 result = {
-                code: 400,
+                code: 402,
                 msg: '该用户不存在',
                 data: err
                 }       
