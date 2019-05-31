@@ -29,9 +29,9 @@ router.put('/update', UserController.updateUserInfo);
 
 router.get('/getPersonalInfo', async (ctx) => {
     if (!ctx.session.username) {
-        ctx.status = 302;
+        ctx.status = 401;
         ctx.body = {
-            code: 302,
+            code: 401,
             msg: '请登录'
         };
         return;
