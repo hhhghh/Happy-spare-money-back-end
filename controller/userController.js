@@ -238,7 +238,9 @@ class UserController {
                             "avatar": data.avatar,
                             "phone": data.phone_number,
                             "wechat": data.wechat,
-                            "qq": data.QQ
+                            "qq": data.QQ,
+                            "score": data.score,
+                            "money": data.money
                         } 
                     }
                 }

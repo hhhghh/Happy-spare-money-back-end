@@ -16,6 +16,7 @@ require('./config/basicStr');
 
 // 使用koa-cors
 app.use(cors({
+  origin: 'http://localhost:8080',
   credentials: true,
 }));
 // app.use(cors());
@@ -37,7 +38,7 @@ app.use(views(__dirname + '/views', {
 // logger
 app.use(async (ctx, next) => {
   const start = new Date();
-  ctx.set("Access-Control-Allow-Credentials", true);
+  // ctx.set("Access-Control-Allow-Credentials", true);
   await next();
   const ms = new Date() - start;
   console.log(`${ctx.method} ${ctx.url} - ${ms}ms`)

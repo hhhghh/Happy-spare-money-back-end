@@ -27,6 +27,19 @@ router.post('/setRate', UserController.setRate);
 
 router.put('/update', UserController.updateUserInfo);
 
+router.get('/getPersonalInfo', async (ctx) => {
+    if (!ctx.session.username) {
+        ctx.status = 302;
+        ctx.body = {
+            code: 302,
+            msg: '请登录'
+        };
+        return;
+    }
+    result = await UserController.getUserInfo(ctx.session.username);
+    ctx = response(ctx, result);
+});
+
 router.get('/getuser', async (ctx) => {
     let query_params = ctx.query;
     let result = null;
