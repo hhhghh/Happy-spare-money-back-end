@@ -98,7 +98,6 @@ class UserController {
         try {
             const user = await UserModel.getUserInfo(info.username);
             if (user != null) {
-                ctx.status = 409;
                 ctx.body = {
                     code: 409,
                     msg: '该用户已存在',
@@ -109,7 +108,7 @@ class UserController {
                 }
                 return
             }
-            const res = await UserModel.createUser(info.type, info, body.extname);
+            const res = await UserModel.createUser(info, body.extname);
             ctx.status = 200;
             ctx.body = {
                 code: 200,
@@ -140,9 +139,9 @@ class UserController {
     static async login(ctx) {
         let req = ctx.request.body;
         try {
-            const flag = await UserModel.getUserByUsernameAndPassword(req.type, req.username, req.password); 
+            const flag = await UserModel.getUserByUsernameAndPassword(req.type, req.username, req.password);
+            ctx.status = 200;
             if (flag === 1) {
-                ctx.status = 412;
                 ctx.body = {
                     code: 412,
                     msg: '用户名或密码错误',
@@ -150,7 +149,6 @@ class UserController {
                 }   
             } 
             else if (flag === 2) {
-                ctx.status = 413;
                 ctx.body = {
                     code: 413,
                     msg: '账户类型错误',
@@ -158,21 +156,11 @@ class UserController {
                 }    
             }
             else if(flag == 0) {
-                
-                var SESSIONID = ctx.cookies.get('SESSIONID')
-                if (SESSIONID) {
-                    // const user = await CookieController.getUsernameFromCtx(ctx)
-                    // if (user == req.username) {
-                    //     console.log(user)
-                        await redis.destroy(SESSIONID)
-                    //}
-                }
-                ctx.session.username = req.username
-                ctx.status = 200;
+                ctx.session = {username: req.username};
                 ctx.body = {
                     code: 200,
                     msg: '登录成功',
-                    data: ctx.session
+                    data: null
                 }
             }
         } catch(err) {

@@ -21,27 +21,25 @@ class UserModel {
      * @param data
      * @returns {Promise<*>} 
      */
-    static async createUser(type, info, avatar) {
-        if (avatar == null) {
+    static async createUser(info, avatarExtName) {
+        var avatar = '';
+        if (avatarExtName == null) {
             avatar = 'http://139.196.79.193:3000/awesomeface.png'
         }
         else {
-            avatar = 'http://139.196.79.193:3000/uploads/user/' + info.username + avatar    
+            avatar = 'http://139.196.79.193:3000/uploads/user/' + info.username + avatarExtName
         }
         return await User.create({
             username: info.username,
             password: info.password,
-            score: info.score,
-            money: info.money,
-            true_name: info.true_name,
-            school_name: info.school_name,
+            true_name: info.name,
+            school_name: info.school,
             grade: info.grade,
             avatar: avatar,
-            nickname: info.nickname,
-            wechat: info.wechat,
-            QQ: info.QQ,
-            phone_number: info.phone_number,
-            account_state: type
+            wechat: info.weChat,
+            QQ: info.qq,
+            phone_number: info.phone,
+            account_state: info.type
         })
     }
 
