@@ -1,3 +1,4 @@
+const util = require('util');
 let toast_info = {
     t0: (p1, p2) => util.format('%s申请加入小组%s', p1, p2),
     t1: (p1) => util.format('你已进入小组%s', p1),
@@ -9,8 +10,7 @@ let toast_info = {
     t10: (p1, p2) => util.format('你发布的任务%s被%s接受', p1, p2),
     t11: (p1, p2) => util.format('你发布的任务%s被%s完成', p1, p2),
     t12: (p1, p2) => util.format('你发布的任务%s被%s取消接受', p1, p2),
-    t13: (p1, p2) => util.format('你完成的任务%s被%s确认', p1, p2),
-
+    t13: (p1, p2) => util.format('你完成的任务%s被%s确认', p1, p2)
 };
 
 module.exports = toast_info;
