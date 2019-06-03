@@ -38,18 +38,11 @@ class CookieController {
      *  username: 用户名，一个字符串
      */
     static async getUsernameFromCtx(ctx) {
-        const flag = await CookieController.judgeCookies(ctx);
-        if (flag === -1) {
-            return -1
-        }
-        else if (flag === -2) {
-
+        const username = ctx.session.username;
+        if (username == null) {
             return -2
         }
-        const SESSIONID = ctx.cookies.get('SESSIONID')
-        const redisData = await redis.get(SESSIONID)
-
-        return redisData.username
+        return username;
     }
 }
 

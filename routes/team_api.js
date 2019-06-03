@@ -11,8 +11,15 @@ router.put('/', TeamController.modifyGroup);
 router.get('/Leader/', async (ctx) => {
     let query_params = ctx.query;
     let result = null;
-    if (query_params.team_id && query_params.leader) {
-        result = await TeamController.isGroupLeader(query_params.team_id, query_params.leader)
+    let cookie_user = await CookieController.getUsernameFromCtx(ctx);
+    if (query_params.team_id && cookie_user !== -2) {
+        result = await TeamController.isGroupLeader(query_params.team_id, cookie_user)
+    } else if (query_params.team_id){
+        result = {
+            code: 220,
+            msg: 'cookie超时，请重新登录',
+            data: null
+        }
     } else {
         result = {
             code: 400,
@@ -71,12 +78,14 @@ router.get('/Label/', async (ctx) => {
 router.get('/MemberName/', async (ctx) => {
     let query_params = ctx.query;
     let result = null;
-    if (query_params.member_username) {
-        result = await TeamController.getGroupByUsername(query_params.member_username)
+    let cookie_user = await CookieController.getUsernameFromCtx(ctx);
+
+    if (cookie_user !== -2) {
+        result = await TeamController.getGroupByUsername(cookie_user);
     } else {
         result = {
-            code: 400,
-            msg: 'Wrong query param.',
+            code: 220,
+            msg: 'cookie超时，请重新登录',
             data: null
         }
     }
@@ -101,7 +110,7 @@ router.get('/Id/', async (ctx) => {
 router.post('/Member/Invitation/', async (ctx) => {
     let result = null;
     let cookie_user = await CookieController.getUsernameFromCtx(ctx);
-    if (cookie_user !== ctx.request.body.leader) {
+    if (cookie_user === -2) {
         result = {
             code: 220,
             msg: 'cookie超时，请重新登录',
@@ -109,8 +118,8 @@ router.post('/Member/Invitation/', async (ctx) => {
         }
     } else {
         let query_params = ctx.request.body;
-        if (query_params.team_id && query_params.leader && query_params.user) {
-            result = await TeamController.addUserToGrope(query_params.team_id, query_params.leader, query_params.user)
+        if (query_params.team_id && query_params.user) {
+            result = await TeamController.addUserToGrope(query_params.team_id, cookie_user, query_params.user)
         } else {
             result = {
                 code: 400,
@@ -125,7 +134,7 @@ router.post('/Member/Invitation/', async (ctx) => {
 router.post('/Member/Addition/', async (ctx) => {
     let result = null;
     let cookie_user = await CookieController.getUsernameFromCtx(ctx);
-    if (cookie_user !== ctx.request.body.leader) {
+    if (cookie_user === -2) {
         result = {
             code: 220,
             msg: 'cookie超时，请重新登录',
@@ -133,8 +142,8 @@ router.post('/Member/Addition/', async (ctx) => {
         }
     } else {
         let query_params = ctx.request.body;
-        if (query_params.team_id && query_params.username) {
-            result = await TeamController.addUserToGrope2(query_params.team_id, query_params.username)
+        if (query_params.team_id) {
+            result = await TeamController.addUserToGrope2(query_params.team_id, cookie_user)
         } else {
             result = {
                 code: 400,
@@ -149,7 +158,7 @@ router.post('/Member/Addition/', async (ctx) => {
 router.post('/Leader/', async (ctx) => {
     let result = null;
     let cookie_user = await CookieController.getUsernameFromCtx(ctx);
-    if (cookie_user !== ctx.request.body.leader) {
+    if (cookie_user === -2) {
         result = {
             code: 220,
             msg: 'cookie超时，请重新登录',
@@ -157,8 +166,8 @@ router.post('/Leader/', async (ctx) => {
         }
     } else {
         let query_params = ctx.request.body;
-        if (query_params.team_id && query_params.leader && query_params.username) {
-            result = await TeamController.updateTeamLeader(query_params.team_id, query_params.leader, query_params.username)
+        if (query_params.team_id && query_params.username) {
+            result = await TeamController.updateTeamLeader(query_params.team_id, cookie_user, query_params.username)
         } else {
             result = {
                 code: 400,
@@ -173,7 +182,7 @@ router.post('/Leader/', async (ctx) => {
 router.del('/Member/Dislodge/', async (ctx) => {
     let result = null;
     let cookie_user = await CookieController.getUsernameFromCtx(ctx);
-    if (cookie_user !== ctx.request.body.leader) {
+    if (cookie_user === -2) {
         result = {
             code: 220,
             msg: 'cookie超时，请重新登录',
@@ -181,8 +190,8 @@ router.del('/Member/Dislodge/', async (ctx) => {
         }
     } else {
         let query_params = ctx.query;
-        if (query_params.team_id && query_params.leader && query_params.username) {
-            result = await TeamController.deleteUserFromGrope(query_params.team_id, query_params.leader, query_params.username)
+        if (query_params.team_id && query_params.username) {
+            result = await TeamController.deleteUserFromGrope(query_params.team_id, cookie_user, query_params.username)
         } else {
             result = {
                 code: 400,
@@ -197,7 +206,7 @@ router.del('/Member/Dislodge/', async (ctx) => {
 router.del('/Member/Departure/', async (ctx) => {
     let result = null;
     let cookie_user = await CookieController.getUsernameFromCtx(ctx);
-    if (cookie_user !== ctx.request.body.leader) {
+    if (cookie_user === -2) {
         result = {
             code: 220,
             msg: 'cookie超时，请重新登录',
@@ -205,8 +214,8 @@ router.del('/Member/Departure/', async (ctx) => {
         }
     } else {
         let query_params = ctx.query;
-        if (query_params.team_id && query_params.username) {
-            result = await TeamController.deleteUserFromGrope2(query_params.team_id, query_params.username)
+        if (query_params.team_id) {
+            result = await TeamController.deleteUserFromGrope2(query_params.team_id, cookie_user)
         } else {
             result = {
                 code: 400,
@@ -221,7 +230,7 @@ router.del('/Member/Departure/', async (ctx) => {
 router.del('/', async (ctx) => {
     let result = null;
     let cookie_user = await CookieController.getUsernameFromCtx(ctx);
-    if (cookie_user !== ctx.request.body.leader) {
+    if (cookie_user === -2) {
         result = {
             code: 220,
             msg: 'cookie超时，请重新登录',
@@ -229,8 +238,8 @@ router.del('/', async (ctx) => {
         }
     } else {
         let query_params = ctx.query;
-        if (query_params.team_id && query_params.leader) {
-            result = await TeamController.deleteGroup(query_params.team_id, query_params.leader);
+        if (query_params.team_id) {
+            result = await TeamController.deleteGroup(query_params.team_id, cookie_user);
         } else {
             result = {
                 code: 400,
