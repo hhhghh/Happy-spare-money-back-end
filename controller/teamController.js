@@ -452,16 +452,16 @@ class TeamController {
     static async deleteUserFromGrope(team_id, leader, username) {
         let result = null;
         try {
-            let isLeader = await TeamModel.getTeamByTeamId(team_id);
-            if (isLeader.leader === leader) {
-                let team = await TeamModel.getUserByTeamIdUsername(team_id, username);
-                if (isLeader.leader === username) {
+            let team = await TeamModel.getTeamByTeamId(team_id);
+            if (team.leader === leader) {
+                let user_team = await TeamModel.getUserByTeamIdUsername(team_id, username);
+                if (team.leader === username) {
                     result = {
                         code: 216,
                         msg: '删除失败，不能删除组长',
                         data: false
                     };
-                } else if (team.length === 0) {
+                } else if (user_team.length === 0) {
                     result = {
                         code: 211,
                         msg: '删除失败，user不在小组中',
@@ -523,8 +523,8 @@ class TeamController {
                         };
                     } else {
                         await TeamModel.deleteMember(team_id, username);
-                        await ToastModel.createToast(team.leader, 5,
-                            Toast_info.t5(username, team.team_name),
+                        await ToastModel.createToast(teams.leader, 5,
+                            Toast_info.t5(username, teams.team_name),
                             username, team_id, null);
                         result = {
                             code: 200,
@@ -548,8 +548,8 @@ class TeamController {
     static async updateTeamLeader(team_id, leader, username) {
         let result = null;
         try {
-            let isLeader = await TeamModel.getTeamByTeamId(team_id);
-            if (isLeader.leader === leader) {
+            let team = await TeamModel.getTeamByTeamId(team_id);
+            if (team.leader === leader) {
                 let isMember = await TeamModel.getUserByTeamIdUsername(team_id, username);
                 if (isMember.length === 0) {
                     result = {
