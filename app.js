@@ -16,7 +16,7 @@ require('./config/basicStr');
 
 // 使用koa-cors
 app.use(cors({
-  credentials: true,
+  credentials: true
 }));
 // app.use(cors());
 // error handler
