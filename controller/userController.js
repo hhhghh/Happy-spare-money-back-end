@@ -174,31 +174,19 @@ class UserController {
     }
 
     static async logout(ctx) {
-        const flag = await UserController.judgeCookies(ctx);
-        if (flag == -1) {
+        if (!ctx.session.username) {
             ctx.status = 401;
             ctx.body = {
                 code: 401,
-                msg: '未携带cookies',
+                msg: 'cookies无效',
             }
-        } 
-        else if (flag == -2) {
-            ctx.status = 402;
-            ctx.body = {
-                code: 402,
-                msg: 'cookies已过期，已自动登出',
-            }
-        }        
-        else if(flag == 0) {
-            const SESSIONID = ctx.cookies.get('SESSIONID');
-            const redisData = await redis.get(SESSIONID);
-            const user = redisData.username
-
-            await redis.destroy(SESSIONID);
+        }
+        else {
+            ctx.session = {};
             ctx.status = 200;
             ctx.body = {
                 code: 200,
-                msg: user + '登出成功'
+                msg: '退出成功'
             }
         }
     }
