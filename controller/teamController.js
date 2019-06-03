@@ -603,7 +603,7 @@ class TeamController {
                     data: false
                 };
             } else {
-                for (let i = 0; i < team.members.length(); i++) {
+                for (let i = 0; i < team.members.length; i++) {
                     await ToastModel.createToast(team.members[i].member_username, 3,
                         Toast_info.t3(team.team_name),
                         leader, team_id, null);
