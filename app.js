@@ -37,7 +37,6 @@ app.use(views(__dirname + '/views', {
 // logger
 app.use(async (ctx, next) => {
   const start = new Date();
-  ctx.set("Access-Control-Allow-Credentials", true);
   await next();
   const ms = new Date() - start;
   console.log(`${ctx.method} ${ctx.url} - ${ms}ms`)
@@ -45,7 +44,7 @@ app.use(async (ctx, next) => {
 
 
 app.use(session({
-  store: new Store(),
+  // store: new Store(),
   key: "SESSIONID",
   maxAge: 6000000,
   rolling: true
