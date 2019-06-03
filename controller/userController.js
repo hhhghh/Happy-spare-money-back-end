@@ -4,7 +4,7 @@ const path = require('path')
 const fs = require('fs')
 const session = require("koa-session2")
 const Store = require("../utils/Store.js")
-// const redis = new Store();
+const redis = new Store();
 const CookieController = require('./CookieController');
 require('./CookieController');
 
@@ -20,22 +20,22 @@ class UserController {
      *  -2：携带了cookies但是cookies已过期
      *   0：cookies认证成功
      */
-    // static async judgeCookies(ctx) {
-    //     const SESSIONID = ctx.cookies.get('SESSIONID');
-    //     //没有携带cookies
-    //     if (!SESSIONID) {
-    //         return -1
-    //     }
-    //     // 如果有SESSIONID，就去redis里拿数据
-    //     const redisData = await redis.get(SESSIONID);
-    //
-    //     //携带了cookies但session已过期
-    //     if (!redisData) {
-    //         return -2
-    //     }
-    //
-    //     return 0
-    // }
+    static async judgeCookies(ctx) {
+        const SESSIONID = ctx.cookies.get('SESSIONID');
+        //没有携带cookies
+        if (!SESSIONID) {
+            return -1
+        }
+        // 如果有SESSIONID，就去redis里拿数据
+        const redisData = await redis.get(SESSIONID);
+    
+        //携带了cookies但session已过期
+        if (!redisData) {
+            return -2
+        }
+    
+        return 0
+    }
 
     /**
      * 从前端的一个请求中通过cookies获得用户名
@@ -45,20 +45,20 @@ class UserController {
      *  -2：携带的cookies无效或已过期
      *  username: 用户名，一个字符串 
      */
-    // static async getUsernameFromCtx(ctx) {
-    //     const flag = await UserController.judgeCookies(ctx);
-    //     if (flag === -1) {
-    //         return -1
-    //     }
-    //     else if (flag === -2) {
-    //
-    //         return -2
-    //     }
-    //     const SESSIONID = ctx.cookies.get('SESSIONID')
-    //     const redisData = await redis.get(SESSIONID)
-    //
-    //     return redisData.username
-    // }
+    static async getUsernameFromCtx(ctx) {
+        const flag = await UserController.judgeCookies(ctx);
+        if (flag === -1) {
+            return -1
+        }
+        else if (flag === -2) {
+    
+            return -2
+        }
+        const SESSIONID = ctx.cookies.get('SESSIONID')
+        const redisData = await redis.get(SESSIONID)
+    
+        return redisData.username
+    }
     
     /**
      * 用户注册
@@ -72,15 +72,18 @@ class UserController {
               form.keepExtensions = true;     
               form.uploadDir = 'static/uploads/user/';
               form.parse(req, function (err, fields, files) {
-                var extname = path.extname(files.avatar.path)
-                var oldpath = files.avatar.path
-                var newpath = form.uploadDir + fields.username + extname
-                if (!fs.existsSync(newpath)) {
-                    fs.rename(oldpath, newpath, function(err) {
-                        if (err) {
-                            throw err
-                        }
-                    })
+                var extname = null
+                if (files.avatar) {
+                    var extname = path.extname(files.avatar.path)
+                    var oldpath = files.avatar.path
+                    var newpath = form.uploadDir + fields.username + extname
+                    if (!fs.existsSync(newpath)) {
+                        fs.rename(oldpath, newpath, function(err) {
+                            if (err) {
+                                throw err
+                            }
+                        })
+                    }
                 }
                 if (err) return reject(err)
                 resolve({ fields: fields, files: files, newpath: newpath, oldpath: oldpath, extname: extname })
@@ -154,14 +157,15 @@ class UserController {
                     data: 'error' 
                 }    
             }
-            else if(flag === 0) {
+            else if(flag == 0) {
                 
-                const SESSIONID = ctx.cookies.get('SESSIONID')
+                var SESSIONID = ctx.cookies.get('SESSIONID')
                 if (SESSIONID) {
-                    if (await CookieController.getUsernameFromCtx(ctx) == req.username) {
-                        console.log(await CookieController.getUsernameFromCtx(ctx))
+                    // const user = await CookieController.getUsernameFromCtx(ctx)
+                    // if (user == req.username) {
+                    //     console.log(user)
                         await redis.destroy(SESSIONID)
-                    }
+                    //}
                 }
                 ctx.session.username = req.username
                 ctx.status = 200;
@@ -182,7 +186,7 @@ class UserController {
     }
 
     static async logout(ctx) {
-        const flag = await CookieController.judgeCookies(ctx);
+        const flag = await UserController.judgeCookies(ctx);
         if (flag == -1) {
             ctx.status = 401;
             ctx.body = {
