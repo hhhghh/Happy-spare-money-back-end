@@ -32,7 +32,7 @@ router.get('/getPersonalInfo', async (ctx) => {
         ctx.status = 401;
         ctx.body = {
             code: 401,
-            msg: '请登录'
+            msg: '请登录！'
         };
         return;
     }

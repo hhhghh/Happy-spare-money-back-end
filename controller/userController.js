@@ -297,11 +297,12 @@ class UserController {
             ctx.status = 401;
             ctx.body = {
                 code: 401,
-                msg: '请登录'
+                msg: '请登录！'
             };
             return;
         }
         let req = ctx.request.body;
+        req.username = ctx.session.username;
         //判断是否修改密码
         let ifChangePasswd = false;
         let msg = [];
@@ -312,15 +313,20 @@ class UserController {
                 msg.push('原密码错误，更新密码失败！');
                 ifChangePasswd = false;
             }
+            else{
+                msg.push('更新密码成功！');
+
+            }
         }
 
         try {
             const data = await UserModel.updateUserInfo(req, ifChangePasswd);
+            msg.unshift('更新信息成功！')
             ctx.status = 200;
             ctx.body = {
                 code: 200,
-                msg: msg.unshift('更新信息成功！'),
-                data: user
+                msg: msg,
+                data: data
             }
         } catch (error) {
             ctx.status = 500;
