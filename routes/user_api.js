@@ -7,7 +7,7 @@ router.post('/create', UserController.register);
 
 router.post('/login', UserController.login);
 
-router.post('/logout', UserController.logout);
+router.get('/logout', UserController.logout);
 
 router.post('/recharge', UserController.updateUserMoney);
 
@@ -26,6 +26,19 @@ router.post('/getteammembersavatat', UserController.getTeamMembersAvatar);
 router.post('/setRate', UserController.setRate);
 
 router.put('/update', UserController.updateUserInfo);
+
+router.get('/getPersonalInfo', async (ctx) => {
+    if (!ctx.session.username) {
+        ctx.status = 401;
+        ctx.body = {
+            code: 401,
+            msg: '请登录！'
+        };
+        return;
+    }
+    result = await UserController.getUserInfo(ctx.session.username);
+    ctx = response(ctx, result);
+});
 
 router.get('/getuser', async (ctx) => {
     let query_params = ctx.query;

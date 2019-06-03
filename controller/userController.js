@@ -98,7 +98,6 @@ class UserController {
         try {
             const user = await UserModel.getUserInfo(info.username);
             if (user != null) {
-                ctx.status = 409;
                 ctx.body = {
                     code: 409,
                     msg: '该用户已存在',
@@ -109,7 +108,7 @@ class UserController {
                 }
                 return
             }
-            const res = await UserModel.createUser(info.type, info, body.extname);
+            const res = await UserModel.createUser(info, body.extname);
             ctx.status = 200;
             ctx.body = {
                 code: 200,
@@ -140,9 +139,9 @@ class UserController {
     static async login(ctx) {
         let req = ctx.request.body;
         try {
-            const flag = await UserModel.getUserByUsernameAndPassword(req.type, req.username, req.password); 
+            const flag = await UserModel.getUserByUsernameAndPassword(req.type, req.username, req.password);
+            ctx.status = 200;
             if (flag === 1) {
-                ctx.status = 412;
                 ctx.body = {
                     code: 412,
                     msg: '用户名或密码错误',
@@ -150,7 +149,6 @@ class UserController {
                 }   
             } 
             else if (flag === 2) {
-                ctx.status = 413;
                 ctx.body = {
                     code: 413,
                     msg: '账户类型错误',
@@ -158,21 +156,11 @@ class UserController {
                 }    
             }
             else if(flag == 0) {
-                
-                var SESSIONID = ctx.cookies.get('SESSIONID')
-                if (SESSIONID) {
-                    // const user = await CookieController.getUsernameFromCtx(ctx)
-                    // if (user == req.username) {
-                    //     console.log(user)
-                        await redis.destroy(SESSIONID)
-                    //}
-                }
-                ctx.session.username = req.username
-                ctx.status = 200;
+                ctx.session = {username: req.username};
                 ctx.body = {
                     code: 200,
                     msg: '登录成功',
-                    data: ctx.session
+                    data: null
                 }
             }
         } catch(err) {
@@ -186,31 +174,19 @@ class UserController {
     }
 
     static async logout(ctx) {
-        const flag = await UserController.judgeCookies(ctx);
-        if (flag == -1) {
+        if (!ctx.session.username) {
             ctx.status = 401;
             ctx.body = {
                 code: 401,
-                msg: '未携带cookies',
+                msg: 'cookies无效',
             }
-        } 
-        else if (flag == -2) {
-            ctx.status = 402;
-            ctx.body = {
-                code: 402,
-                msg: 'cookies已过期，已自动登出',
-            }
-        }        
-        else if(flag == 0) {
-            const SESSIONID = ctx.cookies.get('SESSIONID');
-            const redisData = await redis.get(SESSIONID);
-            const user = redisData.username
-
-            await redis.destroy(SESSIONID);
+        }
+        else {
+            ctx.session = {};
             ctx.status = 200;
             ctx.body = {
                 code: 200,
-                msg: user + '登出成功'
+                msg: '退出成功'
             }
         }
     }
@@ -250,7 +226,9 @@ class UserController {
                             "avatar": data.avatar,
                             "phone": data.phone_number,
                             "wechat": data.wechat,
-                            "qq": data.QQ
+                            "qq": data.QQ,
+                            "score": data.score,
+                            "money": data.money
                         } 
                     }
                 }
@@ -315,42 +293,48 @@ class UserController {
 
 
     static async updateUserInfo(ctx) {
+        if (!ctx.session.username) {
+            ctx.status = 401;
+            ctx.body = {
+                code: 401,
+                msg: '请登录！'
+            };
+            return;
+        }
         let req = ctx.request.body;
+        req.username = ctx.session.username;
+        //判断是否修改密码
+        let ifChangePasswd = false;
+        let msg = [];
+        if (req.oldPasswd) {
+            ifChangePasswd = true;
+            const data = await UserModel.getUserInfo(ctx.session.username);
+            if (data.password != req.oldPasswd) {
+                msg.push('原密码错误，更新密码失败！');
+                ifChangePasswd = false;
+            }
+            else{
+                msg.push('更新密码成功！');
+
+            }
+        }
+
         try {
-            const data = await UserModel.updateUserInfo(req);
-            if (data === 0) {
-                ctx.status = 412;
-                ctx.body = {
-                    code: 412,
-                    msg: '更新失败',
-                    data: 'error' 
-                }        
-            } else{
-                const user = await UserModel.getUserInfo(req.username);
-                if (user !== null) {
-                    ctx.status = 200;
-                    ctx.body = {
-                        code: 200,
-                        msg: '更新成功',
-                        data: user
-                    }
-                } 
-                else {
-                    ctx.status = 412;
-                    ctx.body = {
-                        code: 412,
-                        msg: '更新失败',
-                        data: 'error' 
-                    }   
-                }
+            const data = await UserModel.updateUserInfo(req, ifChangePasswd);
+            msg.unshift('更新信息成功！')
+            ctx.status = 200;
+            ctx.body = {
+                code: 200,
+                msg: msg,
+                data: data
             }
         } catch (error) {
             ctx.status = 500;
             ctx.body = {
                 code: 500,
-                msg: 'failed',
+                msg: '服务器错误，更新失败！',
                 data: error
-            } 
+            }
         }
     }
 
