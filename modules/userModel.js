@@ -16,6 +16,7 @@ Tr.sync({force: false})
 Task.sync({force: false})
 
 class UserModel {
+    static updateInfo;
     /**
      * 创建 user 模型
      * @param data
@@ -87,19 +88,16 @@ class UserModel {
      * @param info
      * @returns {Promise<Model>}
      */
-    static async updateUserInfo(info) {
-        return await User.update({
-            username: info.username,
-            password: info.password,
-            true_name: info.true_name,
-            school_name: info.school_name,
-            grade: info.grade,
-            avatar: info.avatar,
-            nickname: info.nickname,
-            wechat: info.wechat,
-            QQ: info.QQ,
-            phone_number: info.phone_number
-        }, {
+    static async updateUserInfo(data, ifChangePasswd) {
+        let updateInfo = {
+            grade: data.grade,
+            wechat: data.wechat,
+            QQ: data.qq,
+            phone_number: data.phone
+        };
+        if (ifChangePasswd) updateInfo.password = data.newPasswd;
+
+        return await User.update(updateInfo, {
             where: {
                 username: info.username
             }

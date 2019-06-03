@@ -293,42 +293,42 @@ class UserController {
 
 
     static async updateUserInfo(ctx) {
+        if (!ctx.session.username) {
+            ctx.status = 401;
+            ctx.body = {
+                code: 401,
+                msg: '请登录'
+            };
+            return;
+        }
         let req = ctx.request.body;
+        //判断是否修改密码
+        let ifChangePasswd = false;
+        let msg = [];
+        if (req.oldPasswd) {
+            ifChangePasswd = true;
+            const data = await UserModel.getUserInfo(ctx.session.username);
+            if (data.password != req.oldPasswd) {
+                msg.push('原密码错误，更新密码失败！');
+                ifChangePasswd = false;
+            }
+        }
+
         try {
-            const data = await UserModel.updateUserInfo(req);
-            if (data === 0) {
-                ctx.status = 412;
-                ctx.body = {
-                    code: 412,
-                    msg: '更新失败',
-                    data: 'error' 
-                }        
-            } else{
-                const user = await UserModel.getUserInfo(req.username);
-                if (user !== null) {
-                    ctx.status = 200;
-                    ctx.body = {
-                        code: 200,
-                        msg: '更新成功',
-                        data: user
-                    }
-                } 
-                else {
-                    ctx.status = 412;
-                    ctx.body = {
-                        code: 412,
-                        msg: '更新失败',
-                        data: 'error' 
-                    }   
-                }
+            const data = await UserModel.updateUserInfo(req, ifChangePasswd);
+            ctx.status = 200;
+            ctx.body = {
+                code: 200,
+                msg: msg.unshift('更新信息成功！'),
+                data: user
             }
         } catch (error) {
             ctx.status = 500;
             ctx.body = {
                 code: 500,
-                msg: 'failed',
+                msg: '服务器错误，更新失败！',
                 data: error
-            } 
+            }
         }
     }
 
