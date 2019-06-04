@@ -5,6 +5,7 @@ const checkUndefined = require('../utils/url_params_utils').checkUndefined;
 const FileController = require('../controller/fileController');
 const TaskModel = require('../modules/taskModel');
 const ToastModel = require('../modules/toastModel');
+require('../config/basicStr');
 
 class TRController {
     /**
