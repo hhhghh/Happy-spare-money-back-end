@@ -634,7 +634,7 @@ class UserController {
                 ctx.status = 406
                 ctx.body = {
                     code: 406,
-                    msg: '没有拉黑无法取消拉黑',
+                    msg: '已经拉黑无法再次拉黑',
                     data: result
                 }   
             }
