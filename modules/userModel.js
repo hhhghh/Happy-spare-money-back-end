@@ -103,6 +103,18 @@ class UserModel {
         });
     }
 
+    static async updateAvatar(username, avatarExtName) {
+        var avatar = 'http://139.196.79.193:3000/uploads/user/' + username + avatarExtName
+        await User.update({
+            avatar: avatar
+        }, {
+            where: {
+                username: username
+            }
+        });
+        return avatar
+    }
+
     /**
      * 更新用户账户余额
      * @param {*} username 
@@ -413,8 +425,8 @@ class UserModel {
                 }
             })
             data.push({
-                "orgorganization name": org.username,
-                "orgorganization avatar": org.avatar
+                "orgorganizationname": org.username,
+                "orgorganizationavatar": org.avatar
             })
         }
         return data

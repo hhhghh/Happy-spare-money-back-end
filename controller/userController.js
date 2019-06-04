@@ -49,6 +49,7 @@ class UserController {
                 if (files.avatar) {
                     var extname = path.extname(files.avatar.path)
                     var oldpath = files.avatar.path
+                    console.log(oldpath)
                     var newpath = form.uploadDir + fields.username + extname
                     if (!fs.existsSync(newpath)) {
                         fs.rename(oldpath, newpath, function(err) {
@@ -309,6 +310,68 @@ class UserController {
                 data: error
             }
         }
+    }
+
+    static async updateAvatar(ctx) {
+        if (!ctx.session.username) {
+            ctx.status = 401;
+            ctx.body = {
+                code: 401,
+                msg: 'cookies无效',
+            }   
+        } else {
+            try {
+                const user = await UserModel.getUserInfo(ctx.session.username)
+                var oldpath = user.avatar.replace(/http:\/\/139.196.79.193:3000\/uploads\/user\//,__dirname +  "\\static\\uploads\\user\\")
+                oldpath = oldpath.replace(/controller\\/, '')
+                if (fs.existsSync(oldpath)) {
+                    fs.unlinkSync(oldpath)
+                }   
+
+                function formidablePromise (req, opts, username) {
+                    return new Promise(function (resolve, reject) {
+                      var form = new formidable.IncomingForm(opts)
+                      form.keepExtensions = true;     
+                      form.uploadDir = 'static/uploads/user/';
+                      form.parse(req, function (err, fields, files) {
+                        var extname = null
+                        if (files.avatar) {
+                            var extname = path.extname(files.avatar.path)
+                            var oldpath = files.avatar.path
+                            var newpath = form.uploadDir + username + extname
+                            if (!fs.existsSync(newpath)) {
+                                fs.rename(oldpath, newpath, function(err) {
+                                    if (err) {
+                                        throw err
+                                    }
+                                })
+                            }
+                        }
+                        if (err) return reject(err)
+                        resolve({ fields: fields, files: files, newpath: newpath, oldpath: oldpath, extname: extname })
+                      })
+                    })
+                  }
+        
+                var body = await formidablePromise(ctx.req, null, ctx.session.username);
+
+                const res = await UserModel.updateAvatar(ctx.session.username, body.extname);
+                ctx.status = 200;
+                ctx.body = {
+                    code: 200,
+                    msg: 'success',
+                    data: res
+                }
+            } catch(err) {
+                ctx.status = 500;
+                    ctx.body = {
+                        code: 500,
+                        msg: '服务器异常',
+                        data: err
+                    }   
+            }
+        }
+
     }
 
     static async updateUserMoney(ctx) {
