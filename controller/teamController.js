@@ -11,7 +11,7 @@ class TeamController {
     static async createGroup(ctx) {
         let req = ctx.request.body;
         let cookie_user = await CookieController.getUsernameFromCtx(ctx);
-        if (cookie_user !== ctx.request.body.leader) {
+        if (cookie_user === -2) {
             ctx.body = {
                 code: 220,
                 msg: 'cookie超时，请重新登录',
@@ -20,72 +20,73 @@ class TeamController {
             return;
         }
 
-        if (req.team_name && req.leader && req.members) {
+        if (req.team_name && req.members) {
+            let leader = await TeamModel.getUserByUsername(cookie_user);
+            if (leader === null) {
+                ctx.response.status = 213;
+                ctx.body = {
+                    code: 212,
+                    msg: '组长不存在',
+                    data: null
+                };
+                return;
+            }
             try {
-                let leader = await TeamModel.getUserByUsername(req.leader);
-                if (leader === null) {
-                    ctx.response.status = 213;
-                    ctx.body = {
-                        code: 212,
-                        msg: '组长不存在',
-                        data: null
-                    }
-                } else {
-                    let members = req.members;
-                    let flag = true;
-                    for (let i = 0; i < members.length; i++) {
-                        let user = await TeamModel.getUserByUsername(members[i].member_username);
-                        if (user === null) {
-                            flag = false;
-                            break;
-                        }
-                    }
-                    if (flag) {
-                        const ret = await TeamModel.createTeam(req);
-                        let labels = req.teamlabels;
-                        for (let i = 0; i < labels.length; i++) {
-                            await TeamModel.createTeamLabel(ret.team_id, labels[i].label);
-                        }
-                        for (let i = 0; i < members.length; i++) {
-                            await TeamModel.createTeamMember(ret.team_id, members[i].member_username);
-                            // if (members[i].member_username !== ret.leader) {
-                            await ToastModel.createToast(members[i].member_username, 1,
-                                Toast_info.t1(ret.team_name),
-                                ret.leader, ret.team_id, null);
-                            // }
-                        }
-
-                        const data = await TeamModel.getTeamByTeamId(ret.team_id);
-                        ctx.response.status = 200;
-                        ctx.body = {
-                            code: 200,
-                            msg: '创建team成功',
-                            data: data
-                        }
-                    } else {
-                        let wrongMembers = req.members;
-                        for (let i = 0; i < wrongMembers.length; i++) {
-                            let user = await TeamModel.getUserByUsername(members[i].member_username);
-                            if (user !== null) {
-                                wrongMembers.splice(i, 1);
-                                i--;
-                            }
-                        }
-                        ctx.response.status = 211;
-                        ctx.body = {
-                            code: 211,
-                            msg: '部分成员不存在',
-                            data: wrongMembers
-                        }
+                let members = req.members;
+                req.leader = cookie_user;
+                let flag = true;
+                for (let i = 0; i < members.length; i++) {
+                    let user = await TeamModel.getUserByUsername(members[i].member_username);
+                    if (user === null) {
+                        flag = false;
+                        break;
                     }
                 }
+                if (flag) {
+                    const ret = await TeamModel.createTeam(req);
+                    let labels = req.teamlabels;
+                    for (let i = 0; i < labels.length; i++) {
+                        await TeamModel.createTeamLabel(ret.team_id, labels[i].label);
+                    }
+                    for (let i = 0; i < members.length; i++) {
+                        await TeamModel.createTeamMember(ret.team_id, members[i].member_username);
+                        // if (members[i].member_username !== ret.leader) {
+                        await ToastModel.createToast(members[i].member_username, 1,
+                            Toast_info.t1(ret.team_name),
+                            ret.leader, ret.team_id, null);
+                        // }
+                    }
 
+                    const data = await TeamModel.getTeamByTeamId(ret.team_id);
+                    ctx.response.status = 200;
+                    ctx.body = {
+                        code: 200,
+                        msg: '创建team成功',
+                        data: data
+                    }
+                } else {
+                    let wrongMembers = req.members;
+                    for (let i = 0; i < wrongMembers.length; i++) {
+                        let user = await TeamModel.getUserByUsername(members[i].member_username);
+                        if (user !== null) {
+                            wrongMembers.splice(i, 1);
+                            i--;
+                        }
+                    }
+                    ctx.response.status = 211;
+                    ctx.body = {
+                        code: 211,
+                        msg: '部分成员不存在',
+                        data: wrongMembers
+                    }
+                }
             } catch (err) {
+                console.log(err)
                 ctx.response.status = 412;
                 ctx.body = {
                     code: 412,
                     msg: '创建team失败',
-                    data: err
+                    data: err.message
                 }
             }
         } else {
@@ -451,16 +452,16 @@ class TeamController {
     static async deleteUserFromGrope(team_id, leader, username) {
         let result = null;
         try {
-            let isLeader = await TeamModel.getTeamByTeamId(team_id);
-            if (isLeader.leader === leader) {
-                let team = await TeamModel.getUserByTeamIdUsername(team_id, username);
-                if (isLeader.leader === username) {
+            let team = await TeamModel.getTeamByTeamId(team_id);
+            if (team.leader === leader) {
+                let user_team = await TeamModel.getUserByTeamIdUsername(team_id, username);
+                if (team.leader === username) {
                     result = {
                         code: 216,
                         msg: '删除失败，不能删除组长',
                         data: false
                     };
-                } else if (team.length === 0) {
+                } else if (user_team.length === 0) {
                     result = {
                         code: 211,
                         msg: '删除失败，user不在小组中',
@@ -522,8 +523,8 @@ class TeamController {
                         };
                     } else {
                         await TeamModel.deleteMember(team_id, username);
-                        await ToastModel.createToast(team.leader, 5,
-                            Toast_info.t5(username, team.team_name),
+                        await ToastModel.createToast(teams.leader, 5,
+                            Toast_info.t5(username, teams.team_name),
                             username, team_id, null);
                         result = {
                             code: 200,
@@ -547,8 +548,8 @@ class TeamController {
     static async updateTeamLeader(team_id, leader, username) {
         let result = null;
         try {
-            let isLeader = await TeamModel.getTeamByTeamId(team_id);
-            if (isLeader.leader === leader) {
+            let team = await TeamModel.getTeamByTeamId(team_id);
+            if (team.leader === leader) {
                 let isMember = await TeamModel.getUserByTeamIdUsername(team_id, username);
                 if (isMember.length === 0) {
                     result = {
@@ -602,7 +603,7 @@ class TeamController {
                     data: false
                 };
             } else {
-                for (let i = 0; i < team.members.length(); i++) {
+                for (let i = 0; i < team.members.length; i++) {
                     await ToastModel.createToast(team.members[i].member_username, 3,
                         Toast_info.t3(team.team_name),
                         leader, team_id, null);
@@ -632,7 +633,7 @@ class TeamController {
     static async modifyGroup(ctx) {
         let req = ctx.request.body;
         let cookie_user = await CookieController.getUsernameFromCtx(ctx);
-        if (cookie_user !== ctx.request.body.leader) {
+        if (cookie_user === -2) {
             ctx.body = {
                 code: 220,
                 msg: 'cookie超时，请重新登录',
@@ -640,7 +641,8 @@ class TeamController {
             };
             return;
         }
-        if (req.team_id && req.leader) {
+        req.leader = cookie_user;
+        if (req.team_id) {
             try {
                 let team = await TeamModel.getTeamByTeamId(req.team_id);
                 if (team === null) {
