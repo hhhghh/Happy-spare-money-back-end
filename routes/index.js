@@ -4,15 +4,24 @@ const db = require('../config/db');
 const Sequelize = require('sequelize')
 const sequelize = db.sequelize;
 const models = require('../table/all_tables')
-
+const TRModel = require('../modules/trModel');
+const checkUndefined = require('../utils/url_params_utils').checkUndefined;
+const FileController = require('../controller/fileController');
+const path = require('path');
+const TaskModel = require('../modules/taskModel');
+const ToastModel = require('../modules/toastModel');
+const ToastInfo = require('../utils/toast_info');
 const Op = Sequelize.Op
 
 router.get('/test', async (ctx, next) => {
-    let re = await models.Task.findByPk(4, {
-        attributes: ['publisher']
-    });
-    console.log(re);
-    ctx.body = re;
+    post_body = {
+        task_id: 2
+    }
+    let current_user = "hyx"
+    let toastTask = await TaskModel.searchTaskById(post_body.task_id);
+    ToastModel.createToast(toastTask.publisher, 11, 
+                            ToastInfo.t11(toastTask.title, current_user), 
+                            current_user, -1, post_body.task_id);
 })
 
 router.get('/', async (ctx, next) => {

@@ -12,52 +12,25 @@ require('./CookieController');
 class UserController {
 
     /**
-     * 判断前端请求是否携带了cookies
-     * 若携带了还会判断session是否过期
+     * 判断前端请求是否携带了正确的cookies
      * @param ctx
      * @returns
-     *  -1: 请求未携带cookies
-     *  -2：携带了cookies但是cookies已过期
-     *   0：cookies认证成功
+     *  -1: 请求未携带cookies或cookie失效
+     *  -0：cookies认证成功
      */
     static async judgeCookies(ctx) {
-        const SESSIONID = ctx.cookies.get('SESSIONID');
-        //没有携带cookies
-        if (!SESSIONID) {
-            return -1
-        }
-        // 如果有SESSIONID，就去redis里拿数据
-        const redisData = await redis.get(SESSIONID);
-    
-        //携带了cookies但session已过期
-        if (!redisData) {
-            return -2
-        }
-    
-        return 0
+        return ctx.session.username ? 0 : -1;
     }
 
     /**
      * 从前端的一个请求中通过cookies获得用户名
-     * @param ctx 
+     * @param ctx
      * @returns
-     *  -1：未携带cookies
-     *  -2：携带的cookies无效或已过期
-     *  username: 用户名，一个字符串 
+     *  -1：cookies无效
+     *  username: 用户名，一个字符串
      */
     static async getUsernameFromCtx(ctx) {
-        const flag = await UserController.judgeCookies(ctx);
-        if (flag === -1) {
-            return -1
-        }
-        else if (flag === -2) {
-    
-            return -2
-        }
-        const SESSIONID = ctx.cookies.get('SESSIONID')
-        const redisData = await redis.get(SESSIONID)
-    
-        return redisData.username
+        return ctx.session.username ? ctx.session.username : -1;
     }
     
     /**
@@ -228,7 +201,8 @@ class UserController {
                             "wechat": data.wechat,
                             "qq": data.QQ,
                             "score": data.score,
-                            "money": data.money
+                            "money": data.money,
+                            "type": data.account_state
                         } 
                     }
                 }
@@ -762,6 +736,64 @@ class UserController {
             }
         }
         return result;   
+    }
+
+    static async getPublishedFinishedTasks(username) {
+        let result;
+        try{
+            const user = await UserModel.getUserInfo(username)
+            if (user === null) {
+                result = {
+                    code: 412,
+                    msg: "用户不存在",
+                    data: null
+                }   
+            }
+            else {
+                const data = await UserModel.getPublishedFinishedTasks(username);
+                result = {
+                    code: 200,
+                    msg: "success",
+                    data: data
+                }
+            }
+        } catch(error) {
+            result = {
+                code: 500,
+                msg: "服务器异常",
+                data: error
+            }
+        }
+        return result;     
+    }
+
+    static async getCanPublishTasksOrg(teamId) {
+        let result;
+        try {
+            const data = await UserModel.getCanPublishTasksOrg(teamId);
+            if (data == -1) {
+                result = {
+                    code: 412,
+                    msg: "小组不存在",
+                    data: null
+                }    
+            }
+            else {
+                result = {
+                    code: 200,
+                    msg: "success",
+                    data: data
+                }     
+            }
+
+        } catch(err) {
+            result = {
+                code: 500,
+                msg: "服务器异常",
+                data: err
+            }   
+        }
+        return result
     }
 
     static async setRate(ctx) {
