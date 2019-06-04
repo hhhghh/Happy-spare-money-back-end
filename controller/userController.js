@@ -737,6 +737,64 @@ class UserController {
         return result;   
     }
 
+    static async getPublishedFinishedTasks(username) {
+        let result;
+        try{
+            const user = await UserModel.getUserInfo(username)
+            if (user === null) {
+                result = {
+                    code: 412,
+                    msg: "用户不存在",
+                    data: null
+                }   
+            }
+            else {
+                const data = await UserModel.getPublishedFinishedTasks(username);
+                result = {
+                    code: 200,
+                    msg: "success",
+                    data: data
+                }
+            }
+        } catch(error) {
+            result = {
+                code: 500,
+                msg: "服务器异常",
+                data: error
+            }
+        }
+        return result;     
+    }
+
+    static async getCanPublishTasksOrg(teamId) {
+        let result;
+        try {
+            const data = await UserModel.getCanPublishTasksOrg(teamId);
+            if (data == -1) {
+                result = {
+                    code: 412,
+                    msg: "小组不存在",
+                    data: null
+                }    
+            }
+            else {
+                result = {
+                    code: 200,
+                    msg: "success",
+                    data: data
+                }     
+            }
+
+        } catch(err) {
+            result = {
+                code: 500,
+                msg: "服务器异常",
+                data: err
+            }   
+        }
+        return result
+    }
+
     static async setRate(ctx) {
         console.log()
         const flag = await UserController.judgeCookies(ctx);
