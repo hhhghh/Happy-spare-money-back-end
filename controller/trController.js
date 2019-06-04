@@ -6,7 +6,10 @@ const FileController = require('../controller/fileController');
 const path = require('path');
 const TaskModel = require('../modules/taskModel');
 const ToastModel = require('../modules/toastModel');
+const ToastInfo = require('../utils/toast_info');
+
 require('../config/basicStr');
+
 
 class TRController {
     /**
@@ -72,6 +75,7 @@ class TRController {
         let publisher = await TaskModel.searchTaskById(post_body.task_id).publisher
         ToastModel.createToast(publisher, 10, "", post_body.username, -1, post_body.task_id);
     }
+
     /**
      * 获取文章详情
      * @param ctx
@@ -188,6 +192,11 @@ class TRController {
             msg: result.msg,
             data: result.data
         }
+
+        let toastTask = await TaskModel.searchTaskById(post_body.task_id);
+        ToastModel.createToast(toastTask.publisher, 12, 
+                                ToastInfo.t12(toastTask.title, post_body.username), 
+                                post_body.username, -1, post_body.task_id);
     }
 
     static async confirmComplement(ctx) {
@@ -231,6 +240,11 @@ class TRController {
             msg: result.msg,
             data: result.data
         }
+
+        let toastTask = await TaskModel.searchTaskById(post_body.task_id);
+        ToastModel.createToast(current_user, 13, 
+                                ToastInfo.t13(toastTask.title, toastTask.publisher), 
+                                toastTask.publisher, -1, post_body.task_id);
     }
 
     static async completeTask(ctx) {
@@ -265,6 +279,11 @@ class TRController {
             }
         }
         response(ctx, result.code, result.msg, result.data);
+
+        let toastTask = await TaskModel.searchTaskById(post_body.task_id);
+        ToastModel.createToast(toastTask.publisher, 11, 
+                                ToastInfo.t11(toastTask.title, current_user), 
+                                current_user, -1, post_body.task_id);
     }
  
     static async searchTR(ctx) {
@@ -314,7 +333,6 @@ class TRController {
         };
     }
 }
-
 
 let response = (ctx, code, msg, data = null) => {
     ctx.response.status = code;
