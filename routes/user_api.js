@@ -120,6 +120,38 @@ router.get('/getPublishedWaitedTasks', async(ctx) => {
     ctx = response(ctx, result)
 })
 
+router.get('/getPublishedFinishedTasks', async(ctx) => {
+    let query_params = ctx.query;
+    let result = null;
+    if (query_params.username) {
+        result = await UserController.getPublishedFinishedTasks(query_params.username);
+    }
+    else {
+        result = {
+            code: 400,
+            msg: 'Wrong query param.',
+            data: null    
+        }    
+    }
+    ctx = response(ctx, result)
+})
+
+router.get('/getCanPublishTasksOrg', async(ctx) => {
+    let query_params = ctx.query;
+    let result = null;
+    if (query_params.teamId) {
+        result = await UserController.getCanPublishTasksOrg(query_params.teamId);
+    }
+    else {
+        result = {
+            code: 400,
+            msg: 'Wrong query param.',
+            data: null
+        }
+    }
+    ctx = response(ctx, result)
+})
+
 let response = (ctx, result) => {
     ctx.response.status = result.code;
     ctx.body = {

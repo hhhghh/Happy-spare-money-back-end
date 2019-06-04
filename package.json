@@ -6,13 +6,16 @@
     "start": "node bin/www",
     "dev": "./node_modules/.bin/nodemon bin/www",
     "prd": "pm2 start bin/www",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "scheduler": "node services/scheduler.js",
+    "all": "node bin/www & node services/scheduler.js"
   },
   "dependencies": {
     "busboy": "^0.3.1",
     "debug": "^2.6.3",
     "formidable": "^1.2.1",
     "ioredis": "^4.9.3",
+    "js-yaml": "latest",
     "koa": "^2.2.0",
     "koa-body": "^4.1.0",
     "koa-bodyparser": "^3.2.0",
@@ -27,11 +30,11 @@
     "koa-views": "^5.2.1",
     "mysql": "^2.16.0",
     "mysql2": "^1.6.5",
+    "node-schedule": "^1.3.2",
     "pug": "^2.0.0-rc.1",
     "sequelize": "^5.3.5",
     "silly-datetime": "^0.1.2",
-    "yamljs": "^0.3.0",
-    "js-yaml": "latest"
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "nodemon": "^1.8.1"
