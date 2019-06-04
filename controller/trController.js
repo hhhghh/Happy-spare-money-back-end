@@ -3,6 +3,7 @@ const TRModel = require('../modules/trModel');
 const getUsernameFromCtx = require('./cookieController').getUsernameFromCtx;
 const checkUndefined = require('../utils/url_params_utils').checkUndefined;
 const FileController = require('../controller/fileController');
+const path = require('path');
 const TaskModel = require('../modules/taskModel');
 const ToastModel = require('../modules/toastModel');
 require('../config/basicStr');
