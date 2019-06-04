@@ -71,7 +71,7 @@ class TaskController {
         let post_body = ctx.request.body
         let result = undefined
         let required_param_list = ['title', 'introduction', 'money', 'score', 
-                                    'max_accepter_number', 'publisher', 'type', 'range',
+                                    'max_accepter_number', 'type', 'range',
                                     'starttime', 'endtime'];
         
         console.log(post_body)
@@ -80,17 +80,11 @@ class TaskController {
             let current_user = await getUsernameFromCtx(ctx);
 
             console.log(current_user)
-            
+
             if (current_user == -1 || current_user == -2) {
                 result = {
                     code: 401,
                     msg: "Please login first.",
-                    data: []
-                }
-            } else if (current_user != post_body.publisher) {
-                result = {
-                    code: 403,
-                    msg: "Cannot release a task with publisher of other user.",
                     data: []
                 }
             } else {
@@ -100,7 +94,7 @@ class TaskController {
                     money: post_body.money,
                     score: post_body.score,
                     max_accepter_number: post_body.max_accepter_number,
-                    publisher: post_body.publisher,
+                    publisher: current_user, // only session
                     type: post_body.type,
                     starttime: post_body.starttime,
                     endtime: post_body.endtime,
