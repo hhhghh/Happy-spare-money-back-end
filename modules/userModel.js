@@ -158,6 +158,7 @@ class UserModel {
     }
 
     static async UserBlacklistUser(username1, username2) {
+
         const user1 = await User.findOne({
             where: {
                 username: username1
@@ -183,12 +184,14 @@ class UserModel {
                 username: username2
             }
         })
-        if (relate !== null) {
+        if (relate === null) {
             return 4
         }
         await Piu.destroy({
-            ins_name: username1,
-            username: username2
+            where: {
+                ins_name: username1,
+                username: username2
+            }
         })
         return 0
     }
@@ -219,12 +222,14 @@ class UserModel {
                 team_id: team_id
             }
         })
-        if (relate !== null) {
+        if (relate === null) {
             return 4
         }
         await Pit.destroy({
-            ins_name: ins_name,
-            team_id: team_id
+            where: {
+                ins_name: ins_name,
+                team_id: team_id    
+            }
         })
         return 0    
     }
@@ -255,16 +260,14 @@ class UserModel {
                 username: username2
             }
         })
-        if (relate === null) {
+        if (relate !== null) {
             return 4
         }
         await Piu.create({
-            where: {
-                ins_name: username1,
-                username: username2
-            }
+            ins_name: username1,
+            username: username2
         })
-        return 0    
+        return 0        
     }
 
     static async teamCancelBlack(ins_name, team_id) {
@@ -293,16 +296,14 @@ class UserModel {
                 team_id: team_id
             }
         })
-        if (relate === null) {
+        if (relate !== null) {
             return 4
         }
         await Pit.create({
-            where: {
-                ins_name: ins_name,
-                team_id: team_id    
-            }
+            ins_name: ins_name,
+            team_id: team_id
         })
-        return 0    
+        return 0        
     }
 
     static async getUserAvatar(username) {
@@ -406,8 +407,14 @@ class UserModel {
             }
         }) 
         for (var i = 0; i < orgs.length; i++) {
+            const org = await User.findOne({
+                where: {
+                    username: orgs[i].ins_name
+                }
+            })
             data.push({
-                "orgorganization name": orgs.ins_name
+                "orgorganization name": org.username,
+                "orgorganization avatar": org.avatar
             })
         }
         return data

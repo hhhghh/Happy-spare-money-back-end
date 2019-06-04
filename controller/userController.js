@@ -569,7 +569,7 @@ class UserController {
                 ctx.status = 405
                 ctx.body = {
                     code: 405,
-                    msg: '没有拉黑过的用户或机构不能取消拉黑',
+                    msg: '请勿重复取消拉黑',
                     data: result
                 }   
             }
@@ -635,7 +635,7 @@ class UserController {
                 ctx.status = 406
                 ctx.body = {
                     code: 406,
-                    msg: '没有拉黑无法取消拉黑',
+                    msg: '已经拉黑无法再次拉黑',
                     data: result
                 }   
             }
