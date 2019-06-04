@@ -11,7 +11,7 @@ router.get('/', async (ctx) => {
         result = await ToastController.getToastByUsername(cookie_user)
     } else {
         result = {
-            code: 220,
+            code: 401,
             msg: 'cookie超时，请重新登录',
             data: null
         }
@@ -41,7 +41,7 @@ router.del('/Username/', async (ctx) => {
         result = await ToastController.deleteToastByUsername(cookie_user)
     } else {
         result = {
-            code: 220,
+            code: 401,
             msg: 'cookie超时，请重新登录',
             data: null
         }

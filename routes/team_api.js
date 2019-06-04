@@ -16,7 +16,7 @@ router.get('/Leader/', async (ctx) => {
         result = await TeamController.isGroupLeader(query_params.team_id, cookie_user)
     } else if (query_params.team_id){
         result = {
-            code: 220,
+            code: 401,
             msg: 'cookie超时，请重新登录',
             data: null
         }
@@ -84,7 +84,7 @@ router.get('/MemberName/', async (ctx) => {
         result = await TeamController.getGroupByUsername(cookie_user);
     } else {
         result = {
-            code: 220,
+            code: 401,
             msg: 'cookie超时，请重新登录',
             data: null
         }
@@ -112,7 +112,7 @@ router.post('/Member/Invitation/', async (ctx) => {
     let cookie_user = await CookieController.getUsernameFromCtx(ctx);
     if (cookie_user === -2) {
         result = {
-            code: 220,
+            code: 401,
             msg: 'cookie超时，请重新登录',
             data: null
         }
@@ -136,7 +136,7 @@ router.post('/Member/Addition/', async (ctx) => {
     let cookie_user = await CookieController.getUsernameFromCtx(ctx);
     if (cookie_user === -2) {
         result = {
-            code: 220,
+            code: 401,
             msg: 'cookie超时，请重新登录',
             data: null
         }
@@ -160,7 +160,7 @@ router.post('/Leader/', async (ctx) => {
     let cookie_user = await CookieController.getUsernameFromCtx(ctx);
     if (cookie_user === -2) {
         result = {
-            code: 220,
+            code: 401,
             msg: 'cookie超时，请重新登录',
             data: null
         }
@@ -184,7 +184,7 @@ router.del('/Member/Dislodge/', async (ctx) => {
     let cookie_user = await CookieController.getUsernameFromCtx(ctx);
     if (cookie_user === -2) {
         result = {
-            code: 220,
+            code: 401,
             msg: 'cookie超时，请重新登录',
             data: null
         }
@@ -208,7 +208,7 @@ router.del('/Member/Departure/', async (ctx) => {
     let cookie_user = await CookieController.getUsernameFromCtx(ctx);
     if (cookie_user === -2) {
         result = {
-            code: 220,
+            code: 401,
             msg: 'cookie超时，请重新登录',
             data: null
         }
@@ -232,7 +232,7 @@ router.del('/', async (ctx) => {
     let cookie_user = await CookieController.getUsernameFromCtx(ctx);
     if (cookie_user === -2) {
         result = {
-            code: 220,
+            code: 401,
             msg: 'cookie超时，请重新登录',
             data: null
         }
