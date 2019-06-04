@@ -74,10 +74,13 @@ class TaskController {
                                     'max_accepter_number', 'publisher', 'type', 'range',
                                     'starttime', 'endtime'];
         
+        console.log(post_body)
         if (checkUndefined(post_body, required_param_list)) {
             // Confirm the publisher is the current user
             let current_user = await getUsernameFromCtx(ctx);
 
+            console.log(current_user)
+            
             if (current_user == -1 || current_user == -2) {
                 result = {
                     code: 401,

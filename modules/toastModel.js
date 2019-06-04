@@ -55,4 +55,5 @@ class ToastModel {
         })
     }
 }
+
 module.exports = ToastModel;

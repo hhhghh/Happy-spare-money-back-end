@@ -4,6 +4,7 @@ const getUsernameFromCtx = require('./cookieController').getUsernameFromCtx;
 const checkUndefined = require('../utils/url_params_utils').checkUndefined;
 const FileController = require('../controller/fileController');
 const TaskModel = require('../modules/taskModel');
+const ToastModel = require('../modules/toastModel');
 
 class TRController {
     /**
@@ -14,7 +15,7 @@ class TRController {
     static async recieveATask(ctx) {
         let post_body = ctx.request.body
         let result = undefined
-        let required_param_list = ['username', 'task_id']
+        let required_param_list = ['task_id']
         if (checkUndefined(post_body, required_param_list)) {
             let current_user = await getUsernameFromCtx(ctx)
             if (current_user == -1 || current_user == -2) {
@@ -23,13 +24,9 @@ class TRController {
                     msg: "Should login first",
                     data: []
                 }
-            } else if (current_user != post_body.username) {
-                result = {
-                    code: 403,
-                    msg: "Can only accept task for yourself",
-                    data: []
-                }
             } else {
+                username = current_user;
+                task_id = post_body.task_id;
                 try {
                     await TRModel.receiveTask(username, task_id);
                     let data = await TRModel.searchByTaskId(task_id);
@@ -70,6 +67,8 @@ class TRController {
             data: result.data
         }
 
+        let publisher = await TaskModel.searchTaskById(post_body.task_id).publisher
+        ToastModel.createToast(publisher, 10, "", post_body.username, -1, post_body.task_id);
     }
     /**
      * 获取文章详情
@@ -157,31 +156,22 @@ class TRController {
         let current_user = await getUsernameFromCtx(ctx)
         let post_body = ctx.query
         let result = undefined
-        let required_param_list = ['task_id', 'username']
+        let required_param_list = ['task_id']
         if (checkUndefined(post_body, required_param_list)) {
-            if (post_body.username == current_user) {
-                try {
-                    let data = await TRModel.deleteTR(post_body.username, post_body.task_id)
-                    result = {
-                        code: 200, 
-                        msg: 'Success',
-                        data: data
-                    }
-                } catch (err) {
-                    result = {
-                        code: 500,
-                        msg: 'Failed, database wrong.',
-                        data: err
-                    }
-                }
-            } else {
+            try {
+                let data = await TRModel.deleteTR(current_user, post_body.task_id)
                 result = {
-                    code: 403,
-                    msg: "Only accepter self can quit a task",
-                    data: []
+                    code: 200, 
+                    msg: 'Success',
+                    data: data
+                }
+            } catch (err) {
+                result = {
+                    code: 500,
+                    msg: 'Failed, database wrong.',
+                    data: err
                 }
             }
-            
         } else {
             result = {
                 code: 412,
@@ -201,12 +191,15 @@ class TRController {
     static async confirmComplement(ctx) {
         let result = undefined
         let post_body = ctx.request.body
-        console.log(post_body)
-        if (post_body.username &&
-            post_body.task_id &&
+        let current_user = getUsernameFromCtx(ctx)
+        if (current_user == -1 || current_user == -2 || current_user == undefined || current_user == null) {
+            response(ctx, 403, "Please login first", []);
+            return;
+        }
+        if (post_body.task_id &&
             post_body.score) {
             try {
-                let data = await TRModel.comfirm_complement(post_body.username, 
+                let data = await TRModel.comfirm_complement(current_user, 
                                                             post_body.task_id, 
                                                             post_body.score);
                 result = {
@@ -230,7 +223,7 @@ class TRController {
             }
         }
 
-        ctx.response.status  =  result.code
+        ctx.response.status = result.code
         ctx.body = {
             code: result.code,
             msg: result.msg,
@@ -241,10 +234,14 @@ class TRController {
     static async completeTask(ctx) {
         let post_body = ctx.request.body
         let result = undefined
-        
-        if (post_body.task_id
-            && post_body.username) {
+        let current_user = getUsernameFromCtx(ctx)
+        if (current_user == -1 || current_user == -2 || current_user == undefined || current_user == null) {
+            response(ctx, 403, "please login first", []);
+            return;
+        }
+        if (post_body.task_id != undefined) {
             try {
+                post_body.username = current_user
                 result = await TRModel.accepter_make_complement(post_body)
                 result = {
                     code: 200,
@@ -265,16 +262,9 @@ class TRController {
                 data: []
             }
         }
-
-        ctx.response.status = result.code
-        ctx.body = {
-            code: result.code,
-            msg: result.msg,
-            data: result.data
-        }
+        response(ctx, result.code, result.msg, result.data);
     }
-
-    
+ 
     static async searchTR(ctx) {
         let query = ctx.query
         let result = undefined
@@ -300,13 +290,7 @@ class TRController {
                 data: []
             }
         }
-
-        ctx.response.status = result.code
-        ctx.body = {
-            code: result.code,
-            msg: result.msg,
-            data: result.data
-        }
+        response(ctx, result.code, result.msg, result.data);
     }
 
     static async submitQuestionnaire(ctx) {
@@ -316,8 +300,6 @@ class TRController {
             fileType: 'questionnaire',
             path: serverPath
         });
-
-        AnalysisModel.AnalysisQuestionnaire('./static/uploads' + result.imgPath);
 
         let fileUrl = defaultIP + '/uploads' + result.imgPath.split('.')[0] + '.json'
 
