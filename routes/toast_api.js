@@ -20,10 +20,17 @@ router.get('/', async (ctx) => {
 });
 
 router.del('/Id/', async (ctx) => {
+    let cookie_user = await CookieController.getUsernameFromCtx(ctx);
     let result = null;
     let query_params = ctx.query;
-    if (query_params.id) {
-        result = await ToastController.deleteToastById(query_params.id)
+    if (query_params.id && cookie_user !== -2) {
+        result = await ToastController.deleteToastById(query_params.id, cookie_user)
+    } else if (cookie_user === -2) {
+        result = {
+            code: 401,
+            msg: 'cookie超时，请重新登录',
+            data: null
+        }
     } else {
         result = {
             code: 400,
