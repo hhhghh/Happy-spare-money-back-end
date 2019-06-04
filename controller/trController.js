@@ -71,9 +71,9 @@ class TRController {
             msg: result.msg,
             data: result.data
         }
-
+        
         let publisher = await TaskModel.searchTaskById(post_body.task_id).publisher
-        ToastModel.createToast(publisher, 10, "", post_body.username, -1, post_body.task_id);
+        ToastModel.createToast(publisher, 10, "", post_body.username, null, post_body.task_id);
     }
 
     /**
@@ -202,7 +202,7 @@ class TRController {
     static async confirmComplement(ctx) {
         let result = undefined
         let post_body = ctx.request.body
-        let current_user = getUsernameFromCtx(ctx)
+        let current_user = await getUsernameFromCtx(ctx)
         if (current_user == -1 || current_user == -2 || current_user == undefined || current_user == null) {
             response(ctx, 403, "Please login first", []);
             return;
@@ -250,7 +250,7 @@ class TRController {
     static async completeTask(ctx) {
         let post_body = ctx.request.body
         let result = undefined
-        let current_user = getUsernameFromCtx(ctx)
+        let current_user = await getUsernameFromCtx(ctx)
         if (current_user == -1 || current_user == -2 || current_user == undefined || current_user == null) {
             response(ctx, 403, "please login first", []);
             return;
@@ -280,10 +280,15 @@ class TRController {
         }
         response(ctx, result.code, result.msg, result.data);
 
-        let toastTask = await TaskModel.searchTaskById(post_body.task_id);
-        ToastModel.createToast(toastTask.publisher, 11, 
-                                ToastInfo.t11(toastTask.title, current_user), 
-                                current_user, -1, post_body.task_id);
+        try {
+            let toastTask = await TaskModel.searchTaskById(post_body.task_id);
+            ToastModel.createToast(toastTask.publisher, 11, 
+                                    ToastInfo.t11(toastTask.title, current_user), 
+                                    current_user, null, post_body.task_id);
+        } catch (err) {
+            console.log("err")
+            
+        }
     }
  
     static async searchTR(ctx) {
