@@ -201,7 +201,8 @@ class UserController {
                             "wechat": data.wechat,
                             "qq": data.QQ,
                             "score": data.score,
-                            "money": data.money
+                            "money": data.money,
+                            "type": data.account_state
                         } 
                     }
                 }
