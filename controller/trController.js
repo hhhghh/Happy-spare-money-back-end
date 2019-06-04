@@ -30,8 +30,8 @@ class TRController {
                     data: []
                 }
             } else {
-                username = current_user;
-                task_id = post_body.task_id;
+                let username = current_user;
+                let task_id = post_body.task_id;
                 try {
                     await TRModel.receiveTask(username, task_id);
                     let data = await TRModel.searchByTaskId(task_id);
