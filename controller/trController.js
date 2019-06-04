@@ -303,7 +303,7 @@ class TRController {
             path: serverPath
         });
 
-        let fileUrl = defaultIP + '/uploads' + result.imgPath.split('.')[0] + '.json'
+        let fileUrl = defaultIP + '/uploads' + result.imgPath
 
         ctx.body = {
             code: result.code,
