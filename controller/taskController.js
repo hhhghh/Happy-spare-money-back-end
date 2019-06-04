@@ -280,7 +280,7 @@ class TaskController {
                 }
             } else {
                 try {
-                    task_publisher = await TaskModel.searchPublisherByTaskid(query_params.task_id);
+                    let task_publisher = await TaskModel.searchPublisherByTaskid(query_params.task_id);
                     if (current_user != task_publisher) {
                         result = {
                             code: 403,

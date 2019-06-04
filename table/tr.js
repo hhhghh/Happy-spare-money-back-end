@@ -27,6 +27,10 @@ module.exports = function(sequelize, DataTypes){
             // 1: accpeter complete, waiting publisher confirm
             // 2: publisher confirmed, over
         },
+        score: {
+            type: DataTypes.INTEGER,
+            allowNull: true
+        },
         questionnaire_path: {
             type: DataTypes.CHAR(128),
             allowNull: true

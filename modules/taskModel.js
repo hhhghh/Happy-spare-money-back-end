@@ -27,7 +27,7 @@ class TaskModel {
             content: data.content,
             questionnaire_path: data.questionnaire_path
         });
-        
+
         let create_param = []
         for (let i = 0; i < range.length; i++) {
             create_param.push({
@@ -335,9 +335,9 @@ class TaskModel {
      * @return {string} the publisher's username
      */
     static async searchPublisherByTaskid(task_id) {
-        return models.Task.findByPk(task_id, {
+        return (await models.Task.findByPk(task_id, {
             attributes: ['publisher']
-        }).publisher;
+        })).publisher;
     }
 }
 
