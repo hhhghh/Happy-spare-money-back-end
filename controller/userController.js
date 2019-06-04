@@ -568,7 +568,7 @@ class UserController {
                 ctx.status = 405
                 ctx.body = {
                     code: 405,
-                    msg: '没有拉黑过的用户或机构不能取消拉黑',
+                    msg: '请勿重复取消拉黑',
                     data: result
                 }   
             }
