@@ -29,20 +29,22 @@ class ToastModel {
     }
 
     // 通过id查找消息
-    static async getToastById(id) {
+    static async getToastByIdUsername(id, username) {
         return await Toast.findAll({
             attributes: ['id', 'username', 'type', 'message', 'msg_username', 'msg_team_id', 'msg_task_id'],
             where: {
                 id: id,
+                usename: username
             }
         })
     }
 
     // 删除消息
-    static async deleteToastById(id) {
+    static async deleteToastByIdUsername(id, username) {
         return await Toast.destroy({
             where: {
-                id: id
+                id: id,
+                username: username
             }
         })
     }

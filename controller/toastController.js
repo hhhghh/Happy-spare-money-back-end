@@ -11,7 +11,7 @@ class ToastController {
                 result = {
                     code: 200,
                     msg: '查询成功，没有消息',
-                    data: null
+                    data: []
                 };
             } else {
                 result = {
@@ -31,10 +31,10 @@ class ToastController {
     }
 
     // 200 成功，412 异常, 220 没有消息
-    static async deleteToastById(id) {
+    static async deleteToastById(id, username) {
         let result = null;
         try {
-            let toast = await ToastModel.getToastById(id);
+            let toast = await ToastModel.getToastByIdUsername(id, username);
             if (toast === null) {
                 result = {
                     code: 200,
@@ -42,7 +42,7 @@ class ToastController {
                     data: false
                 };
             } else {
-                await ToastModel.deleteToastById(id);
+                await ToastModel.deleteToastByIdUsername(id, username);
                 result = {
                     code: 200,
                     msg: '删除成功',
