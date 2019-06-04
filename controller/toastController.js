@@ -9,7 +9,7 @@ class ToastController {
             let data = await ToastModel.getToastByUsername(username);
             if (data.length === 0) {
                 result = {
-                    code: 220,
+                    code: 200,
                     msg: '查询成功，没有消息',
                     data: null
                 };
@@ -37,7 +37,7 @@ class ToastController {
             let toast = await ToastModel.getToastById(id);
             if (toast === null) {
                 result = {
-                    code: 220,
+                    code: 200,
                     msg: '删除失败，没有该消息',
                     data: false
                 };
@@ -66,7 +66,7 @@ class ToastController {
             let toast = await ToastModel.getToastByUsername(username);
             if (toast === null) {
                 result = {
-                    code: 220,
+                    code: 200,
                     msg: '删除失败，没有消息',
                     data: false
                 };
