@@ -11,7 +11,7 @@ class ToastController {
                 result = {
                     code: 200,
                     msg: '查询成功，没有消息',
-                    data: null
+                    data: []
                 };
             } else {
                 result = {
