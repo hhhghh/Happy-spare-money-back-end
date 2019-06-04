@@ -186,7 +186,7 @@ class UserModel {
         if (relate !== null) {
             return 4
         }
-        await Piu.create({
+        await Piu.destroy({
             ins_name: username1,
             username: username2
         })
@@ -222,7 +222,7 @@ class UserModel {
         if (relate !== null) {
             return 4
         }
-        await Pit.create({
+        await Pit.destroy({
             ins_name: ins_name,
             team_id: team_id
         })
@@ -258,7 +258,7 @@ class UserModel {
         if (relate === null) {
             return 4
         }
-        await Piu.destroy({
+        await Piu.create({
             where: {
                 ins_name: username1,
                 username: username2
@@ -296,7 +296,7 @@ class UserModel {
         if (relate === null) {
             return 4
         }
-        await Pit.destroy({
+        await Pit.create({
             where: {
                 ins_name: ins_name,
                 team_id: team_id    
@@ -363,6 +363,52 @@ class UserModel {
                 "score": ts.score,
                 "money": ts.money
             })    
+        }
+        return data
+    }
+
+    static async getPublishedFinishedTasks(username) {
+        const tasks = await Task.findAll({
+            where: {
+                publisher: username,
+                state: All_Tables.status_code.task.CONFIRM_OVER
+            }
+        })
+        let data = []
+        for (var i = 0; i < tasks.length; i++) {
+            var ts = tasks[i]
+            data.push({
+                "taskId": ts.task_id,
+                "title": ts.title,
+                "introduction": ts.intro == null ? null : ts.intro,
+                "starttime": ts.starttime,
+                "endtime": ts.endtime,
+                "score": ts.score,
+                "money": ts.money
+            })    
+        }
+        return data    
+    }
+
+    static async getCanPublishTasksOrg(teamId) {
+        const team = await Team.findOne({
+            where: {
+                team_id: teamId
+            }
+        })
+        if (team == null) {
+            return -1
+        }
+        let data = []
+        const orgs = await Pit.findAll({
+            where: {
+                team_id: teamId
+            }
+        }) 
+        for (var i = 0; i < orgs.length; i++) {
+            data.push({
+                "orgorganization name": orgs.ins_name
+            })
         }
         return data
     }
