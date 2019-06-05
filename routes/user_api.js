@@ -25,6 +25,8 @@ router.post('/getteammembersavatat', UserController.getTeamMembersAvatar);
 
 router.post('/setRate', UserController.setRate);
 
+router.post('/verifyPassword', UserController.verifyPassword);
+
 router.put('/update', UserController.updateUserInfo);
 
 router.put('/updateAvatar', UserController.updateAvatar);
