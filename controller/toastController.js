@@ -34,13 +34,19 @@ class ToastController {
     static async deleteToastById(id, username) {
         let result = null;
         try {
-            let toast = await ToastModel.getToastByIdUsername(id, username);
+            let toast = await ToastModel.getToastById(id);
             if (toast === null) {
                 result = {
                     code: 200,
                     msg: '删除失败，没有该消息',
                     data: false
                 };
+            } else if (toast.username !== username) {
+                result = {
+                    code: 401,
+                    msg: 'cookie不正确',
+                    data: null
+                }
             } else {
                 await ToastModel.deleteToastByIdUsername(id, username);
                 result = {
