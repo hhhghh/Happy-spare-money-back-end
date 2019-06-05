@@ -42,13 +42,13 @@ module.exports = function(sequelize, DataTypes){
         starttime:{
             type:DataTypes.DATE,
             get() {
-                return moment(this.getDataValue('createdAt')).format('YYYY-MM-DD HH:mm:ss');
+                return moment(this.getDataValue('starttime')).format('YYYY-MM-DD HH:mm:ss');
             }
         },
         endtime:{
             type:DataTypes.DATE,
             get() {
-                return moment(this.getDataValue('createdAt')).format('YYYY-MM-DD HH:mm:ss');
+                return moment(this.getDataValue('endtime')).format('YYYY-MM-DD HH:mm:ss');
             }
         },
         questionnaire_path:{
