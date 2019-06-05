@@ -197,7 +197,7 @@ class UserController {
                             "name": data.true_name,
                             "school": data.school_name,
                             "grade": data.grade,
-                            "avatar": data.avatar,
+                            "avatar": data.avatar + '?t=' + new Date().getTime(),
                             "phone": data.phone_number,
                             "wechat": data.wechat,
                             "qq": data.QQ,
