@@ -29,12 +29,11 @@ class ToastModel {
     }
 
     // 通过id查找消息
-    static async getToastByIdUsername(id, username) {
-        return await Toast.findAll({
+    static async getToastById(id) {
+        return await Toast.findOne({
             attributes: ['id', 'username', 'type', 'message', 'msg_username', 'msg_team_id', 'msg_task_id'],
             where: {
-                id: id,
-                usename: username
+                id: id
             }
         })
     }
