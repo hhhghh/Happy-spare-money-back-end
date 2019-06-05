@@ -910,6 +910,52 @@ class UserController {
         }
     }
 
+    static async verifyPassword(ctx) {
+        console.log("yunxingdaozhele ")
+        if (!ctx.session.username) {
+            ctx.status = 401;
+            ctx.body = {
+                code: 401,
+                msg: 'cookies无效',
+            }   
+        }
+        else {
+            try{
+                const user = await UserModel.getUserInfo(ctx.session.username)
+                if (!ctx.request.body.password) {
+                    ctx.status = 400;
+                    ctx.body = {
+                        code: 400,
+                        msg: '参数错误，缺少密码',
+                    }    
+                }
+                else {
+                    if (ctx.request.body.password == user.password) {
+                        ctx.status = 200;
+                        ctx.body = {
+                            code: 200,
+                            msg: '验证成功',
+                        }    
+                    }
+                    else {
+                        ctx.status = 402;
+                        ctx.body = {
+                            code: 402,
+                            msg: '密码错误',
+                        }   
+                    }
+                }
+            } catch(err) {
+                ctx.status = 500;
+                ctx.body = {
+                    code: 500,
+                    msg: '服务器错误',
+                    data: err
+                }   
+            }
+        }
+    }
+
     static async getTeamMembersAvatar(ctx) {
         var members = ctx.request.body.members;
         console.log(members)
