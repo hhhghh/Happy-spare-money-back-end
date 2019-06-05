@@ -115,6 +115,7 @@ class TRModel {
     }
 
     static async comfirm_complement(username, task_id, score) {
+        console.log(username, task_id, score)
         let user_task_info = await Promise.all([
             models.TR.update({
                 state: models.status_code.tr.CONFIRMED_OVER,

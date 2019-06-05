@@ -71,7 +71,7 @@ class TRController {
             msg: result.msg,
             data: result.data
         }
-        
+
         let publisher = await TaskModel.searchTaskById(post_body.task_id).publisher
         ToastModel.createToast(publisher, 10, "", post_body.username, null, post_body.task_id);
     }
@@ -165,6 +165,7 @@ class TRController {
         let required_param_list = ['task_id']
         if (checkUndefined(post_body, required_param_list)) {
             try {
+                console.log('<<Delete TR use', current_user, post_body.task_id, '>>')
                 let data = await TRModel.deleteTR(current_user, post_body.task_id)
                 result = {
                     code: 200, 
@@ -175,7 +176,7 @@ class TRController {
                 result = {
                     code: 500,
                     msg: 'Failed, database wrong.',
-                    data: err
+                    data: err.message
                 }
             }
         } else {
@@ -210,14 +211,26 @@ class TRController {
         if (post_body.task_id &&
             post_body.score) {
             try {
-                let data = await TRModel.comfirm_complement(current_user, 
-                                                            post_body.task_id, 
-                                                            post_body.score);
-                result = {
-                    code: 200, 
-                    msg: 'Success',
-                    data: data
+                // 判断
+                let publisher = (await TaskModel.searchTaskById(post_body.task_id)).publisher;
+                console.log(publisher, current_user)
+                if (publisher == current_user) {
+                    let data = await TRModel.comfirm_complement(post_body.username, 
+                                                                post_body.task_id, 
+                                                                post_body.score);
+                    result = {
+                        code: 200, 
+                        msg: 'Success',
+                        data: data
+                    }
+                } else {
+                    result = {
+                        code: 412,
+                        msg: "Cannot confirm task not published by u",
+                        data: []
+                    }
                 }
+                
             } catch (err) {
                 console.log(err)
                 result = {
