@@ -40,10 +40,16 @@ module.exports = function(sequelize, DataTypes){
             // 2: 取快递
         },
         starttime:{
-            type:DataTypes.DATE
+            type:DataTypes.DATE,
+            get() {
+                return moment(this.getDataValue('createdAt')).format('YYYY-MM-DD HH:mm:ss');
+            }
         },
         endtime:{
-            type:DataTypes.DATE
+            type:DataTypes.DATE,
+            get() {
+                return moment(this.getDataValue('createdAt')).format('YYYY-MM-DD HH:mm:ss');
+            }
         },
         questionnaire_path:{
             type:DataTypes.CHAR(255)
