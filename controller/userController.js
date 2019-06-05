@@ -939,7 +939,7 @@ class UserController {
                         }    
                     }
                     else {
-                        ctx.status = 402;
+                        ctx.status = 200;
                         ctx.body = {
                             code: 402,
                             msg: '密码错误',
