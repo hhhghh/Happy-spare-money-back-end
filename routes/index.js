@@ -13,15 +13,17 @@ const ToastModel = require('../modules/toastModel');
 const ToastInfo = require('../utils/toast_info');
 const Op = Sequelize.Op
 
-router.get('/test', async (ctx, next) => {
-    post_body = {
-        task_id: 2
+router.post('/test', async (ctx, next) => {
+    let post_body = ctx.request.body
+    if (post_body.username instanceof Array) {
+        data = await TRModel.batch_confirm_complement(post_body.username, 
+                                                      post_body.task_id, 
+                                                      post_body.score);
+    } else {
+        data = await TRModel.comfirm_complement(post_body.username, 
+                                                post_body.task_id, 
+                                                post_body.score);
     }
-    let current_user = "hyx"
-    let toastTask = await TaskModel.searchTaskById(post_body.task_id);
-    ToastModel.createToast(toastTask.publisher, 11, 
-                            ToastInfo.t11(toastTask.title, current_user), 
-                            current_user, -1, post_body.task_id);
 })
 
 router.get('/', async (ctx, next) => {

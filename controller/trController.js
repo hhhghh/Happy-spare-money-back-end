@@ -200,6 +200,25 @@ class TRController {
                                 post_body.username, -1, post_body.task_id);
     }
 
+    /**
+     * post body should be like
+     * 
+     *  {
+     *      "username": ["hyx", "yao"],
+     *      "task_id": 2,
+     *      "score": [5, 5]
+     *  }
+     * 
+     * or looks like
+     *  
+     * {
+     *     "username": "hyx",
+     *     "task_id": 2,
+     *     "score": 5
+     * }
+     *  
+     * @param {*} ctx 
+     */
     static async confirmComplement(ctx) {
         let result = undefined
         let post_body = ctx.request.body
@@ -208,16 +227,23 @@ class TRController {
             response(ctx, 403, "Please login first", []);
             return;
         }
-        if (post_body.task_id &&
-            post_body.score) {
+        if (post_body.username != undefined && post_body.task_id != undefined && post_body.score != undefined) {
             try {
                 // 判断
                 let publisher = (await TaskModel.searchTaskById(post_body.task_id)).publisher;
                 console.log(publisher, current_user)
                 if (publisher == current_user) {
-                    let data = await TRModel.comfirm_complement(post_body.username, 
+                    let data = undefined
+                    
+                    if (post_body.username instanceof Array) {
+                        data = await TRModel.batch_comfirm_complement(post_body.username, 
+                                                                      post_body.task_id, 
+                                                                      post_body.score);
+                    } else {
+                        data = await TRModel.comfirm_complement(post_body.username, 
                                                                 post_body.task_id, 
                                                                 post_body.score);
+                    }
                     result = {
                         code: 200, 
                         msg: 'Success',
