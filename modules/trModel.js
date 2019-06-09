@@ -185,6 +185,14 @@ class TRModel {
             models.User.findByPk(username)
         ])
     }
+
+    static async batch_confirm_complement(usernames, task_id, scores) {
+        let batch = []
+        for (let i = 0; i < usernames.length; i++) {
+            batch.push(TRModel.comfirm_complement(usernames[i], task_id, scores[i]))
+        }
+        return await Promise.all(batch)
+    }
 }
 
 
