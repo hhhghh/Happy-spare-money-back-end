@@ -236,7 +236,7 @@ class TRController {
                     let data = undefined
                     
                     if (post_body.username instanceof Array) {
-                        data = await TRModel.batch_comfirm_complement(post_body.username, 
+                        data = await TRModel.batch_confirm_complement(post_body.username, 
                                                                       post_body.task_id, 
                                                                       post_body.score);
                     } else {
