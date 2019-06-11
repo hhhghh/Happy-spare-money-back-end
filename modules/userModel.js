@@ -221,20 +221,22 @@ class UserModel {
         if (user2.account_state == 1) {
             return 3
         }
+        console.log(username1)
+        console.log(username2)
         const relate = await Piu.findOne({
             where: {
                 ins_name: username1,
                 username: username2
             }
         })
-        if (relate === null) {
+        if (relate !== null) {
             return 4
         }
-        await Piu.destroy({
-            where: {
-                ins_name: username1,
-                username: username2
-            }
+        console.log(username1)
+        console.log(username2)
+        await Piu.create({
+            ins_name: username1,
+            username: username2
         })
         return 0
     }
@@ -303,12 +305,14 @@ class UserModel {
                 username: username2
             }
         })
-        if (relate !== null) {
+        if (relate === null) {
             return 4
         }
-        await Piu.create({
-            ins_name: username1,
-            username: username2
+        await Piu.destroy({
+            where: {
+                ins_name: username1,
+                username: username2
+            }
         })
         return 0        
     }
@@ -461,6 +465,35 @@ class UserModel {
             })
         }
         return data
+    }
+
+    static async getUserBlacklist(username) {
+        const user = await User.findOne({
+            where: {
+                username: username
+            }
+        })
+        if (user == null) {
+            return -1
+        }
+        let data = []
+        const orgs = await Piu.findAll({
+            where: {
+                username: username
+            }
+        }) 
+        for (var i = 0; i < orgs.length; i++) {
+            const org = await User.findOne({
+                where: {
+                    username: orgs[i].ins_name
+                }
+            })
+            data.push({
+                "username": org.username,
+                "useravatar": org.avatar
+            })
+        }
+        return data    
     }
 
     static async getTaskByTaskId(taskId) {

@@ -29,6 +29,8 @@ router.put('/update', UserController.updateUserInfo);
 
 router.put('/updateAvatar', UserController.updateAvatar);
 
+router.get('/getUserBlacklist', UserController.getUserBlacklist);
+
 router.get('/getPersonalInfo', async (ctx) => {
     if (!ctx.session.username) {
         ctx.status = 401;
