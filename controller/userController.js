@@ -919,6 +919,46 @@ class UserController {
         return result
     }
 
+    static async getUserBlacklist(ctx) {
+        console.log(1)
+        if (!ctx.session.username) {
+            ctx.status = 200;
+            ctx.body = {
+                code: 401,
+                msg: "cookies无效",
+                data: null
+            }
+            return
+        }
+        try {
+            const data = await UserModel.getUserBlacklist(ctx.session.username);
+            if (data == -1) {
+                ctx.status = 200;
+                ctx.body = {
+                    code: 412,
+                    msg: "用户不存在",
+                    data: null
+                }    
+            }
+            else {
+                ctx.status = 200;
+                ctx.body =  {
+                    code: 200,
+                    msg: "success",
+                    data: data
+                }     
+            }
+
+        } catch(err) {
+            ctx.status = 200;
+            ctx.body =  {
+                code: 500,
+                msg: "服务器异常",
+                data: err
+            }   
+        }    
+    }
+
     static async setRate(ctx) {
         console.log()
         const flag = await UserController.judgeCookies(ctx);
