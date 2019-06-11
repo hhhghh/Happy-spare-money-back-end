@@ -339,7 +339,8 @@ class UserController {
                         if (files.avatar) {
                             var extname = path.extname(files.avatar.path)
                             var oldpath = files.avatar.path
-                            var newpath = form.uploadDir + username + extname
+                            var timestamp =(new Date()).valueOf();
+                            var newpath = form.uploadDir + username + timestamp + extname
                             if (!fs.existsSync(newpath)) {
                                 fs.rename(oldpath, newpath, function(err) {
                                     if (err) {
@@ -349,14 +350,14 @@ class UserController {
                             }
                         }
                         if (err) return reject(err)
-                        resolve({ fields: fields, files: files, newpath: newpath, oldpath: oldpath, extname: extname })
+                        resolve({ fields: fields, files: files, newpath: newpath, oldpath: oldpath, extname: extname, timestamp: timestamp })
                       })
                     })
                   }
         
                 var body = await formidablePromise(ctx.req, null, ctx.session.username);
 
-                const res = await UserModel.updateAvatar(ctx.session.username, body.extname);
+                const res = await UserModel.updateAvatar(ctx.session.username, body.extname, body.timestamp);
                 ctx.status = 200;
                 ctx.body = {
                     code: 200,
@@ -376,29 +377,35 @@ class UserController {
     }
 
     static async updateUserMoney(ctx) {
-        let req = ctx.request.body;
+        let result 
+        if (!ctx.session.username) {
+            result = {
+                code: 401,
+                msg: 'cookies无效',
+                data: null
+            }  
+            return result 
+        }
+        var username = ctx.session.username
         try {
-            const data = await UserModel.getUserInfo(req.username);
+            const data = await UserModel.getUserInfo(username);
             if (data === null) {
-                ctx.status = 413;
-                ctx.body = {
+                result = {
                     code: 413,
                     msg: '无当前用户',
                     data: 'error' 
                 }    
             } else {
-                const state = await UserModel.updateUserMoney(req.username, req.money);
+                const state = await UserModel.updateUserMoney(username, ctx.query.amount);
                 if (state === -1) {
-                    ctx.status = 412;
-                    ctx.body = {
+                    result = {
                         code: 412,
                         msg: '账户余额不足',
                         data: 'error' 
                     }
                 } else if (state === 0) {   
-                    const user = await UserModel.getUserInfo(req.username);
-                    ctx.status = 200;
-                    ctx.body = {
+                    const user = await UserModel.getUserInfo(username);
+                    result = {
                         code: 200,
                         msg: '充值成功',
                         data: user.money
@@ -406,13 +413,13 @@ class UserController {
                 }
             }
         } catch(err) {
-            ctx.status = 500;
-            ctx.body = {
+            result = {
                 code: 500,
                 msg: 'failed',
-                data: req
+                data: err
             }
         }
+        return result
     }
 
     static async updateUserScore(ctx) {
