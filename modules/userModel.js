@@ -120,6 +120,33 @@ class UserModel {
      * @param {*} username 
      * @param {*} money 
      */
+    static async updateUserMoney(username, money) {
+        const data = await User.findOne({
+            where: {
+                username: username
+            }
+        }) 
+        money += data.money;
+        if (money < 0) {
+            return -1;
+        }
+        else {
+            await User.update({
+                money: money
+            }, {
+                where: {
+                    username: username
+                }
+            });
+            return 0;
+        }  
+    }
+
+    /**
+     * 更新用户账户余额
+     * @param {*} username 
+     * @param {*} money 
+     */
     static async deposit(username, money) {
         const data = await User.findOne({
             where: {
@@ -482,6 +509,7 @@ class UserModel {
                 username: username
             }
         }) 
+        console.log(orgs.length)
         for (var i = 0; i < orgs.length; i++) {
             const org = await User.findOne({
                 where: {
