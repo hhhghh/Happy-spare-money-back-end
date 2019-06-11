@@ -1,4 +1,5 @@
 const TaskModel = require('../modules/taskModel');
+const UserModel = require('../modules/userModel');
 
 // Get username from session.
 const getUsernameFromCtx = require('./cookieController').getUsernameFromCtx;
@@ -104,6 +105,10 @@ class TaskController {
 
                 try {
                     result = await TaskModel.createTask(post_data, post_body.range)
+                    let task_id = result.get('task_id')
+                    let task_money = (await TaskModel.searchTaskById(task_id)).get('money');
+                    await UserModel.updateUserMoney(current_user, -task_money);
+                    
                     result = {
                         code: 200,
                         msg: "Success",
