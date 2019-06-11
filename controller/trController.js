@@ -7,9 +7,9 @@ const path = require('path');
 const TaskModel = require('../modules/taskModel');
 const ToastModel = require('../modules/toastModel');
 const ToastInfo = require('../utils/toast_info');
+const UserModel = require('../modules/userModel');
 
 require('../config/basicStr');
-
 
 class TRController {
     /**
@@ -165,13 +165,22 @@ class TRController {
         let required_param_list = ['task_id']
         if (checkUndefined(post_body, required_param_list)) {
             try {
-                console.log('<<Delete TR use', current_user, post_body.task_id, '>>')
+                // let publisher = await TaskModel.searchTaskById(post_body.task_id).publisher;
+                // // console.log('<<Delete TR use', current_user, post_body.task_id, '>>')
+                // if (publisher != current_user) {
+                //     result = {
+                //         code: 403,
+                //         msg: "Failed, authorize wrong, the ",
+                //         data: err.message
+                //     }
+                // } else {
                 let data = await TRModel.deleteTR(current_user, post_body.task_id)
                 result = {
                     code: 200, 
                     msg: 'Success',
                     data: data
                 }
+                // }
             } catch (err) {
                 result = {
                     code: 500,
@@ -224,7 +233,7 @@ class TRController {
         let post_body = ctx.request.body
         let current_user = await getUsernameFromCtx(ctx)
         if (current_user == -1 || current_user == -2 || current_user == undefined || current_user == null) {
-            response(ctx, 403, "Please login first", []);
+            response(ctx, 401, "Please login first", []);
             return;
         }
         if (post_body.username != undefined && post_body.task_id != undefined && post_body.score != undefined) {
@@ -244,6 +253,11 @@ class TRController {
                                                                 post_body.task_id, 
                                                                 post_body.score);
                     }
+                    // 扣钱, 要查找所有完成的用户，去完成
+                    // TODO ...
+
+                    // let task_money = await TaskModel.searchTaskById(post_body.task_id).money;
+                    // await UserModel.updateUserMoney(post_body.username, task_money);
                     result = {
                         code: 200, 
                         msg: 'Success',
@@ -291,7 +305,7 @@ class TRController {
         let result = undefined
         let current_user = await getUsernameFromCtx(ctx)
         if (current_user == -1 || current_user == -2 || current_user == undefined || current_user == null) {
-            response(ctx, 403, "please login first", []);
+            response(ctx, 401, "please login first", []);
             return;
         }
         if (post_body.task_id != undefined) {
