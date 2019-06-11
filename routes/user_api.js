@@ -158,7 +158,41 @@ router.get('/deposit', async(ctx) => {
     let query_params = ctx.query
     let result = null
     if (query_params.amount) {
-        result = await UserController.updateUserMoney(ctx);   
+        if (Number(query_params.amount) <= 0) {
+            result = {
+                code: 400,
+                msg: 'Wrong query param, money cannot be less than or equal to 0',
+                data: null
+            }    
+        }
+        else {        
+            result = await UserController.deposit(ctx);
+        }   
+    }
+    else {
+        result = {
+            code: 400,
+            msg: 'Wrong query param.',
+            data: null
+        }
+    }
+    ctx = response(ctx, result)
+})
+
+router.get('/withdraw', async(ctx) => {
+    let query_params = ctx.query
+    let result = null
+    if (query_params.amount) {
+        if (Number(query_params.amount) <= 0) {
+            result = {
+                code: 400,
+                msg: 'Wrong query param, money cannot be less than or equal to 0',
+                data: null
+            }    
+        }
+        else {        
+            result = await UserController.withdraw(ctx);
+        }   
     }
     else {
         result = {

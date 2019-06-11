@@ -51,16 +51,18 @@ class UserController {
                     var oldpath = files.avatar.path
                     console.log(oldpath)
                     var newpath = form.uploadDir + fields.username + extname
+                    var issave = false
                     if (!fs.existsSync(newpath)) {
                         fs.rename(oldpath, newpath, function(err) {
                             if (err) {
                                 throw err
                             }
                         })
+                        issave = true
                     }
                 }
                 if (err) return reject(err)
-                resolve({ fields: fields, files: files, newpath: newpath, oldpath: oldpath, extname: extname })
+                resolve({ fields: fields, files: files, newpath: newpath, oldpath: oldpath, extname: extname, issave: issave })
               })
             })
           }
@@ -79,6 +81,11 @@ class UserController {
                 }
                 if (fs.existsSync(body.oldpath)) {
                     fs.unlinkSync(body.oldpath)
+                }
+                if (body.issave) {
+                    if (fs.existsSync(body.newpath)) {
+                        fs.unlinkSync(body.newpath)
+                    }
                 }
                 return
             }
@@ -375,7 +382,7 @@ class UserController {
 
     }
 
-    static async updateUserMoney(ctx) {
+    static async deposit(ctx) {
         let result 
         if (!ctx.session.username) {
             result = {
@@ -395,7 +402,7 @@ class UserController {
                     data: 'error' 
                 }    
             } else {
-                const state = await UserModel.updateUserMoney(username, ctx.query.amount);
+                const state = await UserModel.deposit(username, ctx.query.amount);
                 if (state === -1) {
                     result = {
                         code: 412,
@@ -407,6 +414,52 @@ class UserController {
                     result = {
                         code: 200,
                         msg: '充值成功',
+                        data: user.money
+                    }  
+                }
+            }
+        } catch(err) {
+            result = {
+                code: 500,
+                msg: 'failed',
+                data: err
+            }
+        }
+        return result
+    }
+
+    static async withdraw(ctx) {
+        let result 
+        if (!ctx.session.username) {
+            result = {
+                code: 401,
+                msg: 'cookies无效',
+                data: null
+            }  
+            return result 
+        }
+        var username = ctx.session.username
+        try {
+            const data = await UserModel.getUserInfo(username);
+            if (data === null) {
+                result = {
+                    code: 413,
+                    msg: '无当前用户',
+                    data: 'error' 
+                }    
+            } else {
+                const state = await UserModel.withdraw(username, ctx.query.amount);
+                if (state === -1) {
+                    result = {
+                        code: 412,
+                        msg: '账户余额不足',
+                        data: 'error' 
+                    }
+                } else if (state === 0) {   
+                    const user = await UserModel.getUserInfo(username);
+                    result = {
+                        code: 200,
+                        msg: '提现成功',
                         data: user.money
                     }  
                 }

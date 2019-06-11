@@ -120,7 +120,7 @@ class UserModel {
      * @param {*} username 
      * @param {*} money 
      */
-    static async updateUserMoney(username, money) {
+    static async deposit(username, money) {
         const data = await User.findOne({
             where: {
                 username: username
@@ -128,6 +128,35 @@ class UserModel {
         }) 
 
         var num = Number(money) + data.money
+
+        if (num < 0) {
+            return -1;
+        }
+        else {
+            await User.update({
+                money: num
+            }, {
+                where: {
+                    username: username
+                }
+            });
+            return 0;
+        }  
+    }
+
+    /**
+     * 更新用户账户余额
+     * @param {*} username 
+     * @param {*} money 
+     */
+    static async withdraw(username, money) {
+        const data = await User.findOne({
+            where: {
+                username: username
+            }
+        }) 
+
+        var num = data.money - Number(money)
 
         if (num < 0) {
             return -1;
