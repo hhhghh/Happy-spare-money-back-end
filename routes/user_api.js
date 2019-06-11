@@ -9,8 +9,6 @@ router.post('/login', UserController.login);
 
 router.get('/logout', UserController.logout);
 
-router.post('/recharge', UserController.updateUserMoney);
-
 router.post('/score', UserController.updateUserScore);
 
 router.post('/userblacklist', UserController.UserBlacklistUser);
@@ -145,6 +143,22 @@ router.get('/getCanPublishTasksOrg', async(ctx) => {
     let result = null;
     if (query_params.teamId) {
         result = await UserController.getCanPublishTasksOrg(query_params.teamId);
+    }
+    else {
+        result = {
+            code: 400,
+            msg: 'Wrong query param.',
+            data: null
+        }
+    }
+    ctx = response(ctx, result)
+})
+
+router.get('/deposit', async(ctx) => {
+    let query_params = ctx.query
+    let result = null
+    if (query_params.amount) {
+        result = await UserController.updateUserMoney(ctx);   
     }
     else {
         result = {

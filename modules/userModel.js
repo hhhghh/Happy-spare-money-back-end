@@ -103,8 +103,8 @@ class UserModel {
         });
     }
 
-    static async updateAvatar(username, avatarExtName) {
-        var avatar = 'http://139.196.79.193:3000/uploads/user/' + username + avatarExtName
+    static async updateAvatar(username, avatarExtName, timestamp) {     
+        var avatar = 'http://139.196.79.193:3000/uploads/user/' + username + timestamp + avatarExtName
         await User.update({
             avatar: avatar
         }, {
@@ -126,13 +126,15 @@ class UserModel {
                 username: username
             }
         }) 
-        money += data.money;
-        if (money < 0) {
+
+        var num = Number(money) + data.money
+
+        if (num < 0) {
             return -1;
         }
         else {
             await User.update({
-                money: money
+                money: num
             }, {
                 where: {
                     username: username
