@@ -33,8 +33,15 @@ router.get('/Leader/', async (ctx) => {
 router.get('/Member/', async (ctx) => {
     let query_params = ctx.query;
     let result = null;
-    if (query_params.team_id && query_params.member_username) {
-        result = await TeamController.isGroupMember(query_params.team_id, query_params.member_username)
+    let cookie_user = await CookieController.getUsernameFromCtx(ctx);
+    if (query_params.team_id && cookie_user !== -2) {
+        result = await TeamController.isGroupMember(query_params.team_id, cookie_user)
+    } else if (query_params.team_id){
+        result = {
+            code: 401,
+            msg: 'cookie超时，请重新登录',
+            data: null
+        }
     } else {
         result = {
             code: 400,
@@ -42,6 +49,7 @@ router.get('/Member/', async (ctx) => {
             data: null
         }
     }
+
     response(ctx, result);
 });
 

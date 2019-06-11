@@ -473,7 +473,7 @@ class TeamController {
                 leader, team_id, null);
             result = {
                 code: 200,
-                msg: '决绝成功',
+                msg: '拒绝成功',
                 data: true
             };
         } catch (err) {
