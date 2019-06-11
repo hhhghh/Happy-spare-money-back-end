@@ -24,7 +24,7 @@ class ToastController {
             result = {
                 code: 412,
                 msg: '查询失败',
-                data: err
+                data: err.message
             };
         }
         return result;
