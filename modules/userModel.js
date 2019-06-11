@@ -103,8 +103,8 @@ class UserModel {
         });
     }
 
-    static async updateAvatar(username, avatarExtName) {
-        var avatar = 'http://139.196.79.193:3000/uploads/user/' + username + avatarExtName
+    static async updateAvatar(username, avatarExtName, timestamp) {     
+        var avatar = 'http://139.196.79.193:3000/uploads/user/' + username + timestamp + avatarExtName
         await User.update({
             avatar: avatar
         }, {
@@ -154,9 +154,62 @@ class UserModel {
         }
         let ps = []
         for (let i = 0; i < usernames.length; i++) {
-            ps.push(updateUserMoney(usernames[i], money));
+            ps.push(UserModel.updateUserMoney(usernames[i], money));
         }
         return await Promise.all(ps);
+    }
+  
+    static async deposit(username, money) {
+        const data = await User.findOne({
+            where: {
+                username: username
+            }
+        }) 
+
+        var num = Number(money) + data.money
+
+        if (num < 0) {
+            return -1;
+        }
+        else {
+            await User.update({
+                money: num
+            }, {
+                where: {
+                    username: username
+                }
+            });
+            return 0;
+        }  
+    }
+
+    /**
+     * 更新用户账户余额
+     * @param {*} username 
+     * @param {*} money 
+     */
+    static async withdraw(username, money) {
+        const data = await User.findOne({
+            where: {
+                username: username
+            }
+        }) 
+
+        var num = data.money - Number(money)
+
+        if (num < 0) {
+            return -1;
+        }
+        else {
+            await User.update({
+                money: num
+            }, {
+                where: {
+                    username: username
+                }
+            });
+            return 0;
+        }  
     }
 
     /**
@@ -207,20 +260,22 @@ class UserModel {
         if (user2.account_state == 1) {
             return 3
         }
+        console.log(username1)
+        console.log(username2)
         const relate = await Piu.findOne({
             where: {
                 ins_name: username1,
                 username: username2
             }
         })
-        if (relate === null) {
+        if (relate !== null) {
             return 4
         }
-        await Piu.destroy({
-            where: {
-                ins_name: username1,
-                username: username2
-            }
+        console.log(username1)
+        console.log(username2)
+        await Piu.create({
+            ins_name: username1,
+            username: username2
         })
         return 0
     }
@@ -289,12 +344,14 @@ class UserModel {
                 username: username2
             }
         })
-        if (relate !== null) {
+        if (relate === null) {
             return 4
         }
-        await Piu.create({
-            ins_name: username1,
-            username: username2
+        await Piu.destroy({
+            where: {
+                ins_name: username1,
+                username: username2
+            }
         })
         return 0        
     }
@@ -447,6 +504,36 @@ class UserModel {
             })
         }
         return data
+    }
+
+    static async getUserBlacklist(username) {
+        const user = await User.findOne({
+            where: {
+                username: username
+            }
+        })
+        if (user == null) {
+            return -1
+        }
+        let data = []
+        const orgs = await Piu.findAll({
+            where: {
+                username: username
+            }
+        }) 
+        console.log(orgs.length)
+        for (var i = 0; i < orgs.length; i++) {
+            const org = await User.findOne({
+                where: {
+                    username: orgs[i].ins_name
+                }
+            })
+            data.push({
+                "username": org.username,
+                "useravatar": org.avatar
+            })
+        }
+        return data    
     }
 
     static async getTaskByTaskId(taskId) {
