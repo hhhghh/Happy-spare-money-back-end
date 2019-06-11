@@ -119,7 +119,7 @@ class TeamController {
             result = {
                 code: 412,
                 msg: '查询失败',
-                data: err
+                data: err.message
             };
         }
         return result;
@@ -147,7 +147,7 @@ class TeamController {
             result = {
                 code: 412,
                 msg: '查询失败',
-                data: err
+                data: err.message
             };
         }
         return result;
@@ -175,7 +175,7 @@ class TeamController {
             result = {
                 code: 412,
                 msg: '查询失败',
-                data: err
+                data: err.message
             };
         }
         return result;
@@ -203,7 +203,7 @@ class TeamController {
             result = {
                 code: 412,
                 msg: '查询失败',
-                data: err
+                data: err.message
             };
         }
         return result;
@@ -239,7 +239,7 @@ class TeamController {
             result = {
                 code: 412,
                 msg: '查询失败',
-                data: err
+                data: err.message
             };
         }
         return result;
@@ -276,7 +276,7 @@ class TeamController {
             result = {
                 code: 412,
                 msg: '查询失败',
-                data: err
+                data: err.message
             };
         }
         return result;
@@ -361,7 +361,7 @@ class TeamController {
             result = {
                 code: 412,
                 msg: '添加失败',
-                data: err
+                data: err.message
             };
         }
         return result;
@@ -412,8 +412,8 @@ class TeamController {
                         data: false
                     };
                 } else {
-                    let team = await TeamModel.getUserByTeamIdUsername(team_id, username);
-                    if (team.length === 0) {
+                    let member = await TeamModel.getUserByTeamIdUsername(team_id, username);
+                    if (member.length === 0) {
                         await ToastModel.createToast(team.leader, 0,
                             Toast_info.t0(username, team.team_name),
                             username, team_id, null);
@@ -441,7 +441,46 @@ class TeamController {
             result = {
                 code: 412,
                 msg: '添加失败',
-                data: err
+                data: err.message
+            };
+        }
+        return result;
+    }
+
+
+    static async rejectUserToGrope(username, team_id, leader) {
+        let result = null;
+        try {
+            let team = await TeamModel.getTeamByTeamId(team_id);
+            if (team === null) {
+                result = {
+                    code: 213,
+                    msg: '没有该小组',
+                    data: false
+                };
+                return;
+            }
+            if (team.leader !== leader) {
+                result = {
+                    code: 212,
+                    msg: 'leader不是组长，拒绝失败',
+                    data: false
+                };
+                return;
+            }
+            await ToastModel.createToast(username, 6,
+                Toast_info.t6(team.team_name),
+                leader, team_id, null);
+            result = {
+                code: 200,
+                msg: '决绝成功',
+                data: true
+            };
+        } catch (err) {
+            result = {
+                code: 412,
+                msg: '决绝失败',
+                data: err.message
             };
         }
         return result;
@@ -488,7 +527,7 @@ class TeamController {
             result = {
                 code: 412,
                 msg: '删除失败',
-                data: err
+                data: err.message
             };
         }
         return result;
@@ -537,7 +576,7 @@ class TeamController {
             result = {
                 code: 412,
                 msg: '删除失败',
-                data: err
+                data: err.message
             };
         }
         return result;
@@ -578,7 +617,7 @@ class TeamController {
             result = {
                 code: 412,
                 msg: '修改失败',
-                data: err
+                data: err.message
             };
         }
         return result;
@@ -622,7 +661,7 @@ class TeamController {
             result = {
                 code: 412,
                 msg: '查询失败',
-                data: err
+                data: err.message
             };
         }
         return result;
@@ -694,7 +733,7 @@ class TeamController {
                 ctx.body = {
                     code: 412,
                     msg: '修改小组失败',
-                    data: err
+                    data: err.message
                 }
             }
         } else {

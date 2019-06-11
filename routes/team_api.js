@@ -155,6 +155,30 @@ router.post('/Member/Addition/', async (ctx) => {
     response(ctx, result)
 });
 
+router.post('/Member/Rejection/', async (ctx) => {
+    let result = null;
+    let cookie_user = await CookieController.getUsernameFromCtx(ctx);
+    if (cookie_user === -2) {
+        result = {
+            code: 401,
+            msg: 'cookie超时，请重新登录',
+            data: null
+        }
+    } else {
+        let query_params = ctx.request.body;
+        if (query_params.username && query_params.team_id) {
+            result = await TeamController.rejectUserToGrope(query_params.username, query_params.team_id, cookie_user)
+        } else {
+            result = {
+                code: 400,
+                msg: 'Wrong query param.',
+                data: null
+            }
+        }
+    }
+    response(ctx, result)
+});
+
 router.post('/Leader/', async (ctx) => {
     let result = null;
     let cookie_user = await CookieController.getUsernameFromCtx(ctx);
