@@ -13,12 +13,10 @@ module.exports = function(sequelize, DataTypes){
         username:{
             type:DataTypes.CHAR(20),
             allowNull:false,
-            unique: 'one_reciever_to_one_task'
         },
         task_id:{
             type:DataTypes.INTEGER,
             allowNull:false,
-            unique: 'one_reciever_to_one_task'
         },
         state:{
             type: DataTypes.INTEGER,

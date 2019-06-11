@@ -143,6 +143,23 @@ class UserModel {
     }
 
     /**
+     * 更新用户账户余额
+     * @param {*} username 
+     * @param {*} money 
+     */
+    static async batchUpdateUserMoney(usernames, money) {
+        // Can only add money
+        if (money < 0) {
+            throw new Error("Can only add money through this API")
+        }
+        let ps = []
+        for (let i = 0; i < usernames.length; i++) {
+            ps.push(updateUserMoney(usernames[i], money));
+        }
+        return await Promise.all(ps);
+    }
+
+    /**
      * 更新用户的信用分数
      * @param {*} username 
      * @param {*} grade 

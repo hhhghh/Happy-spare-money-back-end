@@ -251,16 +251,13 @@ class TRController {
                                                                       post_body.task_id, 
                                                                       post_body.score);
                         
-                        await UserModel.updateUserMoney(post_body.username, task_money);
+                        await UserModel.batchUpdateUserMoney(post_body.username, task_money);
                     } else {
                         data = await TRModel.comfirm_complement(post_body.username, 
                                                                 post_body.task_id, 
                                                                 post_body.score);
                         await UserModel.updateUserMoney(post_body.username, task_money);
                     }
-                    // 扣钱, 要查找所有完成的用户，去完成
-                    // TODO ...
-
                     result = {
                         code: 200, 
                         msg: 'Success',

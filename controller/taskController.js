@@ -104,17 +104,23 @@ class TaskController {
                 }
 
                 try {
-                    result = await TaskModel.createTask(post_data, post_body.range)
-                    let task_id = result.get('task_id')
-                    let task_money = (await TaskModel.searchTaskById(task_id)).get('money');
-                    await UserModel.updateUserMoney(current_user, -task_money);
-                    
-                    result = {
-                        code: 200,
-                        msg: "Success",
-                        data: result
+                    let task_money = post_body.money * post_body.max_accepter_number;
+                    // result.get('money') * result.get('max_accepter_number');
+                    let check_money = await UserModel.updateUserMoney(current_user, -task_money);
+                    if (check_money == -1) {
+                        result = {
+                            code: 403,
+                            msg: "Your balance is not enough to publish this task",
+                            data: result
+                        }
+                    } else {
+                        result = await TaskModel.createTask(post_data, post_body.range)
+                        result = {
+                            code: 200,
+                            msg: "Success",
+                            data: result
+                        }
                     }
-                    
                 } catch (err) {
                     result = {
                         code: 500,
