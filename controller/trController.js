@@ -21,8 +21,8 @@ class TRController {
         let post_body = ctx.request.body
         let result = undefined
         let required_param_list = ['task_id']
+        let current_user = await getUsernameFromCtx(ctx)
         if (checkUndefined(post_body, required_param_list)) {
-            let current_user = await getUsernameFromCtx(ctx)
             if (current_user == -1 || current_user == -2) {
                 result = {
                     code: 401,
@@ -72,8 +72,9 @@ class TRController {
             data: result.data
         }
 
-        let publisher = await TaskModel.searchTaskById(post_body.task_id).publisher
-        ToastModel.createToast(publisher, 10, "", post_body.username, null, post_body.task_id);
+        let task = await TaskModel.searchTaskById(post_body.task_id)
+        console.log(task.get('task_id'))
+        ToastModel.createToast(task.get('publisher'), 10, ToastInfo.t10(task.get('title'), post_body.username), post_body.username, null, post_body.task_id);
     }
 
     /**
