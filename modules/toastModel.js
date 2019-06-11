@@ -28,7 +28,7 @@ class ToastModel {
         Task.hasOne(Toast, {foreignKey : 'msg_task_id'});
         Toast.belongsTo(Task, {foreignKey : 'msg_task_id'});
         return await Toast.findAll({
-            attributes: ['id', 'username', 'type', 'message', 'msg_username', 'msg_team_id', 'msg_task_id'],
+            attributes: ['id', 'username', 'type', 'message', 'msg_username'],
             where: {
                 username: username,
             },
