@@ -52,6 +52,17 @@ class ToastModel {
         })
     }
 
+    static async getToastByMessage(type, msg_username, msg_team_id) {
+        return await Toast.findOne({
+            attributes: ['id', 'username', 'type', 'message', 'msg_username', 'msg_team_id', 'msg_task_id'],
+            where: {
+                type: type,
+                msg_username: msg_username,
+                msg_team_id: msg_team_id,
+            }
+        })
+    }
+
     // 删除消息
     static async deleteToastByIdUsername(id, username) {
         return await Toast.destroy({

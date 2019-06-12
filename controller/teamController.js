@@ -1,4 +1,5 @@
 const TeamModel = require('../modules/teamModel');
+const UserModel = require('../modules/userModel');
 const ToastModel = require('../modules/toastModel');
 const CookieController = require('./CookieController');
 const Toast_info = require('../utils/toast_info');
@@ -385,7 +386,7 @@ class TeamController {
                         msg: '添加失败，没有user',
                         data: false
                     };
-                } else {
+                } else if (user.account_state === 0) {
                     let team = await TeamModel.getUserByTeamIdUsername(team_id, username);
                     if (team.length === 0) {
                         await TeamModel.createMembers(team_id, username);
@@ -401,6 +402,22 @@ class TeamController {
                             data: false
                         };
                     }
+                } else if (user.account_state === 1) {
+                    let team = await TeamModel.getUserByTeamIdUsername(team_id, username);
+                    if (team.length === 0) {
+                        await UserModel.teamCancelBlack(username, team_id);
+                        result = {
+                            code: 200,
+                            msg: '添加成功',
+                            data: true
+                        };
+                    } else {
+                        result = {
+                            code: 211,
+                            msg: '添加失败，机构已经在小组中',
+                            data: false
+                        };
+                    }
                 }
             } else if (team.limit === 1) {
                 let user = await TeamModel.getUserByUsername(username);
@@ -413,9 +430,12 @@ class TeamController {
                 } else {
                     let member = await TeamModel.getUserByTeamIdUsername(team_id, username);
                     if (member.length === 0) {
-                        await ToastModel.createToast(team.leader, 0,
-                            Toast_info.t0(username, team.team_name),
-                            username, team_id, null);
+                        let toast = await ToastModel.getToastByMessage(0, username, team_id);
+                        if (toast === null) {
+                            await ToastModel.createToast(team.leader, 0,
+                                Toast_info.t0(username, team.team_name),
+                                username, team_id, null);
+                        }
                         result = {
                             code: 214,
                             msg: '添加失败，需要组长审核',
@@ -645,10 +665,16 @@ class TeamController {
                         Toast_info.t3(team.team_name),
                         leader, team_id, null);
                 }
+                if (team.logo !== defaultLogo) {
+                    let tem = team.logo.split('/');
+                    let filePath = './static/' + tem[3] + '/' + tem[4] + '/' + tem[5];
+                    fs.unlinkSync(filePath);
+                }
                 await TeamModel.deleteTeamMember(team_id);
                 await TeamModel.deleteTeamLabel(team_id);
                 await TeamModel.deleteTeamPit(team_id);
                 await TeamModel.deleteTeam(team_id);
+
                 result = {
                     code: 200,
                     msg: '删除成功',
