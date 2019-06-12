@@ -37,7 +37,7 @@ class TeamController {
                 let flag = true;
                 for (let i = 0; i < members.length; i++) {
                     let user = await TeamModel.getUserByUsername(members[i].member_username);
-                    if (user === null) {
+                        if (user === null) {
                         flag = false;
                         break;
                     }
@@ -56,8 +56,7 @@ class TeamController {
                             ret.leader, ret.team_id, null);
                         // }
                     }
-
-                    const data = await TeamModel.getTeamByTeamId(ret.team_id);
+                    const data = await TeamModel.getTeamByTeamId(ret.team_id, 0);
                     ctx.response.status = 200;
                     ctx.body = {
                         code: 200,
@@ -98,10 +97,10 @@ class TeamController {
     }
 
     // 200 成功，412 异常, 213 没有小组
-    static async getGroupByGroupId(team_id) {
+    static async getGroupByGroupId(team_id, type) {
         let result = null;
         try {
-            let data = await TeamModel.getTeamByTeamId2(team_id);
+            let data = await TeamModel.getTeamByTeamId2(team_id, type);
             if (data.length === 0) {
                 result = {
                     code: 213,
@@ -126,10 +125,10 @@ class TeamController {
     }
 
     // 200 成功，412 异常, 213 没有小组
-    static async getGroupByGroupName(team_name) {
+    static async getGroupByGroupName(team_name, type) {
         let result = null;
         try {
-            let data = await TeamModel.getTeamByName(team_name);
+            let data = await TeamModel.getTeamByName(team_name, type);
             if (data.length === 0) {
                 result = {
                     code: 213,
@@ -154,10 +153,10 @@ class TeamController {
     }
 
     // 200 成功，412 异常，213 没有小组
-    static async getGroupByTag(tag) {
+    static async getGroupByTag(tag, type) {
         let result = null;
         try {
-            let data = await TeamModel.getTeamByLabel(tag);
+            let data = await TeamModel.getTeamByLabel(tag, type);
             if (data.length === 0) {
                 result = {
                     code: 213,
@@ -182,10 +181,10 @@ class TeamController {
     }
 
     // 200 成功，412 异常，213 没有加入小组
-    static async getGroupByUsername(member_username) {
+    static async getGroupByUsername(member_username, type) {
         let result = null;
         try {
-            let data = await TeamModel.getTeamByUsername(member_username);
+            let data = await TeamModel.getTeamByUsername(member_username, type);
             if (data.length === 0) {
                 result = {
                     code: 213,
@@ -213,7 +212,7 @@ class TeamController {
     static async isGroupLeader(team_id, leader) {
         let result = null;
         try {
-            let team = await TeamModel.getTeamByTeamId(team_id);
+            let team = await TeamModel.getTeamByTeamId(team_id, 0);
             if (team === null) {
                 result = {
                     code: 213,
@@ -249,7 +248,7 @@ class TeamController {
     static async isGroupMember(team_id, member_username) {
         let result = null;
         try {
-            let team = await TeamModel.getTeamByTeamId(team_id);
+            let team = await TeamModel.getTeamByTeamId(team_id, 0);
             if (team === null) {
                 result = {
                     code: 213,
@@ -287,7 +286,7 @@ class TeamController {
     static async addUserToGrope(team_id, leader, user) {
         let result = null;
         try {
-            let team = await TeamModel.getTeamByTeamId(team_id);
+            let team = await TeamModel.getTeamByTeamId(team_id, 0);
             if (team === null) {
                 result = {
                     code: 213,
@@ -371,7 +370,7 @@ class TeamController {
     static async addUserToGrope2(team_id, username) {
         let result = null;
         try {
-            let team = await TeamModel.getTeamByTeamId(team_id);
+            let team = await TeamModel.getTeamByTeamId(team_id, 0);
             if (team === null) {
                 result = {
                     code: 213,
@@ -451,7 +450,7 @@ class TeamController {
     static async rejectUserToGrope(username, team_id, leader) {
         let result = null;
         try {
-            let team = await TeamModel.getTeamByTeamId(team_id);
+            let team = await TeamModel.getTeamByTeamId(team_id, 0);
             if (team === null) {
                 result = {
                     code: 213,
@@ -479,7 +478,7 @@ class TeamController {
         } catch (err) {
             result = {
                 code: 412,
-                msg: '决绝失败',
+                msg: '拒绝失败',
                 data: err.message
             };
         }
@@ -490,7 +489,7 @@ class TeamController {
     static async deleteUserFromGrope(team_id, leader, username) {
         let result = null;
         try {
-            let team = await TeamModel.getTeamByTeamId(team_id);
+            let team = await TeamModel.getTeamByTeamId(team_id, 0);
             if (team.leader === leader) {
                 let user_team = await TeamModel.getUserByTeamIdUsername(team_id, username);
                 if (team.leader === username) {
@@ -537,7 +536,7 @@ class TeamController {
     static async deleteUserFromGrope2(team_id, username) {
         let result = null;
         try {
-            let teams = await TeamModel.getTeamByTeamId(team_id);
+            let teams = await TeamModel.getTeamByTeamId(team_id, 0);
             if (teams === null) {
                 result = {
                     code: 213,
@@ -586,7 +585,7 @@ class TeamController {
     static async updateTeamLeader(team_id, leader, username) {
         let result = null;
         try {
-            let team = await TeamModel.getTeamByTeamId(team_id);
+            let team = await TeamModel.getTeamByTeamId(team_id, 0);
             if (team.leader === leader) {
                 let isMember = await TeamModel.getUserByTeamIdUsername(team_id, username);
                 if (isMember.length === 0) {
@@ -596,7 +595,7 @@ class TeamController {
                         data: false
                     };
                 } else {
-                    await  TeamModel.updateTeamLeader(team_id, leader, username);
+                    await TeamModel.updateTeamLeader(team_id, leader, username);
                     await ToastModel.createToast(username, 4,
                         Toast_info.t4(team.team_name),
                         leader, team_id, null);
@@ -627,7 +626,7 @@ class TeamController {
     static async deleteGroup(team_id, leader) {
         let result = null;
         try {
-            let team = await TeamModel.getTeamByTeamId(team_id);
+            let team = await TeamModel.getTeamByTeamId(team_id, 0);
             if (team === null) {
                 result = {
                     code: 213,
@@ -649,7 +648,6 @@ class TeamController {
                 await TeamModel.deleteTeamMember(team_id);
                 await TeamModel.deleteTeamLabel(team_id);
                 await TeamModel.deleteTeamPit(team_id);
-                // 删除任务
                 await TeamModel.deleteTeam(team_id);
                 result = {
                     code: 200,
@@ -682,7 +680,7 @@ class TeamController {
         req.leader = cookie_user;
         if (req.team_id) {
             try {
-                let team = await TeamModel.getTeamByTeamId(req.team_id);
+                let team = await TeamModel.getTeamByTeamId(req.team_id, 0);
                 if (team === null) {
                     ctx.response.status = 213;
                     ctx.body = {
@@ -743,6 +741,26 @@ class TeamController {
                 msg: '参数不齐全',
             }
         }
+    }
+
+    // 200 成功，412 异常
+    static async getDefaultGroup() {
+        let result = null;
+        try {
+            let data = await TeamModel.getDefaultTeam();
+            result = {
+                code: 200,
+                msg: '查询成功',
+                data: data
+            };
+        } catch (err) {
+            result = {
+                code: 412,
+                msg: '查询失败',
+                data: err.message
+            };
+        }
+        return result;
     }
 
 }

@@ -23,6 +23,7 @@ class TeamModel {
             logo : data.logo,
             description : data.description,
             limit : data.limit,
+            type: data.type
         })
     }
 
@@ -41,7 +42,7 @@ class TeamModel {
     }
 
     //  根据组名来查找小组
-    static async getTeamByName(team_name) {
+    static async getTeamByName(team_name, type) {
         Team.hasMany(Teamlabel, {foreignKey : 'team_id'});
         Teamlabel.belongsTo(Team, {foreignKey : 'team_id'});
         Team.hasMany(Members, {foreignKey : 'team_id'});
@@ -49,7 +50,8 @@ class TeamModel {
         return await Team.findAll({
             attributes: ['team_id', 'team_name', 'leader', 'logo', 'description', 'limit'],
             where: {
-                team_name : team_name,
+                team_name: team_name,
+                type: type
             },
             include: [{
                 attributes: ['team_id', 'label'],
@@ -62,7 +64,7 @@ class TeamModel {
     }
 
     // 根据小组id来查找小组
-    static async getTeamByTeamId(team_id) {
+    static async getTeamByTeamId(team_id, type) {
         Team.hasMany(Teamlabel, {foreignKey : 'team_id'});
         Teamlabel.belongsTo(Team, {foreignKey : 'team_id'});
         Team.hasMany(Members, {foreignKey : 'team_id'});
@@ -71,6 +73,7 @@ class TeamModel {
             attributes: ['team_id', 'team_name', 'leader', 'logo', 'description', 'limit'],
             where: {
                 team_id : team_id,
+                type: type
             },
             include: [{
                 attributes: ['team_id', 'label'],
@@ -83,7 +86,7 @@ class TeamModel {
     }
 
     // 根据小组id来查找小组
-    static async getTeamByTeamId2(team_id) {
+    static async getTeamByTeamId2(team_id, type) {
         Team.hasMany(Teamlabel, {foreignKey : 'team_id'});
         Teamlabel.belongsTo(Team, {foreignKey : 'team_id'});
         Team.hasMany(Members, {foreignKey : 'team_id'});
@@ -92,6 +95,7 @@ class TeamModel {
             attributes: ['team_id', 'team_name', 'leader', 'logo', 'description', 'limit'],
             where: {
                 team_id : team_id,
+                type: type
             },
             include: [{
                 attributes: ['team_id', 'label'],
@@ -104,7 +108,7 @@ class TeamModel {
     }
 
     // 根据标签来查找小组
-    static async getTeamByLabel(label) {
+    static async getTeamByLabel(label, type) {
         Team.hasMany(Teamlabel, {foreignKey : 'team_id'});
         Teamlabel.belongsTo(Team, {foreignKey : 'team_id'});
         Team.hasMany(Members, {foreignKey : 'team_id'});
@@ -121,9 +125,9 @@ class TeamModel {
         if (team.length === 0)
             return [];
         let result;
-        result = await TeamModel.getTeamByTeamId2(team[0].team_id);
+        result = await TeamModel.getTeamByTeamId2(team[0].team_id, type);
         for (let i = 1; i < team.length; i++) {
-            result.push(await TeamModel.getTeamByTeamId(team[i].team_id));
+            result.push(await TeamModel.getTeamByTeamId(team[i].team_id, type));
         }
         return result;
     }
@@ -131,7 +135,7 @@ class TeamModel {
     // 获取小组权限,使用根据小组id来查找小组
 
     //  根据用户名返回用户加入了的小组
-    static async getTeamByUsername(member_username) {
+    static async getTeamByUsername(member_username, type) {
         Team.hasMany(Members, {foreignKey : 'team_id'});
         Members.belongsTo(Team, {foreignKey : 'team_id'});
         Team.hasMany(Teamlabel, {foreignKey : 'team_id'});
@@ -148,9 +152,9 @@ class TeamModel {
         if (team.length === 0)
             return [];
         let result;
-        result = await TeamModel.getTeamByTeamId2(team[0].team_id);
+        result = await TeamModel.getTeamByTeamId2(team[0].team_id, type);
         for (let i = 1; i < team.length; i++) {
-            result.push(await TeamModel.getTeamByTeamId(team[i].team_id));
+            result.push(await TeamModel.getTeamByTeamId(team[i].team_id, type));
         }
         return result;
     }
@@ -252,5 +256,34 @@ class TeamModel {
             }
         })
     }
+
+    // 查找默认小组
+    static async getDefaultTeam() {
+        Team.hasMany(Teamlabel, {foreignKey : 'team_id'});
+        Teamlabel.belongsTo(Team, {foreignKey : 'team_id'});
+        Team.hasMany(Members, {foreignKey : 'team_id'});
+        Members.belongsTo(Team, {foreignKey : 'team_id'});
+        return await Team.findAll({
+            attributes: ['team_id', 'team_name', 'leader', 'logo', 'description', 'limit', 'type'],
+            where: {
+                type: 1
+            },
+            include: [{
+                attributes: ['team_id', 'label'],
+                model: Teamlabel,
+            },{
+                attributes: ['team_id', 'member_username'],
+                model: Members,
+            }],
+        })
+    }
+
+    // 添加成员到默认小组
+    static async addToDefaultTeam(username) {
+        await TeamModel.createMembers(1, username);
+        let user = await TeamModel.getUserByUsername(username);
+        await TeamModel.createMembers(user.grade+1, username);
+    }
+
 }
 module.exports = TeamModel;
