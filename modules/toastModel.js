@@ -10,35 +10,28 @@ Task.sync({force: false});
 
 class ToastModel {
     // 创建提示信息
-    static async createToast(username, type, message, msg_username, msg_team_id, msg_task_id) {
+    static async createToast(username, type, message, msg_username, msg_team_id,
+                             msg_team_name, msg_task_id, msg_task_title) {
         return await Toast.create({
             username: username,
             type: type,
             message: message,
             msg_username: msg_username,
             msg_team_id: msg_team_id,
-            msg_task_id: msg_task_id
+            msg_team_name: msg_team_name,
+            msg_task_id: msg_task_id,
+            msg_task_title: msg_task_title
         })
     }
 
     // 通过用户名查找消息
     static async getToastByUsername(username) {
-        Team.hasOne(Toast, {foreignKey : 'msg_team_id'});
-        Toast.belongsTo(Team, {foreignKey : 'msg_team_id'});
-        Task.hasOne(Toast, {foreignKey : 'msg_task_id'});
-        Toast.belongsTo(Task, {foreignKey : 'msg_task_id'});
         return await Toast.findAll({
-            attributes: ['id', 'username', 'type', 'message', 'msg_username'],
+            attributes: ['id', 'username', 'type', 'message', 'msg_username', 'msg_team_id',
+                'msg_team_name', 'msg_task_id', 'msg_task_title'],
             where: {
                 username: username,
-            },
-            include: [{
-                attributes: ['team_id', 'team_name'],
-                model: Team,
-            },{
-                attributes: ['task_id', 'title'],
-                model: Task,
-            }],
+            }
         })
     }
 

@@ -74,7 +74,9 @@ class TRController {
 
         let task = await TaskModel.searchTaskById(post_body.task_id)
         console.log(task.get('task_id'))
-        ToastModel.createToast(task.get('publisher'), 10, ToastInfo.t10(task.get('title'), post_body.username), post_body.username, null, post_body.task_id);
+        ToastModel.createToast(task.get('publisher'), 10, ToastInfo.t10(task.get('title'),
+            post_body.username), post_body.username, null, null,
+            post_body.task_id, task.get('title'));
     }
 
     /**
@@ -207,7 +209,8 @@ class TRController {
         let toastTask = await TaskModel.searchTaskById(post_body.task_id);
         ToastModel.createToast(toastTask.publisher, 12, 
                                 ToastInfo.t12(toastTask.title, post_body.username), 
-                                post_body.username, -1, post_body.task_id);
+                                post_body.username, null, null,
+                                post_body.task_id, toastTask.title);
     }
 
     /**
@@ -297,7 +300,8 @@ class TRController {
         let toastTask = await TaskModel.searchTaskById(post_body.task_id);
         ToastModel.createToast(current_user, 13, 
                                 ToastInfo.t13(toastTask.title, toastTask.publisher), 
-                                toastTask.publisher, -1, post_body.task_id);
+                                toastTask.publisher, null, null,
+                                post_body.task_id, toastTask.title);
     }
 
     static async completeTask(ctx) {
@@ -337,7 +341,8 @@ class TRController {
             let toastTask = await TaskModel.searchTaskById(post_body.task_id);
             ToastModel.createToast(toastTask.publisher, 11, 
                                     ToastInfo.t11(toastTask.title, current_user), 
-                                    current_user, null, post_body.task_id);
+                                    current_user, null, null,
+                                    post_body.task_id, toastTask.title);
         } catch (err) {
             console.log("err")
             

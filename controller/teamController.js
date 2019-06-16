@@ -54,7 +54,7 @@ class TeamController {
                         // if (members[i].member_username !== ret.leader) {
                         await ToastModel.createToast(members[i].member_username, 1,
                             Toast_info.t1(ret.team_name),
-                            ret.leader, ret.team_id, null);
+                            ret.leader, ret.team_id, ret.team_name,null, null);
                         // }
                     }
                     const data = await TeamModel.getTeamByTeamId(ret.team_id, 0);
@@ -329,7 +329,7 @@ class TeamController {
                             await TeamModel.createMembers(team_id, user[i].username);
                             await ToastModel.createToast(user[i].username, 1,
                                 Toast_info.t1(team.team_name),
-                                leader, team_id, null);
+                                leader, team_id, team.team_name, null, null);
                         }
                         result = {
                             code: 200,
@@ -434,7 +434,7 @@ class TeamController {
                         if (toast === null) {
                             await ToastModel.createToast(team.leader, 0,
                                 Toast_info.t0(username, team.team_name),
-                                username, team_id, null);
+                                username, team_id, team.team_name, null, null);
                         }
                         result = {
                             code: 214,
@@ -489,7 +489,7 @@ class TeamController {
             }
             await ToastModel.createToast(username, 6,
                 Toast_info.t6(team.team_name),
-                leader, team_id, null);
+                leader, team_id, team.team_name, null, null);
             result = {
                 code: 200,
                 msg: '拒绝成功',
@@ -528,7 +528,7 @@ class TeamController {
                     await TeamModel.deleteMember(team_id, username);
                     await ToastModel.createToast(username, 2,
                         Toast_info.t2(team.team_name),
-                        username, team_id, null);
+                        username, team_id, team.team_name, null, null);
                     result = {
                         code: 200,
                         msg: '删除成功',
@@ -582,7 +582,7 @@ class TeamController {
                         await TeamModel.deleteMember(team_id, username);
                         await ToastModel.createToast(teams.leader, 5,
                             Toast_info.t5(username, teams.team_name),
-                            username, team_id, null);
+                            username, team_id, teams.team_name, null, null);
                         result = {
                             code: 200,
                             msg: '删除成功',
@@ -618,7 +618,7 @@ class TeamController {
                     await TeamModel.updateTeamLeader(team_id, leader, username);
                     await ToastModel.createToast(username, 4,
                         Toast_info.t4(team.team_name),
-                        leader, team_id, null);
+                        leader, team_id, team.team_name, null, null);
                     result = {
                         code: 200,
                         msg: '修改组长成功',
@@ -663,7 +663,7 @@ class TeamController {
                 for (let i = 0; i < team.members.length; i++) {
                     await ToastModel.createToast(team.members[i].member_username, 3,
                         Toast_info.t3(team.team_name),
-                        leader, team_id, null);
+                        leader, team_id, team.team_name, null, null);
                 }
                 if (team.logo !== defaultLogo) {
                     let tem = team.logo.split('/');
