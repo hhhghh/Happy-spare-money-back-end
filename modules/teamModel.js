@@ -127,7 +127,10 @@ class TeamModel {
         let result;
         result = await TeamModel.getTeamByTeamId2(team[0].team_id, type);
         for (let i = 1; i < team.length; i++) {
-            result.push(await TeamModel.getTeamByTeamId(team[i].team_id, type));
+            let tem = await TeamModel.getTeamByTeamId(team[i].team_id, type);
+            if (tem !== null)
+                result.push(tem);
+            // result.push(await TeamModel.getTeamByTeamId(team[i].team_id, type));
         }
         return result;
     }
@@ -154,7 +157,9 @@ class TeamModel {
         let result;
         result = await TeamModel.getTeamByTeamId2(team[0].team_id, type);
         for (let i = 1; i < team.length; i++) {
-            result.push(await TeamModel.getTeamByTeamId(team[i].team_id, type));
+            let tem = await TeamModel.getTeamByTeamId(team[i].team_id, type);
+            if (tem !== null)
+                result.push(tem);
         }
         return result;
     }
