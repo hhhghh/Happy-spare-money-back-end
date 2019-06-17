@@ -137,7 +137,9 @@ class UserController {
                 }    
             }
             else if(flag == 0) {
-                ctx.session = {username: req.username};
+                ctx.session = {username: req.username,
+                                type: req.type};
+
                 ctx.body = {
                     code: 200,
                     msg: '登录成功',
@@ -293,7 +295,7 @@ class UserController {
         }
 
         try {
-            const data = await UserModel.updateUserInfo(req, ifChangePasswd);
+            const data = await UserModel.updateUserInfo(req, ifChangePasswd, ctx.session.type);
             msg.unshift('更新信息成功！')
             ctx.status = 200;
             ctx.body = {
@@ -541,11 +543,20 @@ class UserController {
                 msg: 'cookies无效',
                 data: null
             }  
-            return result 
+            return 
         }
         let req = ctx.request.body
         let username1 = req.username1
         let username2 = ctx.session.username
+        if (username1 == username2) {
+            ctx.status = 200
+            ctx.body = {
+                code: 407,
+                msg: '自己不能拉黑自己',
+                data: null
+            }  
+            return   
+        }
         if (username1 && username2) {
             try {
             const result = await UserModel.UserBlacklistUser(username1, username2)
@@ -601,6 +612,17 @@ class UserController {
     }
 
     static async teamBlacklistOrg(ctx) {
+
+        if (!ctx.session.username) {
+            ctx.status = 200
+            ctx.body = {
+                code: 401,
+                msg: 'cookies无效',
+                data: null
+            }  
+            return result 
+        }
+
         let req = ctx.request.body
         let ins_name = req.ins_name
         let team_id = req.team_id
