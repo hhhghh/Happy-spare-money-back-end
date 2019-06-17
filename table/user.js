@@ -63,6 +63,9 @@ module.exports = function(sequelize, DataTypes){
             allowNull:false,
             defaultValue:0
         },
+        signature: {
+            type:DataTypes.TEXT
+        },
         createdAt: {
             type: DataTypes.DATE,
             get() {
