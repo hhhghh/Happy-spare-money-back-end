@@ -557,7 +557,7 @@ class UserController {
             }  
             return   
         }
-        if (username1 && username2) {
+        if (username1) {
             try {
             const result = await UserModel.UserBlacklistUser(username1, username2)
             if (result == 0) {
@@ -703,7 +703,7 @@ class UserController {
         let username1 = req.username1
         let username2 = ctx.session.username
 
-        if (username1 && username2) {
+        if (username1) {
             try {
             const result = await UserModel.UserCancelBlack(username1, username2)
             if (result == 0) {
