@@ -89,7 +89,9 @@ class UserController {
                 }
                 return
             }
+            
             const res = await UserModel.createUser(info, body.extname);
+           
             ctx.status = 200;
             ctx.body = {
                 code: 200,
@@ -204,6 +206,7 @@ class UserController {
                             "qq": data.QQ,
                             "score": data.score,
                             "money": data.money,
+                            "type": data.account_state,
                             "signature": data.signature
                         } 
                     }
@@ -1148,7 +1151,199 @@ class UserController {
         }
     }
 
-    
+    static async follow(ctx) {
+        if (!ctx.session.username) {
+            ctx.status = 401;
+            ctx.body = {
+                code: 401,
+                msg: 'cookies无效',
+            }  
+            return  
+        }
+        
+        if (ctx.session.type == 1) {
+            ctx.status = 200;
+            ctx.body = {
+                code: 401,
+                msg: '机构不能关注他人或机构',
+            }  
+            return  
+        }
+        
+        if (!ctx.request.body.ins_name) {
+            ctx.status = 400;
+            ctx.body = {
+                code: 400,
+                msg: '参数不全',
+            }   
+        }
+        else {
+            var ins_name = ctx.request.body.ins_name;
+            var user_name = ctx.session.username;
+            if (ins_name == user_name) {
+                ctx.status = 200;
+                ctx.body = {
+                    code: 401,
+                    msg: '自己不能关注自己',
+                }     
+                return 
+            }
+            try {
+                var result = await UserModel.follow(user_name, ins_name)
+                if (result == 0) {
+                    ctx.status = 200;
+                    ctx.body = {
+                        code: 200,
+                        msg: '关注成功',
+                    }    
+                }
+                else if (result == 1) {
+                    ctx.status = 200;
+                    ctx.body = {
+                        code: 402,
+                        msg: '用户不存在',
+                    }    
+                }
+                else if (result == 2) {
+                    ctx.status = 200;
+                    ctx.body = {
+                        code: 402,
+                        msg: '机构不存在',
+                    }    
+                }
+                else if (result == 3) {
+                    ctx.status = 200;
+                    ctx.body = {
+                        code: 403,
+                        msg: '已关注，不能重复关注',
+                    }    
+                }
+            } catch(err) {
+                ctx.status = 500;
+                ctx.body = {
+                    code: 500,
+                    msg: '服务器错误',
+                    data: err
+                }    
+            }
+        }
+    }
+
+    static async cancelFollow(ctx) {
+        if (!ctx.session.username) {
+            ctx.status = 401;
+            ctx.body = {
+                code: 401,
+                msg: 'cookies无效',
+            }  
+            return  
+        }
+        
+        if (ctx.session.type == 1) {
+            ctx.status = 200;
+            ctx.body = {
+                code: 401,
+                msg: '机构无关注与取消关注功能',
+            }  
+            return  
+        }
+        
+        if (!ctx.request.body.ins_name) {
+            ctx.status = 400;
+            ctx.body = {
+                code: 400,
+                msg: '参数不全',
+            }   
+        }
+        else {
+            var ins_name = ctx.request.body.ins_name;
+            var user_name = ctx.session.username;
+            if (ins_name == user_name) {
+                ctx.status = 200;
+                ctx.body = {
+                    code: 401,
+                    msg: '操作无效',
+                }     
+                return 
+            }
+            try {
+                var result = await UserModel.cancelFollow(user_name, ins_name)
+                if (result == 0) {
+                    ctx.status = 200;
+                    ctx.body = {
+                        code: 200,
+                        msg: '取消关注成功',
+                    }    
+                }
+                else if (result == 1) {
+                    ctx.status = 200;
+                    ctx.body = {
+                        code: 402,
+                        msg: '用户不存在',
+                    }    
+                }
+                else if (result == 2) {
+                    ctx.status = 200;
+                    ctx.body = {
+                        code: 402,
+                        msg: '机构不存在',
+                    }    
+                }
+                else if (result == 3) {
+                    ctx.status = 200;
+                    ctx.body = {
+                        code: 403,
+                        msg: '未关注，无法取消关注',
+                    }    
+                }
+            } catch(err) {
+                ctx.status = 500;
+                ctx.body = {
+                    code: 500,
+                    msg: '服务器错误',
+                    data: err
+                }    
+            }
+        }
+    }
+
+    static async getFollowList(ctx) {
+        if (!ctx.session.username) {
+            ctx.status = 200;
+            ctx.body = {
+                code: 401,
+                msg: "cookies无效",
+            }
+            return
+        }
+        try {
+            const data = await UserModel.getFollowList(ctx.session.username);
+            if (data == -1) {
+                ctx.status = 200;
+                ctx.body = {
+                    code: 412,
+                    msg: "用户不存在",
+                    data: null
+                }    
+            }
+            else {
+                ctx.status = 200;
+                ctx.body =  {
+                    code: 200,
+                    msg: "success",
+                    data: data
+                }     
+            }
+
+        } catch(err) {
+            ctx.status = 200;
+            ctx.body =  {
+                code: 500,
+                msg: "服务器异常",
+                data: err
+            }   
+        }   
+    }
 }
 
 module.exports = UserController;

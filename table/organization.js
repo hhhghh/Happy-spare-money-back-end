@@ -2,23 +2,19 @@ const moment = require('moment')
 const Sequelize = require('sequelize')
 module.exports = function(sequelize, DataTypes) {
     return sequelize.define('organization', {
+        id:{
+            type:DataTypes.INTEGER,
+            primaryKey:true,
+            allowNull:false,
+            autoIncrement:true
+        },
         ins_name: {
             type: DataTypes.CHAR(20),
             allowNull: false,
-            reference: {
-                model: 'user',
-                key: 'username',
-                deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE    
-            }
         },
         user_name: {
             type: DataTypes.CHAR(20),
             allowNull: false,
-            reference: {
-                model: 'user',
-                key: 'username',
-                deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE    
-            }
         },
         createdAt: {
             type: DataTypes.DATE,

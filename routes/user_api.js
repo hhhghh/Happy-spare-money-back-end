@@ -25,11 +25,17 @@ router.post('/setRate', UserController.setRate);
 
 router.post('/verifyPassword', UserController.verifyPassword);
 
+router.post('/follow', UserController.follow);
+
+router.post('/cancelfollow', UserController.cancelFollow);
+
 router.put('/update', UserController.updateUserInfo);
 
 router.put('/updateAvatar', UserController.updateAvatar);
 
 router.get('/getUserBlacklist', UserController.getUserBlacklist);
+
+router.get('/getFollowList', UserController.getFollowList);
 
 router.get('/getPersonalInfo', async (ctx) => {
     if (!ctx.session.username) {

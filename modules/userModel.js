@@ -6,8 +6,9 @@ const Team = sequelize.import('../table/team')
 const Pit = sequelize.import('../table/pit')
 const Tr = sequelize.import('../table/tr')
 const Task = sequelize.import('../table/task')
+const Organization = sequelize.import('../table/organization')
 const All_Tables = require('../table/all_tables')
-const TeamModel = require('./teamModel')
+
 
 User.sync({force: false});
 Piu.sync({force: false})
@@ -23,6 +24,7 @@ class UserModel {
      * @returns {Promise<*>} 
      */
     static async createUser(info, avatarExtName) {
+       
         var avatar = '';
         if (avatarExtName == null) {
             avatar = 'http://139.196.79.193:3000/awesomeface.png'
@@ -30,13 +32,17 @@ class UserModel {
         else {
             avatar = 'http://139.196.79.193:3000/uploads/user/' + info.username + avatarExtName
         }
-        if (info.type == 0) {
-            await TeamModel.addToDefaultTeam(info.username);
-        }
+        
+        if (info.type != 1) {
+            await Organization.create({
+                ins_name: info.grade,
+                user_name: info.username
+            })  
+        }   
         else if (info.type == 1) {
             info.grade = 0
         }
-
+        
         return await User.create({
             username: info.username,
             password: info.password,
@@ -567,6 +573,78 @@ class UserModel {
                 task_id: taskId
             }
         })
+    }
+
+    static async follow(user_name, ins_name) {
+        var user = await User.findOne({
+            where: {
+                username: user_name
+            }
+        })
+        if (user == null) {
+            return 1
+        }
+        var ins = await User.findOne({
+            where: {
+                username: ins_name
+            }
+        })
+        if (ins == null) {
+            return 2
+        }
+        var relate = await Organization.findOne({
+            where: {
+                ins_name: ins_name,
+                user_name: user_name
+            }
+        })
+        if (relate != null) {
+            return 3
+        }
+
+        await Organization.create({
+            ins_name: ins_name,
+            user_name: user_name
+        })
+        return 0
+    }
+
+    static async cancelFollow(user_name, ins_name) {
+        var user = await User.findOne({
+            where: {
+                username: user_name
+            }
+        })
+        if (user == null) {
+            return 1
+        }
+        var ins = await User.findOne({
+            where: {
+                username: ins_name
+            }
+        })
+        if (ins == null) {
+            return 2
+        }
+        console.log(ins_name)
+        console.log(user_name)
+        var relate = await Organization.findOne({
+            where: {
+                ins_name: ins_name,
+                user_name: user_name
+            }
+        })
+        if (relate == null) {
+            return 3
+        }
+
+        await Organization.destroy({
+            where: {
+                ins_name: ins_name,
+                user_name: user_name
+            }
+        })
+        return 0
     }
 }
 
