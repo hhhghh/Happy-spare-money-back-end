@@ -96,7 +96,8 @@ class UserModel {
      * @param info
      * @returns {Promise<Model>}
      */
-    static async updateUserInfo(data, ifChangePasswd) {
+    static async updateUserInfo(data, ifChangePasswd, type) {
+        
         let info = {
             grade: data.grade,
             wechat: data.wechat,
@@ -107,7 +108,7 @@ class UserModel {
         
         if (ifChangePasswd) info.password = data.newPasswd;
         
-        if (data.type == 1) info.true_name = data.name  
+        if (type == 1) info.true_name = data.name  
 
 
         return await User.update(info, {
