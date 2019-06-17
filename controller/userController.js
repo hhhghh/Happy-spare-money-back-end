@@ -188,23 +188,6 @@ class UserController {
                 data: err
                 }       
             } else{
-                if (data.account_state != 0) {
-                    result = {
-                        code: 200,
-                        msg: 'success',
-                        data: {
-                            "ins_name": data.username,
-                            "leader": data.true_name,
-                            "school": data.school_name,
-                            "avatar": data.avatar,
-                            "phone": data.phone_number,
-                            "wechat": data.wechat,
-                            "qq": data.QQ,
-                            "money": data.money
-                        }
-                    }
-                }
-                else {
                     result = {
                         code: 200,
                         msg: 'success',
@@ -218,10 +201,10 @@ class UserController {
                             "wechat": data.wechat,
                             "qq": data.QQ,
                             "score": data.score,
-                            "money": data.money
+                            "money": data.money,
+                            "signature": data.signature
                         } 
                     }
-                }
             }
         } catch(error) {
             result = {
@@ -551,6 +534,14 @@ class UserController {
     }
 
     static async UserBlacklistUser(ctx) {
+        if (!ctx.session.username) {
+            result = {
+                code: 401,
+                msg: 'cookies无效',
+                data: null
+            }  
+            return result 
+        }
         let req = ctx.request.body
         let username1 = req.username1
         let username2 = req.username2
