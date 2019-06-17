@@ -628,7 +628,7 @@ class UserController {
         let team_id = req.team_id
         if (ins_name && team_id) {
             try {
-            const result = await UserModel.TeamBlacklistOrg(ins_name, team_id)
+            const result = await UserModel.TeamBlacklistOrg(ins_name, team_id, ctx.session.username)
             if (result == 0) {
                 ctx.status = 200
                 ctx.body = {
@@ -669,6 +669,14 @@ class UserController {
                     data: result
                 }   
             }
+            else if (result == 5) {
+                ctx.status = 407
+                ctx.body = {
+                    code: 407,
+                    msg: '组长才有权限拉黑组织',
+                    data: result
+                }    
+            }
         } catch(err) {
             ctx.status = 500;
             ctx.body = {
@@ -681,9 +689,20 @@ class UserController {
     }
 
     static async UserCancelBlack(ctx) {
+        if (!ctx.session.username) {
+            ctx.status = 200
+            ctx.body = {
+                code: 401,
+                msg: 'cookies无效',
+                data: null
+            }  
+            return 
+        }
+
         let req = ctx.request.body
         let username1 = req.username1
-        let username2 = req.username2
+        let username2 = ctx.session.username
+
         if (username1 && username2) {
             try {
             const result = await UserModel.UserCancelBlack(username1, username2)
@@ -739,12 +758,23 @@ class UserController {
     }
 
     static async teamCancelBlack(ctx) {
+
+        if (!ctx.session.username) {
+            ctx.status = 200
+            ctx.body = {
+                code: 401,
+                msg: 'cookies无效',
+                data: null
+            }  
+            return result 
+        }
+
         let req = ctx.request.body
         let ins_name = req.ins_name
         let team_id = req.team_id
         if (ins_name && team_id) {
             try {
-            const result = await UserModel.teamCancelBlack(ins_name, team_id)
+            const result = await UserModel.teamCancelBlack(ins_name, team_id, ctx.session.username)
             if (result == 0) {
                 ctx.status = 200
                 ctx.body = {
@@ -781,7 +811,15 @@ class UserController {
                 ctx.status = 406
                 ctx.body = {
                     code: 406,
-                    msg: '已经拉黑无法再次拉黑',
+                    msg: '不存在拉黑关系',
+                    data: result
+                }   
+            }
+            else if (result == 5) {
+                ctx.status = 407
+                ctx.body = {
+                    code: 407,
+                    msg: '组长才能取消拉黑',
                     data: result
                 }   
             }
