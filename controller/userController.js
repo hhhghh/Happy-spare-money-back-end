@@ -190,9 +190,18 @@ class UserController {
             } else{
                 if (data.account_state != 0) {
                     result = {
-                        code: 402,
-                        msg: '查询类型错误',
-                        data: null
+                        code: 200,
+                        msg: 'success',
+                        data: {
+                            "ins_name": data.username,
+                            "leader": data.true_name,
+                            "school": data.school_name,
+                            "avatar": data.avatar,
+                            "phone": data.phone_number,
+                            "wechat": data.wechat,
+                            "qq": data.QQ,
+                            "money": data.money
+                        }
                     }
                 }
                 else {
@@ -209,8 +218,7 @@ class UserController {
                             "wechat": data.wechat,
                             "qq": data.QQ,
                             "score": data.score,
-                            "money": data.money,
-                            "type": data.account_state
+                            "money": data.money
                         } 
                     }
                 }
@@ -382,6 +390,7 @@ class UserController {
         }
 
     }
+
 
     static async deposit(ctx) {
         let result 
