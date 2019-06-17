@@ -7,7 +7,7 @@ const Pit = sequelize.import('../table/pit')
 const Tr = sequelize.import('../table/tr')
 const Task = sequelize.import('../table/task')
 const All_Tables = require('../table/all_tables')
-const TeamModel = import('./teamModel')
+const TeamModel = require('./teamModel')
 
 User.sync({force: false});
 Piu.sync({force: false})
@@ -32,20 +32,24 @@ class UserModel {
         }
         if (info.type == 0) {
             await TeamModel.addToDefaultTeam(info.username);
-            return await User.create({
-                username: info.username,
-                password: info.password,
-                true_name: info.name,
-                school_name: info.school,
-                grade: info.grade,
-                avatar: avatar,
-                wechat: info.weChat,
-                QQ: info.qq,
-                signature: info.signature,
-                phone_number: info.phone,
-                account_state: info.type
-            })
         }
+        else if (info.type == 1) {
+            info.grade = 0
+        }
+
+        return await User.create({
+            username: info.username,
+            password: info.password,
+            true_name: info.name,
+            school_name: info.school,
+            grade: info.grade,
+            avatar: avatar,
+            wechat: info.weChat,
+            QQ: info.qq,
+            signature: info.signature,
+            phone_number: info.phone,
+            account_state: info.type
+        })
     }
 
     /**
