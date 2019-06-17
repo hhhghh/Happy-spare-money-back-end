@@ -535,7 +535,8 @@ class UserController {
 
     static async UserBlacklistUser(ctx) {
         if (!ctx.session.username) {
-            result = {
+            ctx.status = 200
+            ctx.body = {
                 code: 401,
                 msg: 'cookies无效',
                 data: null
@@ -544,7 +545,7 @@ class UserController {
         }
         let req = ctx.request.body
         let username1 = req.username1
-        let username2 = req.username2
+        let username2 = ctx.session.username
         if (username1 && username2) {
             try {
             const result = await UserModel.UserBlacklistUser(username1, username2)

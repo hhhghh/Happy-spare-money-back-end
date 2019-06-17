@@ -101,15 +101,21 @@ class UserModel {
             grade: data.grade,
             wechat: data.wechat,
             QQ: data.qq,
-            phone_number: data.phone
+            phone_number: data.phone,
+            signature: data.signature
         };
+        
         if (ifChangePasswd) info.password = data.newPasswd;
+        
+        if (info.type == 1) info.true_name = data.name  
+
 
         return await User.update(info, {
             where: {
                 username: data.username
             }
         });
+
     }
 
     static async updateAvatar(username, avatarExtName, timestamp) {     
