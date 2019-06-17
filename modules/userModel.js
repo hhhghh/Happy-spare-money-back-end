@@ -107,7 +107,7 @@ class UserModel {
         
         if (ifChangePasswd) info.password = data.newPasswd;
         
-        if (info.type == 1) info.true_name = data.name  
+        if (data.type == 1) info.true_name = data.name  
 
 
         return await User.update(info, {
