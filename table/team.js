@@ -34,6 +34,12 @@ module.exports = function (sequelize, DataTypes){
         },
         limit:{
             type:DataTypes.INTEGER,
+            allowNull:false,
+            defaultValue: 0
+        },
+        type: {
+            type:DataTypes.INTEGER,
+            allowNull:false,
             defaultValue: 0
         },
         createdAt: {

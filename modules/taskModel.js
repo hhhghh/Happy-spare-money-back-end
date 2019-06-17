@@ -20,15 +20,14 @@ class TaskModel {
             number: data.number,
             publisher: data.publisher,
             state: models.status_code.task.WAITING_ACCPET,
+            max_accepter_number: data.max_accepter_number,
             type: data.type,
             starttime: data.starttime,
             endtime: data.endtime,
             content: data.content,
-            createdAt: data.createdAt,
-            updatedAt: data.updatedAt,
             questionnaire_path: data.questionnaire_path
         });
-    
+
         let create_param = []
         for (let i = 0; i < range.length; i++) {
             create_param.push({
@@ -336,9 +335,9 @@ class TaskModel {
      * @return {string} the publisher's username
      */
     static async searchPublisherByTaskid(task_id) {
-        return models.Task.findByPk(task_id, {
+        return (await models.Task.findByPk(task_id, {
             attributes: ['publisher']
-        }).publisher;
+        })).publisher;
     }
 }
 

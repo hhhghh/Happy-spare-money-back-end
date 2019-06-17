@@ -6,6 +6,9 @@ const FileController = require('../controller/fileController');
 const path = require('path');
 const TaskModel = require('../modules/taskModel');
 const ToastModel = require('../modules/toastModel');
+const ToastInfo = require('../utils/toast_info');
+const UserModel = require('../modules/userModel');
+
 require('../config/basicStr');
 
 class TRController {
@@ -18,8 +21,8 @@ class TRController {
         let post_body = ctx.request.body
         let result = undefined
         let required_param_list = ['task_id']
+        let current_user = await getUsernameFromCtx(ctx)
         if (checkUndefined(post_body, required_param_list)) {
-            let current_user = await getUsernameFromCtx(ctx)
             if (current_user == -1 || current_user == -2) {
                 result = {
                     code: 401,
@@ -27,8 +30,8 @@ class TRController {
                     data: []
                 }
             } else {
-                username = current_user;
-                task_id = post_body.task_id;
+                let username = current_user;
+                let task_id = post_body.task_id;
                 try {
                     await TRModel.receiveTask(username, task_id);
                     let data = await TRModel.searchByTaskId(task_id);
@@ -69,9 +72,13 @@ class TRController {
             data: result.data
         }
 
-        let publisher = await TaskModel.searchTaskById(post_body.task_id).publisher
-        ToastModel.createToast(publisher, 10, "", post_body.username, -1, post_body.task_id);
+        let task = await TaskModel.searchTaskById(post_body.task_id)
+        console.log(task.get('task_id'))
+        ToastModel.createToast(task.get('publisher'), 10, ToastInfo.t10(task.get('title'),
+            post_body.username), post_body.username, null, null,
+            post_body.task_id, task.get('title'));
     }
+
     /**
      * 获取文章详情
      * @param ctx
@@ -161,17 +168,27 @@ class TRController {
         let required_param_list = ['task_id']
         if (checkUndefined(post_body, required_param_list)) {
             try {
+                // let publisher = await TaskModel.searchTaskById(post_body.task_id).publisher;
+                // // console.log('<<Delete TR use', current_user, post_body.task_id, '>>')
+                // if (publisher != current_user) {
+                //     result = {
+                //         code: 403,
+                //         msg: "Failed, authorize wrong, the ",
+                //         data: err.message
+                //     }
+                // } else {
                 let data = await TRModel.deleteTR(current_user, post_body.task_id)
                 result = {
                     code: 200, 
                     msg: 'Success',
                     data: data
                 }
+                // }
             } catch (err) {
                 result = {
                     code: 500,
                     msg: 'Failed, database wrong.',
-                    data: err
+                    data: err.message
                 }
             }
         } else {
@@ -188,27 +205,75 @@ class TRController {
             msg: result.msg,
             data: result.data
         }
+
+        let toastTask = await TaskModel.searchTaskById(post_body.task_id);
+        ToastModel.createToast(toastTask.publisher, 12, 
+                                ToastInfo.t12(toastTask.title, post_body.username), 
+                                post_body.username, null, null,
+                                post_body.task_id, toastTask.title);
     }
 
+    /**
+     * post body should be like
+     * 
+     *  {
+     *      "username": ["hyx", "yao"],
+     *      "task_id": 2,
+     *      "score": [5, 5]
+     *  }
+     * 
+     * or looks like
+     *  
+     * {
+     *     "username": "hyx",
+     *     "task_id": 2,
+     *     "score": 5
+     * }
+     *  
+     * @param {*} ctx 
+     */
     static async confirmComplement(ctx) {
         let result = undefined
         let post_body = ctx.request.body
-        let current_user = getUsernameFromCtx(ctx)
+        let current_user = await getUsernameFromCtx(ctx)
         if (current_user == -1 || current_user == -2 || current_user == undefined || current_user == null) {
-            response(ctx, 403, "Please login first", []);
+            response(ctx, 401, "Please login first", []);
             return;
         }
-        if (post_body.task_id &&
-            post_body.score) {
+        if (post_body.username != undefined && post_body.task_id != undefined && post_body.score != undefined) {
             try {
-                let data = await TRModel.comfirm_complement(current_user, 
-                                                            post_body.task_id, 
-                                                            post_body.score);
-                result = {
-                    code: 200, 
-                    msg: 'Success',
-                    data: data
+                // 判断
+                let publisher = (await TaskModel.searchTaskById(post_body.task_id)).publisher;
+                console.log(publisher, current_user)
+                if (publisher == current_user) {
+                    let data = undefined
+                    let task_money = await TaskModel.searchTaskById(post_body.task_id).money;
+                    
+                    if (post_body.username instanceof Array) {
+                        data = await TRModel.batch_confirm_complement(post_body.username, 
+                                                                      post_body.task_id, 
+                                                                      post_body.score);
+                        
+                        await UserModel.batchUpdateUserMoney(post_body.username, task_money);
+                    } else {
+                        data = await TRModel.comfirm_complement(post_body.username, 
+                                                                post_body.task_id, 
+                                                                post_body.score);
+                        await UserModel.updateUserMoney(post_body.username, task_money);
+                    }
+                    result = {
+                        code: 200, 
+                        msg: 'Success',
+                        data: data
+                    }
+                } else {
+                    result = {
+                        code: 412,
+                        msg: "Cannot confirm task not published by u",
+                        data: []
+                    }
                 }
+                
             } catch (err) {
                 console.log(err)
                 result = {
@@ -231,14 +296,20 @@ class TRController {
             msg: result.msg,
             data: result.data
         }
+
+        let toastTask = await TaskModel.searchTaskById(post_body.task_id);
+        ToastModel.createToast(current_user, 13, 
+                                ToastInfo.t13(toastTask.title, toastTask.publisher), 
+                                toastTask.publisher, null, null,
+                                post_body.task_id, toastTask.title);
     }
 
     static async completeTask(ctx) {
         let post_body = ctx.request.body
         let result = undefined
-        let current_user = getUsernameFromCtx(ctx)
+        let current_user = await getUsernameFromCtx(ctx)
         if (current_user == -1 || current_user == -2 || current_user == undefined || current_user == null) {
-            response(ctx, 403, "please login first", []);
+            response(ctx, 401, "please login first", []);
             return;
         }
         if (post_body.task_id != undefined) {
@@ -265,6 +336,17 @@ class TRController {
             }
         }
         response(ctx, result.code, result.msg, result.data);
+
+        try {
+            let toastTask = await TaskModel.searchTaskById(post_body.task_id);
+            ToastModel.createToast(toastTask.publisher, 11, 
+                                    ToastInfo.t11(toastTask.title, current_user), 
+                                    current_user, null, null,
+                                    post_body.task_id, toastTask.title);
+        } catch (err) {
+            console.log("err")
+            
+        }
     }
  
     static async searchTR(ctx) {
@@ -314,7 +396,6 @@ class TRController {
         };
     }
 }
-
 
 let response = (ctx, code, msg, data = null) => {
     ctx.response.status = code;

@@ -13,12 +13,10 @@ module.exports = function(sequelize, DataTypes){
         username:{
             type:DataTypes.CHAR(20),
             allowNull:false,
-            unique: 'one_reciever_to_one_task'
         },
         task_id:{
             type:DataTypes.INTEGER,
             allowNull:false,
-            unique: 'one_reciever_to_one_task'
         },
         state:{
             type: DataTypes.INTEGER,
@@ -26,6 +24,10 @@ module.exports = function(sequelize, DataTypes){
             // 0: waiting to be done
             // 1: accpeter complete, waiting publisher confirm
             // 2: publisher confirmed, over
+        },
+        score: {
+            type: DataTypes.INTEGER,
+            allowNull: true
         },
         questionnaire_path: {
             type: DataTypes.CHAR(128),

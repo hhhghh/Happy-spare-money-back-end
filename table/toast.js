@@ -27,8 +27,16 @@ module.exports = function(sequelize, DataTypes){
             type:DataTypes.INTEGER,
             allowNull:true
         },
+        msg_team_name:{
+            type:DataTypes.CHAR(45),
+            allowNull:true
+        },
         msg_task_id:{
             type:DataTypes.INTEGER,
+            allowNull:true
+        },
+        msg_task_title:{
+            type:DataTypes.CHAR(45),
             allowNull:true
         },
         createdAt: {

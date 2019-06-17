@@ -60,7 +60,8 @@ const status_code = {
 		WAITING_ACCPET : 0, 
 		ACCEPETED_AND_DOING : 1, 
 		ACCPETER_COMPLETE_WAITING_CONFIRM : 2, 
-		CONFIRM_OVER : 3, 
+        CONFIRM_OVER : 3, 
+        EXCEED_DDL_NOT_DONE: 4
 	}
 }
 

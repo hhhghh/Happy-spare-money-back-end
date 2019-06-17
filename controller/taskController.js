@@ -1,4 +1,5 @@
 const TaskModel = require('../modules/taskModel');
+const UserModel = require('../modules/userModel');
 
 // Get username from session.
 const getUsernameFromCtx = require('./cookieController').getUsernameFromCtx;
@@ -103,13 +104,23 @@ class TaskController {
                 }
 
                 try {
-                    result = await TaskModel.createTask(post_data, post_body.range)
-                    result = {
-                        code: 200,
-                        msg: "Success",
-                        data: result
+                    let task_money = post_body.money * post_body.max_accepter_number;
+                    // result.get('money') * result.get('max_accepter_number');
+                    let check_money = await UserModel.updateUserMoney(current_user, -task_money);
+                    if (check_money == -1) {
+                        result = {
+                            code: 403,
+                            msg: "Your balance is not enough to publish this task",
+                            data: result
+                        }
+                    } else {
+                        result = await TaskModel.createTask(post_data, post_body.range)
+                        result = {
+                            code: 200,
+                            msg: "Success",
+                            data: result
+                        }
                     }
-                    
                 } catch (err) {
                     result = {
                         code: 500,
@@ -280,7 +291,7 @@ class TaskController {
                 }
             } else {
                 try {
-                    task_publisher = TaskModel.searchPublisherByTaskid(query_params.task_id);
+                    let task_publisher = await TaskModel.searchPublisherByTaskid(query_params.task_id);
                     if (current_user != task_publisher) {
                         result = {
                             code: 403,

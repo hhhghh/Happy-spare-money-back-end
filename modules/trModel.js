@@ -102,8 +102,10 @@ class TRModel {
         if (task_type == 1 /** 问卷调查 */ && post_body.questionnaire_path == undefined) {
             throw Error("Need questionnaire result file")
         }
+        post_body.questionnaire_path = post_body.questionnaire_path == undefined ? "" : post_body.questionnaire_path
         return await models.TR.update({
-            state: models.status_code.tr.WAITING_CONFIRM
+            state: models.status_code.tr.WAITING_CONFIRM,
+            questionnaire_path: post_body.questionnaire_path
         }, {
             where: {
                 username: post_body.username,
@@ -113,9 +115,11 @@ class TRModel {
     }
 
     static async comfirm_complement(username, task_id, score) {
+        console.log(username, task_id, score)
         let user_task_info = await Promise.all([
             models.TR.update({
-                state: models.status_code.tr.CONFIRMED_OVER
+                state: models.status_code.tr.CONFIRMED_OVER,
+                score: score
             }, {
                 where: {
                     username: username,
@@ -180,6 +184,14 @@ class TRModel {
             }),
             models.User.findByPk(username)
         ])
+    }
+
+    static async batch_confirm_complement(usernames, task_id, scores) {
+        let batch = []
+        for (let i = 0; i < usernames.length; i++) {
+            batch.push(TRModel.comfirm_complement(usernames[i], task_id, scores[i]))
+        }
+        return await Promise.all(batch)
     }
 }
 

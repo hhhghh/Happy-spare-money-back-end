@@ -152,6 +152,18 @@ class UserModel {
      * @param {*} username 
      * @param {*} money 
      */
+    static async batchUpdateUserMoney(usernames, money) {
+        // Can only add money
+        if (money < 0) {
+            throw new Error("Can only add money through this API")
+        }
+        let ps = []
+        for (let i = 0; i < usernames.length; i++) {
+            ps.push(UserModel.updateUserMoney(usernames[i], money));
+        }
+        return await Promise.all(ps);
+    }
+  
     static async deposit(username, money) {
         const data = await User.findOne({
             where: {
