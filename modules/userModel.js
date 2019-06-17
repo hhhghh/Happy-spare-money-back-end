@@ -296,7 +296,7 @@ class UserModel {
         return 0
     }
 
-    static async TeamBlacklistOrg(ins_name, team_id) {
+    static async TeamBlacklistOrg(ins_name, team_id, username) {
         const ins = await User.findOne({
             where: {
                 username: ins_name
@@ -313,9 +313,15 @@ class UserModel {
                 team_id: team_id
             }
         })
+
         if (team === null) {
             return 3
         }
+
+        if (team.leader !== username) {
+            return 5
+        }
+
         const relate = await Pit.findOne({
             where: {
                 ins_name: ins_name,
@@ -372,7 +378,7 @@ class UserModel {
         return 0        
     }
 
-    static async teamCancelBlack(ins_name, team_id) {
+    static async teamCancelBlack(ins_name, team_id, username) {
         const ins = await User.findOne({
             where: {
                 username: ins_name
@@ -391,6 +397,9 @@ class UserModel {
         })
         if (team === null) {
             return 3
+        }
+        if (team.leader !== username) {
+            return 5
         }
         const relate = await Pit.findOne({
             where: {
