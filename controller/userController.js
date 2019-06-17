@@ -1316,13 +1316,24 @@ class UserController {
             }
             return
         }
+
+        if (ctx.session.type == 0) {
+            ctx.status = 200;
+            ctx.body = {
+                code: 400,
+                msg: "用户没有关注者",
+            }
+            return
+        }
+
+
         try {
             const data = await UserModel.getFollowList(ctx.session.username);
-            if (data == -1) {
+            if (data == 1) {
                 ctx.status = 200;
                 ctx.body = {
                     code: 412,
-                    msg: "用户不存在",
+                    msg: "机构不存在",
                     data: null
                 }    
             }

@@ -626,8 +626,6 @@ class UserModel {
         if (ins == null) {
             return 2
         }
-        console.log(ins_name)
-        console.log(user_name)
         var relate = await Organization.findOne({
             where: {
                 ins_name: ins_name,
@@ -645,6 +643,35 @@ class UserModel {
             }
         })
         return 0
+    }
+
+    static async getFollowList(ins_name) {
+        var ins = await User.findOne({
+            where: {
+                username: ins_name
+            }
+        })
+        if (ins == null) {
+            return 1
+        }
+        let data = []
+        const users = await Organization.findAll({
+            where: {
+                ins_name: ins_name
+            }
+        }) 
+        for (var i = 0; i < users.length; i++) {
+            const user = await User.findOne({
+                where: {
+                    username: users[i].user_name
+                }
+            })
+            data.push({
+                "username": user.username,
+                "useravatar": user.avatar
+            })
+        }
+        return data
     }
 }
 
