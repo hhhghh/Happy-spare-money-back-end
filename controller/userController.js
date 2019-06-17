@@ -138,7 +138,7 @@ class UserController {
             }
             else if(flag == 0) {
                 ctx.session = {username: req.username,
-                                usertype: req.usertype};
+                                type: req.type};
 
                 ctx.body = {
                     code: 200,
@@ -295,7 +295,7 @@ class UserController {
         }
 
         try {
-            const data = await UserModel.updateUserInfo(req, ifChangePasswd, ctx.session.usertype);
+            const data = await UserModel.updateUserInfo(req, ifChangePasswd, ctx.session.type);
             msg.unshift('更新信息成功！')
             ctx.status = 200;
             ctx.body = {
