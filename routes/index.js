@@ -17,7 +17,7 @@ const normal = require('../dist/index');
 const trController = require('../controller/trController');
 
 router.get('/hhhghh', async (ctx, next) => {
-    trController.confirmComplement(ctx)
+    ctx.body = await TaskModel.searchTaskByAccepter(ctx.query)
 })
 
 router.get('/', async (ctx, next) => {
