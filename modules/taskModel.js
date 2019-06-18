@@ -317,6 +317,9 @@ class TaskModel {
             return item.get('task_id')
         });
 
+        if (task_ids.length == 0) task_ids.push(1)
+        console.log(task_ids)
+
         let tasks = await // Promise.all([
             models.Task.findAll({
                 where: {
