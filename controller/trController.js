@@ -247,7 +247,7 @@ class TRController {
                 console.log(publisher, current_user)
                 if (publisher == current_user) {
                     let data = undefined
-                    let task_money = await TaskModel.searchTaskById(post_body.task_id).money;
+                    let task_money = (await TaskModel.searchTaskById(post_body.task_id)).money;
                     
                     if (post_body.username instanceof Array) {
                         data = await TRModel.batch_confirm_complement(post_body.username, 
