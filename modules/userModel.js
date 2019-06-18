@@ -58,12 +58,7 @@ class UserModel {
             account_state: info.type
         })
 
-        if (info.type != 1) {
-            await TeamModel.addToDefaultTeam(info.username)
-        }
-        else {
-
-        }
+        await TeamModel.addToDefaultTeam(info.username);
         return "success"
     }
 
