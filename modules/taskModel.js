@@ -31,11 +31,11 @@ class TaskModel {
         let create_param = []
         
         for (let i = 0; i < range.length; i++) {
-            create_param.push({
+            create_param.push(models.TeamTask.create({
                 team_id: range[i],
                 task_id: task.get('task_id'),
                 isolate: false
-            })
+            }))
         }
         
         await Promise.all(create_param)
@@ -288,6 +288,8 @@ class TaskModel {
          *  */   
         restriction = checkParamsAndConvert(restriction, ['range', 'type', 'state'])
         
+        console.log(restriction)
+
         let task_ids = await models.TR.findAll({
             where: {
                 username: restriction.username
@@ -303,14 +305,17 @@ class TaskModel {
             return [];
         } 
 
-        // let task_ids = await models.TeamTask.findAll({
-        //     where: {
-        //         team_id: restriction.range,
-        //         isolate: false
-        //     },
-        //     attributes: ['task_id'],
-        //     raw: true
-        // });
+        task_ids = await models.TeamTask.findAll({
+            where: {
+                team_id: restriction.range,
+                task_id: {
+                    [Op.or]: task_ids
+                }
+            },
+            attributes: ['task_id']
+        }).map((item) => {
+            return item.get('task_id')
+        });
 
         let tasks = await // Promise.all([
             models.Task.findAll({
@@ -328,6 +333,13 @@ class TaskModel {
                     association: models.Task.hasMany(models.TR, {foreignKey: 'task_id'}),
                     where: {
                         username: restriction.username
+                    }
+                }, {
+                    association: models.Task.hasMany(models.TeamTask, {foreignKey: 'task_id'}),
+                    where: {
+                        task_id: {
+                            [Op.or]: task_ids
+                        }
                     }
                 }]
             })
