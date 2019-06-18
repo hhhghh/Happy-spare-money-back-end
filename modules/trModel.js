@@ -115,7 +115,7 @@ class TRModel {
     }
 
     static async comfirm_complement(username, task_id, score) {
-        console.log(username, task_id, score)
+        score = parseFloat(score)
         let user_task_info = await Promise.all([
             models.TR.update({
                 state: models.status_code.tr.CONFIRMED_OVER,
@@ -131,7 +131,7 @@ class TRModel {
                 attributes: ['task_complete', 'score']
             })
         ])
-        let user_task_count = user_task_info[1].task_comlete;
+        let user_task_count = user_task_info[1].task_complete;
         let user_score_current = user_task_info[1].score;
         
         let count = await Promise.all([
@@ -155,15 +155,13 @@ class TRModel {
             }),
             models.User.update({
                 score: (user_score_current * user_task_count + score) / (user_task_count + 1),
-                task_comlete: user_task_count + 1
+                task_complete: user_task_count + 1
             }, {
                 where: {
                     username: username
                 }
             })
         ]);
-
-        console.log(count)
 
         if (count[0] == count[1] && count[0] == count[2].max_accepter_number) {
             await models.Task.update({

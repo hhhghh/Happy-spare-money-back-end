@@ -333,7 +333,7 @@ class TaskController {
     static async searchTaskByAccepter(ctx) {
         let query_params = ctx.query
         let result = undefined
-        if (query_params.username) {
+        if (query_params.username != undefined) {
             try {
                 result = await TaskModel.searchTaskByAccepter(query_params)
                 result = {

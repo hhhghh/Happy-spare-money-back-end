@@ -29,18 +29,17 @@ class TaskModel {
         });
 
         let create_param = []
+        
         for (let i = 0; i < range.length; i++) {
             create_param.push({
-                team_id: range[i],
-                task_id: task.get('task_id')
-            })
-            await models.TeamTask.create({
                 team_id: range[i],
                 task_id: task.get('task_id'),
                 isolate: false
             })
         }
         
+        await Promise.all(create_param)
+
         return task
     }
 
@@ -86,7 +85,8 @@ class TaskModel {
             // No task can be found, then reutrn []
             return [];
         } 
-
+        
+        // 这里可以搜出来所有符合Query要求的任务
         let time = sd.format(new Date(), 'YYYY-MM-DD HH:mm:ss');
         let tasks = await models.Task.findAll({
             where: {
@@ -103,11 +103,9 @@ class TaskModel {
                 attributes: ['username', 'avatar']
             }, {
                 association: models.Task.hasMany(models.TR, {foreignKey: 'task_id'}),
-                // model: models.TR,
-                // attributes: ['task_id', [sequelize.fn('COUNT', Sequelize.col('trs.task_id')), 'count']]
-                // attributes: [[Sequelize.fn('count', Sequelize.col('trs.task_id')), 'count']]
             }]
         });
+
 
         // [[sequelize.fn('COUNT', sequelize.col('hats')), 'no_hats']]
         // find tasks that not be shield be the user. using piu table
@@ -304,6 +302,15 @@ class TaskModel {
             // No task can be found, then reutrn []
             return [];
         } 
+
+        // let task_ids = await models.TeamTask.findAll({
+        //     where: {
+        //         team_id: restriction.range,
+        //         isolate: false
+        //     },
+        //     attributes: ['task_id'],
+        //     raw: true
+        // });
 
         let tasks = await // Promise.all([
             models.Task.findAll({
