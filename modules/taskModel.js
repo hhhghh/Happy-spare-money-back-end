@@ -303,14 +303,17 @@ class TaskModel {
             return [];
         } 
 
-        // let task_ids = await models.TeamTask.findAll({
-        //     where: {
-        //         team_id: restriction.range,
-        //         isolate: false
-        //     },
-        //     attributes: ['task_id'],
-        //     raw: true
-        // });
+        task_ids = await models.TeamTask.findAll({
+            where: {
+                team_id: restriction.range,
+                task_id: {
+                    [Op.or]: task_ids
+                }
+            },
+            attributes: ['task_id']
+        }).map((item) => {
+            return item.get('task_id')
+        });
 
         let tasks = await // Promise.all([
             models.Task.findAll({
