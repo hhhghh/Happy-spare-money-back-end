@@ -1355,6 +1355,55 @@ class UserController {
             }   
         }   
     }
+
+    static async getUsersFollowedOrganizationsList(ctx) {
+        if (!ctx.session.username) {
+            ctx.status = 200;
+            ctx.body = {
+                code: 401,
+                msg: "cookies无效",
+            }
+            return
+        }
+
+        if (ctx.session.type == 1) {
+            ctx.status = 200;
+            ctx.body = {
+                code: 400,
+                msg: "机构不能关注机构",
+            }
+            return
+        }
+
+
+        try {
+            const data = await UserModel.getUsersFollowedOrganizationsList(ctx.session.username);
+            if (data == 1) {
+                ctx.status = 200;
+                ctx.body = {
+                    code: 412,
+                    msg: "用户不存在",
+                    data: null
+                }    
+            }
+            else {
+                ctx.status = 200;
+                ctx.body =  {
+                    code: 200,
+                    msg: "success",
+                    data: data
+                }     
+            }
+
+        } catch(err) {
+            ctx.status = 200;
+            ctx.body =  {
+                code: 500,
+                msg: "服务器异常",
+                data: err
+            }   
+        }   
+    }
 }
 
 module.exports = UserController;

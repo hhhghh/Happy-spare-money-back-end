@@ -35,7 +35,9 @@ router.put('/updateAvatar', UserController.updateAvatar);
 
 router.get('/getUserBlacklist', UserController.getUserBlacklist);
 
-router.get('/getFollowList', UserController.getFollowList);
+router.get('/getOrganizationalFollowersList', UserController.getFollowList);
+
+router.get('/getUsersFollowedOrganizationsList', UserController.getUsersFollowedOrganizationsList)
 
 router.get('/getPersonalInfo', async (ctx) => {
     if (!ctx.session.username) {

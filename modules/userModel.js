@@ -673,6 +673,35 @@ class UserModel {
         }
         return data
     }
+
+    static async getUsersFollowedOrganizationsList(username) {
+        var user = await User.findOne({
+            where: {
+                username: username
+            }
+        })
+        if (user == null) {
+            return 1
+        }
+        let data = []
+        const orgs = await Organization.findAll({
+            where: {
+                user_name: username
+            }
+        }) 
+        for (var i = 0; i < orgs.length; i++) {
+            const org = await User.findOne({
+                where: {
+                    username: orgs[i].ins_name
+                }
+            })
+            data.push({
+                "orgname": org.username,
+                "orgavatar": org.avatar
+            })
+        }
+        return data    
+    }
 }
 
 module.exports = UserModel;
