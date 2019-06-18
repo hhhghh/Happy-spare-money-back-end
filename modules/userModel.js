@@ -8,6 +8,7 @@ const Tr = sequelize.import('../table/tr')
 const Task = sequelize.import('../table/task')
 const Organization = sequelize.import('../table/organization')
 const All_Tables = require('../table/all_tables')
+const TeamModel = require('./teamModel')
 
 
 User.sync({force: false});
@@ -42,8 +43,8 @@ class UserModel {
         else if (info.type == 1) {
             info.grade = 0
         }
-        
-        return await User.create({
+
+        await User.create({
             username: info.username,
             password: info.password,
             true_name: info.name,
@@ -56,6 +57,11 @@ class UserModel {
             phone_number: info.phone,
             account_state: info.type
         })
+
+        if (info.type != 1) {
+            await TeamModel.addToDefaultTeam(info.username)
+        }
+        return "success"
     }
 
     /**
