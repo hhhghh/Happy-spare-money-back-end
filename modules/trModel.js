@@ -133,7 +133,6 @@ class TRModel {
         ])
         let user_task_count = user_task_info[1].task_complete;
         let user_score_current = user_task_info[1].score;
-        
         let count = await Promise.all([
             models.TR.count({
                 where: {
