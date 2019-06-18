@@ -13,8 +13,12 @@ const ToastModel = require('../modules/toastModel');
 const ToastInfo = require('../utils/toast_info');
 const Op = Sequelize.Op
 const UserModel = require('../modules/userModel');
-const normal = require('../dist/index')
+const normal = require('../dist/index');
+const trController = require('../controller/trController');
 
+router.get('/hhhghh', async (ctx, next) => {
+    trController.confirmComplement(ctx)
+})
 
 router.get('/', async (ctx, next) => {
     let restriction = ctx.query
