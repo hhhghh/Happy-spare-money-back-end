@@ -332,11 +332,11 @@ class UserModel {
         if (team === null) {
             return 3
         }
-        if (team.limit != 0) {
-            if (team.leader !== username) {
-                return 5
-            }
+
+        if (team.leader !== username) {
+            return 5
         }
+
 
         const relate = await Pit.findOne({
             where: {
@@ -414,8 +414,10 @@ class UserModel {
         if (team === null) {
             return 3
         }
-        if (team.leader !== username) {
-            return 5
+        if (team.limit != 0) {
+            if (team.leader !== username) {
+                return 5
+            }
         }
         const relate = await Pit.findOne({
             where: {
