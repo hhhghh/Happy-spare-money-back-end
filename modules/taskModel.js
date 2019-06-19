@@ -284,6 +284,33 @@ class TaskModel {
         return "Successfully destroy all task with id = " + task_id + " and related task-reciver and team-task"
     }
 
+    static async searchTaskByOrg(org_name) {
+        // SELECT `task`.`task_id`, ... 
+        // `user`.`username` AS `user.username`, `user`.`avatar` AS `user.avatar`, 
+        // `trs`.`id` AS `trs.id` ... 
+        // FROM `task` AS `task` LEFT OUTER JOIN `user` AS `user` ON `task`.`publisher` = `user`.`username` 
+        // INNER JOIN `tr` AS `trs` ON `task`.`task_id` = `trs`.`task_id` AND `trs`.`username` = 'hyx' WHERE `task`.`publisher` = 'org1';
+        // let sql = "SELECT * FROM `task` where `task_id` NOT IN (SELECT `task_id` FROM `teamtask`) AND `publisher` = ? "
+        let tasks = await sequelize.query("SELECT * FROM `task` where `task_id` NOT IN (SELECT `task_id` FROM `teamtask`) AND `publisher` = \'" + org_name + "\'", { type: sequelize.QueryTypes.SELECT})
+        .then(result => {
+            return result
+        });
+        let task_ids = tasks.map((item) => {return item.task_id})
+        return await models.Task.findAll({
+            where: {
+                task_id: {
+                    [Op.or]: task_ids
+                }
+            },
+            include: [{
+                association: models.Task.belongsTo(models.User, {foreignKey: 'publisher'}),
+                attributes: ['username', 'avatar']
+            }, {
+                association: models.Task.hasMany(models.TR, {foreignKey: 'task_id'})
+            }]
+        })
+    }
+
     static async searchTaskByAccepter(restriction) { 
         /**
          * 先根据 restriction.username 在 tr 里寻找 task ids

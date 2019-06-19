@@ -365,6 +365,40 @@ class TaskController {
             data: result.data
         }
     }
+
+    static async searchTaskByOrganization(ctx) {
+        let query_params = ctx.query
+        let result = undefined
+        if (query_params.orgname != undefined) {
+            try {
+                result = await TaskModel.searchTaskByOrg(query_params.orgname)
+                result = {
+                    code: 200, 
+                    msg: 'Success',
+                    data: result
+                }
+            } catch (err) {
+                result = {
+                    code: 500,
+                    msg: "Failed",
+                    data: err
+                }
+            }
+        } else {
+            result = {
+                code: 412,
+                msg: "Params is not enough...",
+                data: []
+            }
+        }
+
+        ctx.response.status = result.code
+        ctx.body = {
+            code: result.code,
+            msg: result.msg,
+            data: result.data
+        }
+    }
 }
 
 module.exports = TaskController;
