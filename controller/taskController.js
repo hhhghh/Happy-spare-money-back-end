@@ -74,12 +74,16 @@ class TaskController {
         let post_body = ctx.request.body
         let result = undefined
         let required_param_list = ['title', 'introduction', 'money', 'score', 
-                                    'max_accepter_number', 'type',
+                                    'max_accepter_number', 'type', 
                                     'starttime', 'endtime'];
         
         if (checkUndefined(post_body, required_param_list)) {
             // Confirm the publisher is the current user
             let current_user = await getUsernameFromCtx(ctx);
+            
+            if (post_body.range == undefined || post_body.range == null) {
+                post_body.range = []
+            }
 
             console.log(current_user)
 

@@ -98,20 +98,18 @@ class TRModel {
     }
 
     static async searchTRByOrganization(org_name, username) {
-        // return await models.TR.findAll({
-        //     where: {                
-        //         username: username
-        //     },
-        //     include: [{
-        //         association: models.Task.hasMany(models.TR, {foreignKey: 'task_id'}),
-        //         where: {
-        //             'publisher': org_name
-        //         }
-        //     }]
-        // })
+        let task_ids = (await models.TeamTask.findAll({
+            attributes: ['task_id']
+        })).map((item) => {
+            return item.get('task_id')
+        });
+
         return await models.Task.findAll({
             where: {                
-                publisher: org_name
+                publisher: org_name,
+                task_id: {
+                    [Op.notIn]: task_ids
+                }
             },
             include: [{
                 association: models.Task.belongsTo(models.User, {foreignKey: 'publisher'}),
