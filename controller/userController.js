@@ -11,6 +11,7 @@ const ToastModel = require('../modules/toastModel')
 const Toast_info = require('../utils/toast_info');
 const TeamModel = require('../modules/teamModel');
 
+
 class UserController {
 
     /**
@@ -1508,8 +1509,28 @@ class UserController {
                 }    
             }
         }
+    }
 
-
+    static async searchOrg(ctx) {
+        let query_params = ctx.query
+        var ins_name = query_params.ins_name
+        if (ins_name) {
+            var data = await UserModel.searchOrg(ins_name)
+            ctx.status = 200;
+            ctx.body = {
+                code: 200,
+                msg: '查询成功',
+                data: data
+            }
+        }
+        else {        
+            ctx.status = 200;
+            ctx.body = {
+                code: 400,
+                msg: 'Wrong query param.',
+                data: null
+            }
+        }   
     }
 }
 
