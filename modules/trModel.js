@@ -97,6 +97,34 @@ class TRModel {
         })
     }
 
+    static async searchTRByOrganization(org_name, username) {
+        // return await models.TR.findAll({
+        //     where: {                
+        //         username: username
+        //     },
+        //     include: [{
+        //         association: models.Task.hasMany(models.TR, {foreignKey: 'task_id'}),
+        //         where: {
+        //             'publisher': org_name
+        //         }
+        //     }]
+        // })
+        return await models.Task.findAll({
+            where: {                
+                publisher: org_name
+            },
+            include: [{
+                association: models.Task.belongsTo(models.User, {foreignKey: 'publisher'}),
+                attributes: ['username', 'avatar']
+            }, {
+                association: models.Task.hasMany(models.TR, {foreignKey: 'task_id'}),
+                where: {
+                    username: username
+                }
+            }]
+        })
+    }
+
     static async accepter_make_complement(post_body) {
         let task_type = await models.Task.findByPk(post_body.task_id).type
         if (task_type == 1 /** 问卷调查 */ && post_body.questionnaire_path == undefined) {

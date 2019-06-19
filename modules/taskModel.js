@@ -119,7 +119,11 @@ class TaskModel {
      * @param task_id
      */
     static async searchTaskById(task_id) {
-        return await models.Task.findByPk(task_id)
+        return await models.Task.findByPk(task_id, {
+            include: [{
+                association: models.Task.hasMany(models.TeamTask, {foreignKey: 'task_id'})
+            }]
+        })
     }
 
     /**

@@ -116,6 +116,43 @@ class TRController {
         }
     }
 
+    static async searchTRByOrganization(ctx) {
+        let query_params = ctx.query
+        let result = undefined
+        let required_param_list = ['organizationname', 'username'];
+    
+        if (checkUndefined(query_params, required_param_list)) {
+            try {
+                result = await TRModel.searchTRByOrganization(query_params.organizationname, query_params.username)
+                result = {
+                    code: 200,
+                    msg: "Success",
+                    data: result
+                }
+            } catch (err) {
+                result = {
+                    code: 500,
+                    msg: "Failed",
+                    data: err.message
+                }
+                console.log(err)
+            }
+        } else {
+            result = {
+                code: 412,
+                msg: "Params are not enough",
+                data: []
+            }
+        }
+
+        ctx.response.status = result.code
+        ctx.body = {
+            code: result.code,
+            msg: result.msg,
+            data: result.data
+        }
+    }
+
     /**
      * 获取文章详情
      * @param ctx
