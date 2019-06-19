@@ -7,7 +7,9 @@ const Store = require("../utils/Store.js")
 const redis = new Store();
 const CookieController = require('./CookieController');
 require('./CookieController');
-
+const ToastModel = require('../modules/toastModel')
+const Toast_info = require('../utils/toast_info');
+const TeamModel = require('../modules/teamModel');
 
 class UserController {
 
@@ -990,6 +992,35 @@ class UserController {
         return result
     }
 
+    static async getCanPublishTasksTeamList(insname) {
+        let result;
+        try {
+            const data = await UserModel.getCanPublishTasksTeamList(insname);
+            if (data == -1) {
+                result = {
+                    code: 412,
+                    msg: "查询机构不存在",
+                    data: null
+                }    
+            }
+            else {
+                result = {
+                    code: 200,
+                    msg: "success",
+                    data: data
+                }     
+            }
+
+        } catch(err) {
+            result = {
+                code: 500,
+                msg: "服务器异常",
+                data: err
+            }   
+        }
+        return result
+    }
+
     static async getUserBlacklist(ctx) {
         console.log(1)
         if (!ctx.session.username) {
@@ -1413,7 +1444,72 @@ class UserController {
     }
 
     static async refuseOrgToTeam(ctx) {
-        
+        if (!ctx.session.username) {
+            ctx.status = 200;
+            ctx.body = {
+                code: 401,
+                msg: "cookies无效",
+            }
+            return   
+        }  
+        var team_id = ctx.request.body.team_id
+        var ins_name = ctx.request.body.ins_name
+        if (team_id && ins_name) {
+            try {
+                var result = await UserModel.refuseOrgToTeam(team_id, ins_name, ctx.session.username)
+                if (result == 1) {
+                    ctx.status = 200;
+                    ctx.body = {
+                        code: 412,
+                        msg: "小组不存在",
+                        data: null
+                    }   
+                }
+                else if (result == 2) {
+                    ctx.status = 200;
+                    ctx.body = {
+                        code: 413,
+                        msg: "组长才有权利拒绝进组",
+                        data: null
+                    } 
+                }
+                else if (result == 3) {
+                    ctx.status = 200;
+                    ctx.body = {
+                        code: 413,
+                        msg: "机构不存在",
+                        data: null
+                    } 
+                }
+                else if (result == 4) {
+                    ctx.status = 200;
+                    ctx.body = {
+                        code: 414,
+                        msg: "以进组，进组请求有误",
+                        data: null
+                    } 
+                }
+                else if (result == 0) {
+                    let team = await TeamModel.getTeamByTeamId(team_id, 0);
+                    await ToastModel.createToast(ins_name, 6, Toast_info.t6(team.team_name), team.leader, team_id, team.team_name, null, null)
+                    ctx.status = 200;
+                    ctx.body = {
+                        code: 200,
+                        msg: "拒绝成功",
+                        data: true
+                    } 
+                }
+            } catch(err) {
+                ctx.status = 500;
+                ctx.body = {
+                    code: 500,
+                    msg: "服务器错误",
+                    data: err
+                }    
+            }
+        }
+
+
     }
 }
 

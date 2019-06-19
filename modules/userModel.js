@@ -548,6 +548,35 @@ class UserModel {
         return data
     }
 
+    static async getCanPublishTasksTeamList(insname) {
+        const ins = await User.findOne({
+            where: {
+                username: insname
+            }
+        })
+        if (ins == null) {
+            return -1
+        }
+        let data = []
+        const teams = await Pit.findAll({
+            where: {
+                ins_name: insname
+            }
+        }) 
+        for (var i = 0; i < teams.length; i++) {
+            const team = await Team.findOne({
+                where: {
+                    team_id: teams[i].team_id
+                }
+            })
+            data.push({
+                "teamname": team.team_name,
+                "teamavatar": team.logo
+            })
+        }
+        return data
+    }
+
     static async getUserBlacklist(username) {
         const user = await User.findOne({
             where: {
@@ -712,6 +741,38 @@ class UserModel {
             })
         }
         return data    
+    }
+
+    static async refuseOrgToTeam(team_id, ins_name, username) {
+        var team = await Team.findOne({
+            where: {
+                team_id: team_id
+            }
+        })
+        if (team == null) {
+            return 1
+        }
+        if (team.leader !== username) {
+            return 2   
+        }
+        var ins = await User.findOne({
+            where: {
+                username: ins_name
+            }
+        })
+        if (ins == null) {
+            return 3
+        }
+        var relate = await Pit.findOne({
+            where: {
+                ins_name: ins_name,
+                team_id: team_id
+            }
+        })
+        if (relate != null) {
+            return 4
+        }
+        return 0
     }
 }
 

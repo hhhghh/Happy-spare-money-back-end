@@ -166,6 +166,22 @@ router.get('/getCanPublishTasksOrg', async(ctx) => {
     ctx = response(ctx, result)
 })
 
+router.get('/getCanPublishTasksTeamList', async(ctx) => {
+    let query_params = ctx.query;
+    let result = null;
+    if (query_params.ins_name) {
+        result = await UserController.getCanPublishTasksTeamList(query_params.ins_name);
+    }
+    else {
+        result = {
+            code: 400,
+            msg: 'Wrong query param.',
+            data: null
+        }
+    }
+    ctx = response(ctx, result)
+})
+
 
 router.get('/deposit', async(ctx) => {
     let query_params = ctx.query
