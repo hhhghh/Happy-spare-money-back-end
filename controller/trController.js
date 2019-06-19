@@ -247,19 +247,23 @@ class TRController {
                 console.log(publisher, current_user)
                 if (publisher == current_user) {
                     let data = undefined
-                    let task_money = await TaskModel.searchTaskById(post_body.task_id).money;
+                    let task_money = (await TaskModel.searchTaskById(post_body.task_id)).money;
                     
                     if (post_body.username instanceof Array) {
                         data = await TRModel.batch_confirm_complement(post_body.username, 
                                                                       post_body.task_id, 
                                                                       post_body.score);
-                        
+                        // print('[R 252\t] data is ', data)
                         await UserModel.batchUpdateUserMoney(post_body.username, task_money);
+                        // print('[R 262\t] user model update money ok')
                     } else {
                         data = await TRModel.comfirm_complement(post_body.username, 
                                                                 post_body.task_id, 
                                                                 post_body.score);
+
+                        // print('[R 261\t] data is data')
                         await UserModel.updateUserMoney(post_body.username, task_money);
+                        // print('[R 262\t] user model update money ok')
                     }
                     result = {
                         code: 200, 
