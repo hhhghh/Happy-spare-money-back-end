@@ -9,6 +9,8 @@ const Task = sequelize.import('../table/task')
 const Organization = sequelize.import('../table/organization')
 const All_Tables = require('../table/all_tables')
 const TeamModel = require('./teamModel')
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 
 
 User.sync({force: false});
@@ -773,6 +775,27 @@ class UserModel {
             return 4
         }
         return 0
+    }
+
+    static async searchOrg(ins_name) {
+        var ins = await User.findAll({
+            where: {
+                username: {
+                    [Op.like]: '%'+ins_name+'%',
+                }, 
+                account_state: 1
+            }
+        })
+        let data = []
+        for (var i = 0; i < ins.length; i++) {
+            data.push({
+                    "orgname": ins[i].username,
+                    "orgsignature": ins[i].signature,
+                    "orgavatar": ins[i].avatar
+                }
+            )
+        }
+        return data
     }
 }
 

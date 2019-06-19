@@ -233,6 +233,8 @@ router.get('/withdraw', async(ctx) => {
     ctx = response(ctx, result)
 })
 
+router.get('/searchOrg', UserController.searchOrg)
+
 let response = (ctx, result) => {
     ctx.response.status = result.code;
     ctx.body = {
