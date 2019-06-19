@@ -787,7 +787,7 @@ class UserController {
                 }
             }
             else if (result == 1) {
-                ctx.status = 402
+                ctx.status = 200
                 ctx.body = {
                     code: 402,
                     msg: '取消拉黑机构不存在',
@@ -795,7 +795,7 @@ class UserController {
                 }   
             }
             else if (result == 2) {
-                ctx.status = 403
+                ctx.status = 200
                 ctx.body = {
                     code: 403,
                     msg: '该用户不是机构',
@@ -803,7 +803,7 @@ class UserController {
                 }   
             }
             else if (result == 3) {
-                ctx.status = 405
+                ctx.status = 200
                 ctx.body = {
                     code: 405,
                     msg: '小组不存在',
@@ -811,7 +811,7 @@ class UserController {
                 }   
             }
             else if (result == 4) {
-                ctx.status = 406
+                ctx.status = 200
                 ctx.body = {
                     code: 406,
                     msg: '不存在拉黑关系',
@@ -819,12 +819,19 @@ class UserController {
                 }   
             }
             else if (result == 5) {
-                ctx.status = 407
+                ctx.status = 200
                 ctx.body = {
                     code: 407,
                     msg: '组长才能取消拉黑',
                     data: result
                 }   
+            }
+            else if (result == 6) {
+                ctx.status = 200
+                ctx.body = {
+                    code: 408,
+                    msg: '小组不允许添加机构'
+                }
             }
         } catch(err) {
             ctx.status = 500;
@@ -1403,6 +1410,10 @@ class UserController {
                 data: err
             }   
         }   
+    }
+
+    static async refuseOrgToTeam(ctx) {
+        
     }
 }
 
