@@ -209,6 +209,34 @@ class TeamController {
         return result;
     }
 
+    // 200 成功，412 异常，213 没有加入小组
+    static async getGroupByOrgname(member_username, type) {
+        let result = null;
+        try {
+            let data = await TeamModel.getTeamByOrgname(member_username, type);
+            if (data.length === 0) {
+                result = {
+                    code: 213,
+                    msg: '查询成功,没有加入小组',
+                    data: null
+                };
+            } else {
+                result = {
+                    code: 200,
+                    msg: '查询成功',
+                    data: data
+                };
+            }
+        } catch (err) {
+            result = {
+                code: 412,
+                msg: '查询失败',
+                data: err.message
+            };
+        }
+        return result;
+    }
+
     // 200 成功是组长，412 异常，212 不是组长，213 没有小组
     static async isGroupLeader(team_id, leader) {
         let result = null;

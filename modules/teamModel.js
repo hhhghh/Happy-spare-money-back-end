@@ -167,6 +167,32 @@ class TeamModel {
         return result;
     }
 
+    static async getTeamByOrgname(member_username, type) {
+        Team.hasMany(Pit, {foreignKey : 'team_id'});
+        Pit.belongsTo(Team, {foreignKey : 'team_id'});
+        Team.hasMany(Teamlabel, {foreignKey : 'team_id'});
+        Teamlabel.belongsTo(Team, {foreignKey : 'team_id'});
+
+        let team = await Team.findAll({
+            include: [{
+                model: Pit,
+                where: {
+                    ins_name : member_username
+                }
+            }]
+        });
+        if (team.length === 0)
+            return [];
+        let result;
+        result = await TeamModel.getTeamByTeamId2(team[0].team_id, type);
+        for (let i = 1; i < team.length; i++) {
+            let tem = await TeamModel.getTeamByTeamId(team[i].team_id, type);
+            if (tem !== null)
+                result.push(tem);
+        }
+        return result;
+    }
+
     // 返回用户是否是该小组组长，使用根据小组id来查找小组
 
     // 返回用户是否是该小组成员
