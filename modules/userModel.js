@@ -59,7 +59,7 @@ class UserModel {
         })
 
         await TeamModel.addToDefaultTeam(info.username)
-        
+
         return "success"
     }
 

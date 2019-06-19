@@ -9,11 +9,11 @@ module.exports = function(sequelize, DataTypes){
             autoIncrement:true
         },
         title:{
-            type:DataTypes.CHAR(45),
+            type:DataTypes.CHAR(255),
             allowNull:false
         },
         introduction:{
-            type:DataTypes.CHAR(100),
+            type:DataTypes.CHAR(255),
             allowNull:false
         },
         money:{
@@ -55,7 +55,7 @@ module.exports = function(sequelize, DataTypes){
             type:DataTypes.CHAR(255)
         },
         content:{
-            type:DataTypes.CHAR(45)
+            type:DataTypes.TEXT
         },
         createdAt: {
             type: DataTypes.DATE,

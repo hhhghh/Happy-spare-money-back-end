@@ -403,9 +403,9 @@ class TeamController {
                         };
                     }
                 } else if (user.account_state === 1) {
-                    let team = await TeamModel.getUserByTeamIdUsername(team_id, username);
+                    let team = await TeamModel.getOrgByTeamIdOrgname(team_id, username);
                     if (team.length === 0) {
-                        await UserModel.teamCancelBlack(username, team_id);
+                        await TeamModel.createOrganizaitons(team_id, username);
                         result = {
                             code: 200,
                             msg: '添加成功',
@@ -427,7 +427,7 @@ class TeamController {
                         msg: '添加失败，没有user',
                         data: false
                     };
-                } else {
+                } else if (user.account_state === 0) {
                     let member = await TeamModel.getUserByTeamIdUsername(team_id, username);
                     if (member.length === 0) {
                         let toast = await ToastModel.getToastByMessage(0, username, team_id);
@@ -445,6 +445,27 @@ class TeamController {
                         result = {
                             code: 211,
                             msg: '添加失败，user已经在小组中',
+                            data: false
+                        };
+                    }
+                } else if (user.account_state === 1) {
+                    let member = await TeamModel.getOrgByTeamIdOrgname(team_id, username);
+                    if (member.length === 0) {
+                        let toast = await ToastModel.getToastByMessage(7, username, team_id);
+                        if (toast === null) {
+                            await ToastModel.createToast(team.leader, 7,
+                                Toast_info.t7(username, team.team_name),
+                                username, team_id, team.team_name, null, null);
+                        }
+                        result = {
+                            code: 214,
+                            msg: '添加失败，需要组长审核',
+                            data: true
+                        };
+                    } else {
+                        result = {
+                            code: 211,
+                            msg: '添加失败，机构已经在小组中',
                             data: false
                         };
                     }
