@@ -119,11 +119,11 @@ class TRController {
     static async searchTRByOrganization(ctx) {
         let query_params = ctx.query
         let result = undefined
-        let required_param_list = ['organizationname', 'username'];
+        let required_param_list = ['orgname', 'username'];
     
         if (checkUndefined(query_params, required_param_list)) {
             try {
-                result = await TRModel.searchTRByOrganization(query_params.organizationname, query_params.username)
+                result = await TRModel.searchTRByOrganization(query_params.orgname, query_params.username)
                 result = {
                     code: 200,
                     msg: "Success",
