@@ -739,7 +739,8 @@ class UserModel {
             })
             data.push({
                 "orgname": org.username,
-                "orgavatar": org.avatar
+                "orgavatar": org.avatar,
+                "orgsignature": org.signature
             })
         }
         return data    
