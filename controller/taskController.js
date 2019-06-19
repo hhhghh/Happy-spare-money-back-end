@@ -54,6 +54,8 @@ class TaskController {
         }
     }
     
+    
+    
     /**
      * 创建 Task
      * @param {string} title                The title of the task
@@ -72,10 +74,9 @@ class TaskController {
         let post_body = ctx.request.body
         let result = undefined
         let required_param_list = ['title', 'introduction', 'money', 'score', 
-                                    'max_accepter_number', 'type', 'range',
+                                    'max_accepter_number', 'type',
                                     'starttime', 'endtime'];
         
-        console.log(post_body)
         if (checkUndefined(post_body, required_param_list)) {
             // Confirm the publisher is the current user
             let current_user = await getUsernameFromCtx(ctx);
@@ -204,6 +205,7 @@ class TaskController {
         }
         return result
     }
+
 
     static async searchTaskByMoney(money) {
         let result
