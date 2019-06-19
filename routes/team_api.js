@@ -53,6 +53,29 @@ router.get('/Member/', async (ctx) => {
     response(ctx, result);
 });
 
+router.get('/OrgMember/', async (ctx) => {
+    let query_params = ctx.query;
+    let result = null;
+    let cookie_user = await CookieController.getUsernameFromCtx(ctx);
+    if (query_params.team_id && cookie_user !== -2) {
+        result = await TeamController.isGroupOrgMember(query_params.team_id, cookie_user)
+    } else if (query_params.team_id){
+        result = {
+            code: 401,
+            msg: 'cookie超时，请重新登录',
+            data: null
+        }
+    } else {
+        result = {
+            code: 400,
+            msg: 'Wrong query param.',
+            data: null
+        }
+    }
+
+    response(ctx, result);
+});
+
 router.get('/Name/', async (ctx) => {
     let query_params = ctx.query;
     let result = null;

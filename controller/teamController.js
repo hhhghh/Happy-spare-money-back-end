@@ -282,6 +282,43 @@ class TeamController {
         return result;
     }
 
+    // 200 成功是成员，412 异常，211 不是成员，213 没有小组
+    static async isGroupOrgMember(team_id, member_username) {
+        let result = null;
+        try {
+            let team = await TeamModel.getTeamByTeamId(team_id, 0);
+            if (team === null) {
+                result = {
+                    code: 213,
+                    msg: '查询失败，没有该小组',
+                    data: false
+                };
+            } else {
+                let team = await TeamModel.getOrgByTeamIdOrgname(team_id, member_username);
+                if (team.length === 0) {
+                    result = {
+                        code: 211,
+                        msg: '查询成功，不是成员',
+                        data: false
+                    };
+                } else {
+                    result = {
+                        code: 200,
+                        msg: '查询成功，是成员',
+                        data: true
+                    };
+                }
+            }
+        } catch (err) {
+            result = {
+                code: 412,
+                msg: '查询失败',
+                data: err.message
+            };
+        }
+        return result;
+    }
+
     // 200 正常，412 异常，210 没有该user，211 user已经在小组中，212 leader不正确, 需要验证，
     // 213 没有小组，215 不允许添加
     static async addUserToGrope(team_id, leader, user) {
