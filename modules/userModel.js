@@ -35,14 +35,8 @@ class UserModel {
         else {
             avatar = 'http://139.196.79.193:3000/uploads/user/' + info.username + avatarExtName
         }
-        
-        if (info.type != 1) {
-            await Organization.create({
-                ins_name: info.grade,
-                user_name: info.username
-            })  
-        }   
-        else if (info.type == 1) {
+         
+        if (info.type == 1) {
             info.grade = 0
         }
 
@@ -702,12 +696,14 @@ class UserModel {
                 ins_name: ins_name
             }
         }) 
+        console.log("1")
         for (var i = 0; i < users.length; i++) {
             const user = await User.findOne({
                 where: {
                     username: users[i].user_name
                 }
             })
+            console.log("2")
             data.push({
                 "username": user.username,
                 "useravatar": user.avatar
@@ -737,11 +733,13 @@ class UserModel {
                     username: orgs[i].ins_name
                 }
             })
-            data.push({
-                "orgname": org.username,
-                "orgavatar": org.avatar,
-                "orgsignature": org.signature
-            })
+            if (org) {
+                data.push({
+                    "orgname": org.username,
+                    "orgavatar": org.avatar,
+                    "orgsignature": org.signature
+                })
+            }
         }
         return data    
     }

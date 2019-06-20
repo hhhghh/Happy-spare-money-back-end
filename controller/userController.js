@@ -1439,9 +1439,9 @@ class UserController {
             ctx.body =  {
                 code: 500,
                 msg: "服务器异常",
-                data: err
+                data: err.message
             }   
-        }   
+        }  
     }
 
     static async refuseOrgToTeam(ctx) {
