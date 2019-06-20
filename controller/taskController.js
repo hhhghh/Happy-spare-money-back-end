@@ -374,8 +374,11 @@ class TaskController {
         let query_params = ctx.query
         let result = undefined
         if (query_params.orgname != undefined) {
+            let restrictions = {
+                type: query_params.type
+            }
             try {
-                result = await TaskModel.searchTaskByOrg(query_params.orgname)
+                result = await TaskModel.searchTaskByOrg(query_params.orgname, restrictions)
                 result = {
                     code: 200, 
                     msg: 'Success',
