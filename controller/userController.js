@@ -1415,7 +1415,7 @@ class UserController {
         }
 
 
-        try {
+        //try {
             const data = await UserModel.getUsersFollowedOrganizationsList(ctx.session.username);
             if (data == 1) {
                 ctx.status = 200;
@@ -1434,14 +1434,14 @@ class UserController {
                 }     
             }
 
-        } catch(err) {
+        /*} catch(err) {
             ctx.status = 200;
             ctx.body =  {
                 code: 500,
                 msg: "服务器异常",
-                data: err
+                data: err.message
             }   
-        }   
+        }*/   
     }
 
     static async refuseOrgToTeam(ctx) {
