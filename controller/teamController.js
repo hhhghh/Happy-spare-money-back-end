@@ -322,7 +322,7 @@ class TeamController {
                     data: false
                 };
             } else {
-                let team = await TeamModel.getOrgByTeamIdOrgname(team_id, member_username);
+                let team = await TeamModel.getOrgByTeamIdOrgName(team_id, member_username);
                 if (team.length === 0) {
                     result = {
                         code: 211,
