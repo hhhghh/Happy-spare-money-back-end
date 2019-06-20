@@ -1,6 +1,7 @@
 const db = require('../config/db');
 const Sequelize = require('sequelize');
 const sequelize = db.sequelize;
+const Op = Sequelize.Op;
 const User = sequelize.import('../table/user');
 const Team = sequelize.import('../table/team');
 const Teamlabel = sequelize.import('../table/teamlabel');
@@ -50,7 +51,9 @@ class TeamModel {
         return await Team.findAll({
             attributes: ['team_id', 'team_name', 'leader', 'logo', 'description', 'limit'],
             where: {
-                team_name: team_name,
+                team_name: {
+                    [Op.like]: '%'+team_name+'%',
+                },
                 type: type
             },
             include: [{
@@ -198,6 +201,15 @@ class TeamModel {
             where: {
                 team_id : team_id,
                 member_username : member_username
+            }
+        })
+    }
+
+    static async getOrgByTeamIdOrgName(team_id, member_username) {
+        return await Pit.findAll({
+            where: {
+                team_id : team_id,
+                ins_name : member_username
             }
         })
     }
