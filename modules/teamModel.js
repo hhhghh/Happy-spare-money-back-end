@@ -330,9 +330,17 @@ class TeamModel {
 
     // 添加成员到默认小组
     static async addToDefaultTeam(username) {
-        await TeamModel.createMembers(1, username);
         let user = await TeamModel.getUserByUsername(username);
-        await TeamModel.createMembers(user.grade+1, username);
+        if (user.account_state === 0) {
+            await TeamModel.createMembers(1, username);
+            await TeamModel.createMembers(user.grade + 1, username);
+        } else {
+            await TeamModel.createOrganizaitons(1, username);
+            await TeamModel.createOrganizaitons(2, username);
+            await TeamModel.createOrganizaitons(3, username);
+            await TeamModel.createOrganizaitons(4, username);
+            await TeamModel.createOrganizaitons(5, username);
+        }
     }
 
 }
