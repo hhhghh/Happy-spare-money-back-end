@@ -54,6 +54,8 @@ class TaskController {
         }
     }
     
+    
+    
     /**
      * 创建 Task
      * @param {string} title                The title of the task
@@ -72,13 +74,16 @@ class TaskController {
         let post_body = ctx.request.body
         let result = undefined
         let required_param_list = ['title', 'introduction', 'money', 'score', 
-                                    'max_accepter_number', 'type', 'range',
+                                    'max_accepter_number', 'type', 
                                     'starttime', 'endtime'];
         
-        console.log(post_body)
         if (checkUndefined(post_body, required_param_list)) {
             // Confirm the publisher is the current user
             let current_user = await getUsernameFromCtx(ctx);
+            
+            if (post_body.range == undefined || post_body.range == null) {
+                post_body.range = []
+            }
 
             console.log(current_user)
 
@@ -204,6 +209,7 @@ class TaskController {
         }
         return result
     }
+
 
     static async searchTaskByMoney(money) {
         let result
@@ -336,6 +342,40 @@ class TaskController {
         if (query_params.username != undefined) {
             try {
                 result = await TaskModel.searchTaskByAccepter(query_params)
+                result = {
+                    code: 200, 
+                    msg: 'Success',
+                    data: result
+                }
+            } catch (err) {
+                result = {
+                    code: 500,
+                    msg: "Failed",
+                    data: err
+                }
+            }
+        } else {
+            result = {
+                code: 412,
+                msg: "Params is not enough...",
+                data: []
+            }
+        }
+
+        ctx.response.status = result.code
+        ctx.body = {
+            code: result.code,
+            msg: result.msg,
+            data: result.data
+        }
+    }
+
+    static async searchTaskByOrganization(ctx) {
+        let query_params = ctx.query
+        let result = undefined
+        if (query_params.orgname != undefined) {
+            try {
+                result = await TaskModel.searchTaskByOrg(query_params.orgname)
                 result = {
                     code: 200, 
                     msg: 'Success',

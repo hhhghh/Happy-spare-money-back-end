@@ -9,6 +9,8 @@ const Task = sequelize.import('../table/task')
 const Organization = sequelize.import('../table/organization')
 const All_Tables = require('../table/all_tables')
 const TeamModel = require('./teamModel')
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 
 
 User.sync({force: false});
@@ -58,7 +60,8 @@ class UserModel {
             account_state: info.type
         })
 
-        await TeamModel.addToDefaultTeam(info.username);
+        await TeamModel.addToDefaultTeam(info.username)
+
         return "success"
     }
 
@@ -409,10 +412,13 @@ class UserModel {
         if (team === null) {
             return 3
         }
-        if (team.limit != 0) {
+        if (team.limit == 1) {
             if (team.leader !== username) {
                 return 5
             }
+        }
+        else if (team.limit == 2) {
+            return 6
         }
         const relate = await Pit.findOne({
             where: {
@@ -539,6 +545,35 @@ class UserModel {
             data.push({
                 "orgorganizationname": org.username,
                 "orgorganizationavatar": org.avatar
+            })
+        }
+        return data
+    }
+
+    static async getCanPublishTasksTeamList(insname) {
+        const ins = await User.findOne({
+            where: {
+                username: insname
+            }
+        })
+        if (ins == null) {
+            return -1
+        }
+        let data = []
+        const teams = await Pit.findAll({
+            where: {
+                ins_name: insname
+            }
+        }) 
+        for (var i = 0; i < teams.length; i++) {
+            const team = await Team.findOne({
+                where: {
+                    team_id: teams[i].team_id
+                }
+            })
+            data.push({
+                "teamname": team.team_name,
+                "teamavatar": team.logo
             })
         }
         return data
@@ -704,10 +739,64 @@ class UserModel {
             })
             data.push({
                 "orgname": org.username,
-                "orgavatar": org.avatar
+                "orgavatar": org.avatar,
+                "orgsignature": org.signature
             })
         }
         return data    
+    }
+
+    static async refuseOrgToTeam(team_id, ins_name, username) {
+        var team = await Team.findOne({
+            where: {
+                team_id: team_id
+            }
+        })
+        if (team == null) {
+            return 1
+        }
+        if (team.leader !== username) {
+            return 2   
+        }
+        var ins = await User.findOne({
+            where: {
+                username: ins_name
+            }
+        })
+        if (ins == null) {
+            return 3
+        }
+        var relate = await Pit.findOne({
+            where: {
+                ins_name: ins_name,
+                team_id: team_id
+            }
+        })
+        if (relate != null) {
+            return 4
+        }
+        return 0
+    }
+
+    static async searchOrg(ins_name) {
+        var ins = await User.findAll({
+            where: {
+                username: {
+                    [Op.like]: '%'+ins_name+'%',
+                }, 
+                account_state: 1
+            }
+        })
+        let data = []
+        for (var i = 0; i < ins.length; i++) {
+            data.push({
+                    "orgname": ins[i].username,
+                    "orgsignature": ins[i].signature,
+                    "orgavatar": ins[i].avatar
+                }
+            )
+        }
+        return data
     }
 }
 

@@ -293,7 +293,6 @@ class TeamModel {
         })
     }
 
-
     // 修改小组全部信息
     static async updateTeamDescription(new_data) {
         await Team.update({
@@ -331,17 +330,9 @@ class TeamModel {
 
     // 添加成员到默认小组
     static async addToDefaultTeam(username) {
+        await TeamModel.createMembers(1, username);
         let user = await TeamModel.getUserByUsername(username);
-        if (user.account_state === 0) {
-            await TeamModel.createMembers(1, username);
-            await TeamModel.createMembers(user.grade + 1, username);
-        } else if (user.account_state === 1) {
-            await TeamModel.createOrganizaitons(1, username);
-            await TeamModel.createOrganizaitons(2, username);
-            await TeamModel.createOrganizaitons(3, username);
-            await TeamModel.createOrganizaitons(4, username);
-            await TeamModel.createOrganizaitons(5, username);
-        }
+        await TeamModel.createMembers(user.grade+1, username);
     }
 
 }
