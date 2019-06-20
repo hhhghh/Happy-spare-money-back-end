@@ -1,7 +1,7 @@
 const db = require('../config/db');
 const Sequelize = require('sequelize');
 const sequelize = db.sequelize;
-const Op = Sequelize.Op
+const Op = Sequelize.Op;
 const User = sequelize.import('../table/user');
 const Team = sequelize.import('../table/team');
 const Teamlabel = sequelize.import('../table/teamlabel');
@@ -292,6 +292,7 @@ class TeamModel {
             team_id: team_id
         })
     }
+
 
     // 修改小组全部信息
     static async updateTeamDescription(new_data) {
