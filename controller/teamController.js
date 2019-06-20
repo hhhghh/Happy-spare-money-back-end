@@ -468,7 +468,7 @@ class TeamController {
                         };
                     }
                 } else if (user.account_state === 1) {
-                    let team = await TeamModel.getOrgByTeamIdOrgname(team_id, username);
+                    let team = await TeamModel.getOrgByTeamIdOrgName(team_id, username);
                     if (team.length === 0) {
                         await TeamModel.createOrganizaitons(team_id, username);
                         result = {
@@ -514,7 +514,7 @@ class TeamController {
                         };
                     }
                 } else if (user.account_state === 1) {
-                    let member = await TeamModel.getOrgByTeamIdOrgname(team_id, username);
+                    let member = await TeamModel.getOrgByTeamIdOrgName(team_id, username);
                     if (member.length === 0) {
                         let toast = await ToastModel.getToastByMessage(7, username, team_id);
                         if (toast === null) {

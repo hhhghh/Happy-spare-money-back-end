@@ -205,7 +205,7 @@ class TeamModel {
         })
     }
 
-    static async getOrgByTeamIdOrgname(team_id, member_username) {
+    static async getOrgByTeamIdOrgName(team_id, member_username) {
         return await Pit.findAll({
             where: {
                 team_id : team_id,
