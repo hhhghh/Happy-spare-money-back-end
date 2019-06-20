@@ -286,6 +286,13 @@ class TeamModel {
         })
     }
 
+    static async createOrganizaitons(team_id, member_username) {
+        return await Pit.create({
+            ins_name: member_username,
+            team_id: team_id
+        })
+    }
+
     // 修改小组全部信息
     static async updateTeamDescription(new_data) {
         await Team.update({
@@ -327,8 +334,6 @@ class TeamModel {
         let user = await TeamModel.getUserByUsername(username);
         await TeamModel.createMembers(user.grade+1, username);
     }
-
-    
 
 }
 module.exports = TeamModel;
