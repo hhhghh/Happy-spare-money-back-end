@@ -21,47 +21,12 @@ router.get('/hhhghh', async (ctx, next) => {
 })
 
 router.get('/', async (ctx, next) => {
-    let restriction = ctx.query
-
-    // let tasks = await models.TR.findAll({
-    //     where: {
-    //         username: restriction.username
-    //     },
-    //     include: [{
-    //         association: models.Task.hasMany(models.TR, {foreignKey: 'task_id'}),
-    //         include: [{
-    //             association: models.Task.hasMany(models.TeamTask, {foreignKey: 'task_id'}),
-    //             where: {
-    //                 team_id: restriction.range
-    //             }
-    //         }]
-    //     }]
-    // });
-
-    // let tasks = await models.TR.findAll({
-    //     where: {
-    //         username: restriction.username
-    //     },
-    //     include: [{
-    //         // model: models.Task, 
-    //         association: models.Task.hasMany(models.TR, {foreignKey: 'task_id'}),
-    //         through: {
-    //             attributes: ['task_id']
-    //         }
-    //     }]
-    // });
-
-    let tasks = await models.TR.findAll({
+    ctx.body = await models.Task.findAll({
         where: {
-            username: restriction.username
-        },
-        include: [{
-            association: models.Task.hasMany(models.TR, {foreignKey: 'task_id'}),     
-        }]
-    });
-    
-    
-    ctx.body = tasks
+            task_id: 2,
+            
+        }
+    })
 });
 
 router.post('/confirm', async (ctx, next) => {

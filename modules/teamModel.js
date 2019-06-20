@@ -1,7 +1,7 @@
 const db = require('../config/db');
 const Sequelize = require('sequelize');
 const sequelize = db.sequelize;
-const Op = Sequelize.Op
+const Op = Sequelize.Op;
 const User = sequelize.import('../table/user');
 const Team = sequelize.import('../table/team');
 const Teamlabel = sequelize.import('../table/teamlabel');
@@ -286,13 +286,6 @@ class TeamModel {
         })
     }
 
-    static async createOrganizaitons(team_id, member_username) {
-        return await Pit.create({
-            ins_name: member_username,
-            team_id: team_id
-        })
-    }
-
     // 修改小组全部信息
     static async updateTeamDescription(new_data) {
         await Team.update({
@@ -330,18 +323,12 @@ class TeamModel {
 
     // 添加成员到默认小组
     static async addToDefaultTeam(username) {
+        await TeamModel.createMembers(1, username);
         let user = await TeamModel.getUserByUsername(username);
-        if (user.account_state === 0) {
-            await TeamModel.createMembers(1, username);
-            await TeamModel.createMembers(user.grade + 1, username);
-        } else if (user.account_state === 1) {
-            await TeamModel.createOrganizaitons(1, username);
-            await TeamModel.createOrganizaitons(2, username);
-            await TeamModel.createOrganizaitons(3, username);
-            await TeamModel.createOrganizaitons(4, username);
-            await TeamModel.createOrganizaitons(5, username);
-        }
+        await TeamModel.createMembers(user.grade+1, username);
     }
+
+    
 
 }
 module.exports = TeamModel;
