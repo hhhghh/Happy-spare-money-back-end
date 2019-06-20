@@ -286,17 +286,19 @@ class TaskModel {
 
     static async searchTaskByOrg(org_name, restrictions) {
         restrictions = checkParamsAndConvert(restrictions, 'type');
-        let tasks = await sequelize.query("SELECT * FROM `task` where `task_id` NOT IN (SELECT `task_id` FROM `teamtask`) AND `publisher` = \'" + org_name + "\'", { type: sequelize.QueryTypes.SELECT})
-                            .then(result => {
-                                return result
-                            });
-        let task_ids = tasks.map((item) => {return item.task_id})
+        // let tasks = await sequelize.query("SELECT * FROM `task` where `task_id` NOT IN (SELECT `task_id` FROM `teamtask`) AND `publisher` = \'" + org_name + "\'", { type: sequelize.QueryTypes.SELECT})
+        //                     .then(result => {
+        //                         return result
+        //                     });
+        let task_ids = (await models.TeamTask.findAll()).map((item) => {return item.task_id;});
+        // let task_ids = tasks.map((item) => {return item.task_id})
         return await models.Task.findAll({
             where: {
                 task_id: {
-                    [Op.or]: task_ids
+                    [Op.notIn]: task_ids
                 },
-                type: restrictions.type
+                type: restrictions.type,
+                publisher: org_name
             },
             include: [{
                 association: models.Task.belongsTo(models.User, {foreignKey: 'publisher'}),
