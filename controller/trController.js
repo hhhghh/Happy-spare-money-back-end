@@ -124,8 +124,11 @@ class TRController {
         let required_param_list = ['orgname', 'username'];
     
         if (checkUndefined(query_params, required_param_list)) {
+            let restrictions = {
+                type: query_params.type
+            }
             try {
-                result = await TRModel.searchTRByOrganization(query_params.orgname, query_params.username)
+                result = await TRModel.searchTRByOrganization(query_params.orgname, query_params.username, restrictions);
                 result = {
                     code: 200,
                     msg: "Success",

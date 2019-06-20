@@ -24,7 +24,6 @@ router.get('/', async (ctx, next) => {
     ctx.body = await models.Task.findAll({
         where: {
             task_id: 2,
-            
         }
     })
 });
