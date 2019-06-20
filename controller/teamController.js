@@ -821,7 +821,7 @@ class TeamController {
                             for (let i = 0; i < req.teamlabels.length; i++) {
                                 await TeamModel.createTeamLabel(req.team_id, req.teamlabels[i].label);
                             }
-                            let data = await TeamModel.getTeamByTeamId(req.team_id);
+                            let data = await TeamModel.getTeamByTeamId(req.team_id, 0);
                             ctx.response.status = 200;
                             ctx.body = {
                                 code: 200,
