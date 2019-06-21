@@ -342,7 +342,7 @@ class TRController {
         }
 
         let toastTask = await TaskModel.searchTaskById(post_body.task_id);
-        ToastModel.createToast(current_user, 13, 
+        ToastModel.createToast(post_body.username, 13, 
                                 ToastInfo.t13(toastTask.title, toastTask.publisher), 
                                 toastTask.publisher, null, null,
                                 post_body.task_id, toastTask.title);

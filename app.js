@@ -50,6 +50,22 @@ app.use(session({
   rolling: true
 }));
 
+// Will redirect all unlogin request to login page except the page with
+// 1. static...
+// 2. api ...
+// 3. index.html 
+// Or have login in the system
+app.use(async (ctx, next) => {
+  console.log(ctx.url, ctx.url == '/index.html');
+  console.log(ctx.session.username);
+
+  if (/(index.html|api|static)/.test(ctx.url) || ctx.session.username) {
+    await next();
+  } else {
+    ctx.response.redirect('/index.html#/login');
+  }
+})
+
 // routes
 app.use(routers.index.routes(), routers.index.allowedMethods());
 app.use(routers.team_api.routes(), routers.team_api.allowedMethods());
