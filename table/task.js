@@ -9,7 +9,7 @@ module.exports = function(sequelize, DataTypes){
             autoIncrement:true
         },
         title:{
-            type:DataTypes.CHAR(255),
+            type:DataTypes.CHAR(45),
             allowNull:false
         },
         introduction:{

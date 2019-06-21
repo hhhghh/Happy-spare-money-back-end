@@ -11,6 +11,11 @@ module.exports = function(sequelize, DataTypes){
         username:{
             type:DataTypes.CHAR(20),
             allowNull:false,
+            references: {
+                model: 'user',
+                key: 'username',
+                deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
+            }
         },
         type: {
             type:DataTypes.INTEGER,

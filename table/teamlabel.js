@@ -12,7 +12,12 @@ module.exports = function(sequelize, DataTypes){
         },
         team_id:{
             type:DataTypes.INTEGER,
-            allowNull:false
+            allowNull:false,
+            references: {
+                model: 'team',
+                key: 'team_id',
+                deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
+            }
         },
         label:{
             type:DataTypes.CHAR(45),
