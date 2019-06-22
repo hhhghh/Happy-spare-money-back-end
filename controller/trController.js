@@ -358,6 +358,11 @@ class TRController {
         }
         if (post_body.task_id != undefined) {
             try {
+                let endtime = (await TaskModel.searchTaskById(ctx.query.task_id)).get('endtime');
+                if (endtime > sd.format(new Date())) {
+                    response(ctx, 402, "Cannot confirm the task passed the endtime", []);
+                    return;
+                }
                 post_body.username = current_user
                 result = await TRModel.accepter_make_complement(post_body)
                 result = {
