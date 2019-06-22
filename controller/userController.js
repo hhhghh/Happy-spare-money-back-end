@@ -1532,6 +1532,70 @@ class UserController {
             }
         }   
     }
+
+    static async orgquitteam(ctx) {
+
+        if (!ctx.session.username) {
+            ctx.status = 200;
+            ctx.body = {
+                code: 401,
+                msg: "cookies无效",
+            }
+            return   
+        }
+
+        if (ctx.session.type == 0) {
+            ctx.status = 200;
+            ctx.body = {
+                code: 401,
+                msg: "用户不是机构",
+            }
+            return   
+        }
+
+        var team_id = ctx.request.body.team_id;
+        var ins_name = ctx.session.username;
+
+        try {
+            const result = await UserModel.orgquitteam(team_id, ins_name);
+            if (result == 1) {
+                ctx.status = 200;
+                ctx.body = {
+                    code: 402,
+                    msg: "机构不存在",
+                }    
+            }
+            else if (result == 2) {
+                ctx.status = 200;
+                ctx.body = {
+                    code: 403,
+                    msg: "小组不存在",
+                }    
+            }
+            else if (result == 3) {
+                ctx.status = 200;
+                ctx.body = {
+                    code: 405,
+                    msg: "机构不在小组内，退出失败",
+                }    
+            }
+            else if (result == 0) {
+                ctx.status = 200;
+                ctx.body = {
+                    code: 200,
+                    msg: "退出成功",
+                }    
+            }
+            
+        } catch(err) {
+            ctx.status = 500;
+            ctx.body = {
+                code: 200,
+                msg: err.message
+            }    
+        }
+
+    }
 }
 
 module.exports = UserController;

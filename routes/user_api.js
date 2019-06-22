@@ -31,6 +31,8 @@ router.post('/cancelfollow', UserController.cancelFollow);
 
 router.post('/refuseOrgToTeam', UserController.refuseOrgToTeam);
 
+router.post('/orgquitteam', UserController.orgquitteam);
+
 router.put('/update', UserController.updateUserInfo);
 
 router.put('/updateAvatar', UserController.updateAvatar);

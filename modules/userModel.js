@@ -796,6 +796,41 @@ class UserModel {
         }
         return data
     }
+
+    static async orgquitteam(team_id, ins_name) {
+        var ins = await User.findOne({
+            where: {
+                username: ins_name
+            }
+        })
+        if (ins == null) {
+            return 1
+        }
+        var team = await Team.findOne({
+            where: {
+                team_id: team_id
+            }
+        })
+        if (team == null) {
+            return 2
+        }
+        var relate = await Pit.findOne({
+            where: {
+                ins_name: ins_name,
+                team_id: team_id
+            }
+        })
+        if (relate == null) {
+            return 3
+        }
+        await Pit.destroy({
+            where: {
+                ins_name: ins_name,
+                team_id: team_id   
+            }
+        })
+        return 0
+    }
 }
 
 module.exports = UserModel;
