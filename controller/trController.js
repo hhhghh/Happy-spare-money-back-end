@@ -124,8 +124,11 @@ class TRController {
         let required_param_list = ['orgname', 'username'];
     
         if (checkUndefined(query_params, required_param_list)) {
+            let restrictions = {
+                type: query_params.type
+            }
             try {
-                result = await TRModel.searchTRByOrganization(query_params.orgname, query_params.username)
+                result = await TRModel.searchTRByOrganization(query_params.orgname, query_params.username, restrictions);
                 result = {
                     code: 200,
                     msg: "Success",
@@ -339,7 +342,7 @@ class TRController {
         }
 
         let toastTask = await TaskModel.searchTaskById(post_body.task_id);
-        ToastModel.createToast(current_user, 13, 
+        ToastModel.createToast(post_body.username, 13, 
                                 ToastInfo.t13(toastTask.title, toastTask.publisher), 
                                 toastTask.publisher, null, null,
                                 post_body.task_id, toastTask.title);
@@ -355,6 +358,11 @@ class TRController {
         }
         if (post_body.task_id != undefined) {
             try {
+                let endtime = (await TaskModel.searchTaskById(ctx.query.task_id)).get('endtime');
+                if (endtime > sd.format(new Date())) {
+                    response(ctx, 402, "Cannot confirm the task passed the endtime", []);
+                    return;
+                }
                 post_body.username = current_user
                 result = await TRModel.accepter_make_complement(post_body)
                 result = {

@@ -35,14 +35,8 @@ class UserModel {
         else {
             avatar = 'http://139.196.79.193:3000/uploads/user/' + info.username + avatarExtName
         }
-        
-        if (info.type != 1) {
-            await Organization.create({
-                ins_name: info.grade,
-                user_name: info.username
-            })  
-        }   
-        else if (info.type == 1) {
+         
+        if (info.type == 1) {
             info.grade = 0
         }
 
@@ -702,12 +696,14 @@ class UserModel {
                 ins_name: ins_name
             }
         }) 
+        console.log("1")
         for (var i = 0; i < users.length; i++) {
             const user = await User.findOne({
                 where: {
                     username: users[i].user_name
                 }
             })
+            console.log("2")
             data.push({
                 "username": user.username,
                 "useravatar": user.avatar
@@ -737,11 +733,13 @@ class UserModel {
                     username: orgs[i].ins_name
                 }
             })
-            data.push({
-                "orgname": org.username,
-                "orgavatar": org.avatar,
-                "orgsignature": org.signature
-            })
+            if (org) {
+                data.push({
+                    "orgname": org.username,
+                    "orgavatar": org.avatar,
+                    "orgsignature": org.signature
+                })
+            }
         }
         return data    
     }
@@ -797,6 +795,41 @@ class UserModel {
             )
         }
         return data
+    }
+
+    static async orgquitteam(team_id, ins_name) {
+        var ins = await User.findOne({
+            where: {
+                username: ins_name
+            }
+        })
+        if (ins == null) {
+            return 1
+        }
+        var team = await Team.findOne({
+            where: {
+                team_id: team_id
+            }
+        })
+        if (team == null) {
+            return 2
+        }
+        var relate = await Pit.findOne({
+            where: {
+                ins_name: ins_name,
+                team_id: team_id
+            }
+        })
+        if (relate == null) {
+            return 3
+        }
+        await Pit.destroy({
+            where: {
+                ins_name: ins_name,
+                team_id: team_id   
+            }
+        })
+        return 0
     }
 }
 

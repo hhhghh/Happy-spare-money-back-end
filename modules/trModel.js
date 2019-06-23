@@ -97,7 +97,9 @@ class TRModel {
         })
     }
 
-    static async searchTRByOrganization(org_name, username) {
+    static async searchTRByOrganization(org_name, username, restrictions) {
+        restrictions = checkParamsAndConvert(restrictions, 'type');
+
         let task_ids = (await models.TeamTask.findAll({
             attributes: ['task_id']
         })).map((item) => {
@@ -109,7 +111,8 @@ class TRModel {
                 publisher: org_name,
                 task_id: {
                     [Op.notIn]: task_ids
-                }
+                },
+                type: restrictions.type
             },
             include: [{
                 association: models.Task.belongsTo(models.User, {foreignKey: 'publisher'}),
@@ -218,6 +221,32 @@ class TRModel {
     }
 }
 
+function checkParamsAndConvert(query_params, whichs) {
+    let _check_single = (query_params, which) => {
+        if (query_params[which] == undefined
+            || query_params[which].toLowerCase() == 'all') {
+            // 无需任何限制
+            query_params[which] = {
+                [Op.or]: []
+            }
+        } else {
+            // 说明是输入数组形式，改成 Op.or
+            query_params[which] = {
+                [Op.or]: query_params[which].split(',')
+            }
+        }
+        return query_params
+    }
 
+    if (whichs instanceof Array) {
+        for (i = 0; i < whichs.length; i++) {
+            query_params = _check_single(query_params, whichs[i])
+        }
+    } else {
+        query_params = _check_single(query_params, whichs)
+    }
+    
+    return query_params
+}
 
 module.exports = TRModel;

@@ -15,18 +15,15 @@ const Op = Sequelize.Op
 const UserModel = require('../modules/userModel');
 const normal = require('../dist/index');
 const trController = require('../controller/trController');
+const sd = require('silly-datetime');
 
 router.get('/hhhghh', async (ctx, next) => {
     ctx.body = await TaskModel.searchTaskByAccepter(ctx.query)
 })
 
 router.get('/', async (ctx, next) => {
-    ctx.body = await models.Task.findAll({
-        where: {
-            task_id: 2,
-            
-        }
-    })
+    console.log(ctx)
+    ctx.body = ctx
 });
 
 router.post('/confirm', async (ctx, next) => {

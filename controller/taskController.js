@@ -1,5 +1,6 @@
 const TaskModel = require('../modules/taskModel');
 const UserModel = require('../modules/userModel');
+const TRModel = require('../modules/trModel');
 
 // Get username from session.
 const getUsernameFromCtx = require('./cookieController').getUsernameFromCtx;
@@ -285,6 +286,7 @@ class TaskController {
     }
 
     static async deleteTaskByTaskID(ctx) {
+
         let query_params = ctx.query
         let result = undefined
         if (query_params.task_id != undefined) {
@@ -297,8 +299,15 @@ class TaskController {
                 }
             } else {
                 try {
+                    let iftr = await TRModel.searchByTaskId(query_params.task_id);
                     let task_publisher = await TaskModel.searchPublisherByTaskid(query_params.task_id);
-                    if (current_user != task_publisher) {
+                    if (iftr.length != 0) {
+                        result = {
+                            code: 401,
+                            msg: "Tha task have been recieved, cannot be delete currently.",
+                            data: []
+                        }
+                    } else if (current_user != task_publisher) {
                         result = {
                             code: 403,
                             msg: "Task can only be deleted by publisher.",
@@ -374,8 +383,11 @@ class TaskController {
         let query_params = ctx.query
         let result = undefined
         if (query_params.orgname != undefined) {
+            let restrictions = {
+                type: query_params.type
+            }
             try {
-                result = await TaskModel.searchTaskByOrg(query_params.orgname)
+                result = await TaskModel.searchTaskByOrg(query_params.orgname, restrictions)
                 result = {
                     code: 200, 
                     msg: 'Success',
