@@ -1,5 +1,4 @@
 const TeamModel = require('../modules/teamModel');
-const UserModel = require('../modules/userModel');
 const ToastModel = require('../modules/toastModel');
 const CookieController = require('./CookieController');
 const Toast_info = require('../utils/toast_info');
