@@ -114,15 +114,14 @@
 ├─controller        // 控制文件夹
 ├─modules           // 所有的数据库model
 ├─tables            // 数据库建表的文档，使用sequelize进行描述
-├─docs              // 文档
 ├─node_modules      // 被gitignore了，使用时安装的包
 ├─public            // 公共资源，使用vue的话，还不不知道怎么使用这里的资源
 │  ├─images         
 │  ├─javascripts    
-│  └─stylesheets    
+│  └─stylesheets   
+├─static			// 静态文件服务
 ├─routes            // 路由，负责解析url后的分发任务
 └─views             // html模板文件，使用vue可能不需要
 
 ```
 
-## Notes
