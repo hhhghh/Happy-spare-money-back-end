@@ -119,7 +119,7 @@
 │  ├─images         
 │  ├─javascripts    
 │  └─stylesheets   
-├─static			// 静态文件服务
+├─static	    // 静态文件服务
 ├─routes            // 路由，负责解析url后的分发任务
 └─views             // html模板文件，使用vue可能不需要
 
