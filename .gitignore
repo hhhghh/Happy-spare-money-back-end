@@ -87,5 +87,3 @@ typings/
 .dynamodb/
 
 /.idea/
-
-static/
